@@ -48,6 +48,29 @@ sun60iw2-upstream/
 
 **NEVER edit generated C files manually.** Always edit the JSON/source data and regenerate.
 
+### Sunxi Semantic Extraction Engine (SSEE)
+
+A modular, self-improving tool that understands vendor BSP C code semantically.
+
+```python
+from generators.extractor import Engine
+engine = Engine()
+result = engine.extract('clocks', source_file=Path('vendor/ccu-sun60iw2.c'))
+print(engine.report(result))  # 160 clocks, 82.90% confidence
+```
+
+**Architecture:**
+- **Core parser**: Tokenizes C into blocks (structs, macros, comments)
+- **Semantic map**: Knowledge base of what SUNXI_* macros mean
+- **Plugin registry**: Modular extractors per subsystem
+- **Validation**: Cross-checks against semantic rules
+- **Learning**: Tracks failures for pattern improvement
+
+**Plugins:**
+- `clocks`: Extracts PLLs, dividers, gates, fixed-factors
+- `resets`: Extracts reset line definitions
+- `registers`: Extracts register offsets from headers
+
 ### Current Generators
 
 | Generator | Input | Output | Purpose |

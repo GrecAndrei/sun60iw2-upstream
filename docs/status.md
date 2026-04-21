@@ -19,7 +19,7 @@ Last updated: 2026-04-21
 |-----------|--------|-------|----------|
 | Base DTSI (`sun60i-a733.dtsi`) | :construction: | WIP - basic structure done | - |
 | Board DTS (`sun60i-a733-orangepi-4-pro.dts`) | :construction: | WIP - basic structure done | - |
-| Main CCU driver | :construction: | WIP - generator framework done, minimal table | - |
+| Main CCU driver | :construction: | WIP - SSEE extracted 160/333 clocks | - |
 | R-CCU driver | :x: | Not started | - |
 | RTC CCU driver | :x: | Not started | - |
 | CPUPLL driver | :x: | Not started | - |

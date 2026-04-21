@@ -44,9 +44,20 @@ sun60iw2-upstream/
 
 ---
 
-## Code Generation (CRITICAL)
+## Code Generation Factory (CRITICAL)
 
-**NEVER edit generated C files manually.** Always edit the JSON source data and regenerate.
+**NEVER edit generated C files manually.** Always edit the JSON/source data and regenerate.
+
+### Current Generators
+
+| Generator | Input | Output | Purpose |
+|-----------|-------|--------|---------|
+| `generate_pinctrl.py` | `data/pinctrl-main.json` | `drivers/pinctrl/sunxi/*.c` | Pin controller driver |
+| `generate_ccu.py` | `data/ccu-main.json` | `drivers/clk/sunxi-ng/*.c` | Clock controller driver |
+| `generate_buildsys.py` | Internal Python dict | `output/BUILD_PATCH.txt` | Kconfig + Makefile rules |
+| `generate_defconfig.py` | Internal Python dict | `configs/*.config` | Kernel defconfigs |
+| `extract_registers.py` | Vendor C headers | `output/registers.json` | Auto-extract register maps |
+| `generate_bindings.py` | Internal Python dict | `output/bindings/*.yaml` | DT binding docs |
 
 ### Pinctrl Driver
 
@@ -68,12 +79,46 @@ $EDITOR generators/data/ccu-main.json
 python3 generators/generate_ccu.py > drivers/clk/sunxi-ng/ccu-sun60i-a733.c
 ```
 
+### Build System
+
+```bash
+# Generate Kconfig and Makefile patches
+python3 generators/generate_buildsys.py
+# Outputs to generators/output/BUILD_PATCH.txt and Kconfig.sun60iw2
+```
+
+### Kernel Config
+
+```bash
+# Generate defconfigs
+python3 generators/generate_defconfig.py
+# Outputs to configs/sun60iw2_defconfig and configs/sun60iw2_minimal_defconfig
+```
+
+### Register Extraction (from vendor headers)
+
+```bash
+# Auto-extract register offsets from vendor BSP headers
+python3 generators/extract_registers.py \
+    --input /path/to/vendor/bsp/include \
+    --output generators/data/registers.json \
+    --c-header include/generated/sun60i-a733-regs.h
+```
+
+### Device Tree Bindings
+
+```bash
+# Generate YAML binding docs for upstream submission
+python3 generators/generate_bindings.py
+# Outputs to generators/output/bindings/*.yaml
+```
+
 ### Generator Rules
 
-1. **JSON is the source of truth** — C files are build artifacts
-2. **Commit both JSON and C** — Allows building without Python
+1. **Source data is the truth** — Generated files are build artifacts
+2. **Commit both source and output** — Allows building without Python
 3. **Verify generated code compiles** before committing
-4. **Generators use mainline sunxi-ng/pinctrl-sunxi frameworks** — No custom frameworks
+4. **Generators use mainline frameworks** — No custom kernel frameworks
 
 ---
 

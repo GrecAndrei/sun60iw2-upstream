@@ -19,11 +19,11 @@ Last updated: 2026-04-21
 |-----------|--------|-------|----------|
 | Base DTSI (`sun60i-a733.dtsi`) | :construction: | WIP - basic structure done | - |
 | Board DTS (`sun60i-a733-orangepi-4-pro.dts`) | :construction: | WIP - basic structure done | - |
-| Main CCU driver | :x: | Not started | - |
+| Main CCU driver | :construction: | WIP - generator framework done, minimal table | - |
 | R-CCU driver | :x: | Not started | - |
 | RTC CCU driver | :x: | Not started | - |
 | CPUPLL driver | :x: | Not started | - |
-| Pinctrl (main) | :x: | Not started | - |
+| Pinctrl (main) | :construction: | WIP - generated from JSON data | - |
 | Pinctrl (R-domain) | :x: | Not started | - |
 | dt-bindings headers | :white_check_mark: | All clock/reset/power IDs defined | - |
 | UART earlyprintk | :x: | Blocked on clocks + pinctrl | - |

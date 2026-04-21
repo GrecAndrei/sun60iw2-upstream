@@ -7,7 +7,7 @@ $schema: http://devicetree.org/meta-schemas/core.yaml#
 title: Orange Pi 4 Pro
 
 maintainers:
-  - Alexander Grec <andreigrecay@gmail.com>
+  - Alexander Grec <alex092lap@duck.com>
 
 description: |
   The Orange Pi 4 Pro is a single-board computer based on the Allwinner A733 SoC.

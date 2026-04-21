@@ -1,0 +1,247 @@
+{
+  "_comment": "Auto-extracted from vendor BSP. Review and verify before use.",
+  "clocks": [
+    {
+      "name": "pll-ref",
+      "type": "nm",
+      "reg": "0x000",
+      "parent": "dcxo"
+    },
+    {
+      "name": "pll-ddr",
+      "type": "nm",
+      "reg": "0x020",
+      "parent": "pll-ref",
+      "id": "PLL_DDR"
+    },
+    {
+      "name": "pll-peri0",
+      "type": "nm",
+      "reg": "0x0a0",
+      "parent": "pll-ref",
+      "id": "PLL_PERI0"
+    },
+    {
+      "name": "pll-peri0-600m",
+      "type": "fixed_factor",
+      "parent": "pll-peri0-2x",
+      "mult": 2,
+      "div": 1,
+      "id": "PLL_PERI0_600M"
+    },
+    {
+      "name": "pll-peri0-400m",
+      "type": "fixed_factor",
+      "parent": "pll-peri0-2x",
+      "mult": 3,
+      "div": 1,
+      "id": "PLL_PERI0_400M"
+    },
+    {
+      "name": "pll-peri0-300m",
+      "type": "fixed_factor",
+      "parent": "pll-peri0-600m",
+      "mult": 2,
+      "div": 1,
+      "id": "PLL_PERI0_300M"
+    },
+    {
+      "name": "pll-peri0-200m",
+      "type": "fixed_factor",
+      "parent": "pll-peri0-400m",
+      "mult": 2,
+      "div": 1,
+      "id": "PLL_PERI0_200M"
+    },
+    {
+      "name": "pll-peri0-160m",
+      "type": "fixed_factor",
+      "parent": "pll-peri0-480m",
+      "mult": 3,
+      "div": 1,
+      "id": "PLL_PERI0_160M"
+    },
+    {
+      "name": "pll-peri0-150m",
+      "type": "fixed_factor",
+      "parent": "pll-peri0-300m",
+      "mult": 2,
+      "div": 1,
+      "id": "PLL_PERI0_150M"
+    },
+    {
+      "name": "pll-peri1",
+      "type": "nm",
+      "reg": "0x0c0",
+      "parent": "pll-ref",
+      "id": "PLL_PERI1"
+    },
+    {
+      "name": "pll-peri1-600m",
+      "type": "fixed_factor",
+      "parent": "pll-peri1-2x",
+      "mult": 2,
+      "div": 1,
+      "id": "PLL_PERI1_600M"
+    },
+    {
+      "name": "pll-peri1-400m",
+      "type": "fixed_factor",
+      "parent": "pll-peri1-2x",
+      "mult": 3,
+      "div": 1,
+      "id": "PLL_PERI1_400M"
+    },
+    {
+      "name": "pll-peri1-300m",
+      "type": "fixed_factor",
+      "parent": "pll-peri1-600m",
+      "mult": 2,
+      "div": 1,
+      "id": "PLL_PERI1_300M"
+    },
+    {
+      "name": "pll-peri1-200m",
+      "type": "fixed_factor",
+      "parent": "pll-peri1-400m",
+      "mult": 2,
+      "div": 1,
+      "id": "PLL_PERI1_200M"
+    },
+    {
+      "name": "pll-peri1-160m",
+      "type": "fixed_factor",
+      "parent": "pll-peri1-480m",
+      "mult": 3,
+      "div": 1,
+      "id": "PLL_PERI1_160M"
+    },
+    {
+      "name": "pll-peri1-150m",
+      "type": "fixed_factor",
+      "parent": "pll-peri1-300m",
+      "mult": 2,
+      "div": 1,
+      "id": "PLL_PERI1_150M"
+    },
+    {
+      "name": "hdmi-cec-clk32k",
+      "type": "fixed_factor",
+      "parent": "pll-peri0-2x",
+      "mult": 1,
+      "div": 36621
+    },
+    {
+      "name": "pll-gpu0",
+      "type": "nm",
+      "reg": "0x0e0",
+      "parent": "pll-ref",
+      "id": "PLL_GPU0"
+    },
+    {
+      "name": "pll-video0",
+      "type": "nm",
+      "reg": "0x120",
+      "parent": "pll-ref",
+      "id": "PLL_VIDEO0"
+    },
+    {
+      "name": "pll-video1",
+      "type": "nm",
+      "reg": "0x140",
+      "parent": "pll-ref",
+      "id": "PLL_VIDEO1"
+    },
+    {
+      "name": "pll-video2",
+      "type": "nm",
+      "reg": "0x160",
+      "parent": "pll-ref",
+      "id": "PLL_VIDEO2"
+    },
+    {
+      "name": "pll-ve0",
+      "type": "nm",
+      "reg": "0x220",
+      "parent": "pll-ref",
+      "id": "PLL_VE0"
+    },
+    {
+      "name": "pll-ve1",
+      "type": "nm",
+      "reg": "0x240",
+      "parent": "pll-ref",
+      "id": "PLL_VE1"
+    },
+    {
+      "name": "pll-audio0-4x",
+      "type": "nm",
+      "reg": "0x260",
+      "parent": "pll-ref",
+      "id": "PLL_AUDIO0_4X"
+    },
+    {
+      "name": "pll-audio1",
+      "type": "nm",
+      "reg": "0x280",
+      "parent": "pll-ref",
+      "id": "PLL_AUDIO1"
+    },
+    {
+      "name": "pll-npu",
+      "type": "nm",
+      "reg": "0x2a0",
+      "parent": "pll-ref",
+      "id": "PLL_NPU"
+    },
+    {
+      "name": "pll-de",
+      "type": "nm",
+      "reg": "0x2e0",
+      "parent": "pll-ref",
+      "id": "PLL_DE"
+    },
+    {
+      "name": "sys12M",
+      "type": "fixed_factor",
+      "parent": "sys24M",
+      "mult": 2,
+      "div": 1
+    },
+    {
+      "name": "pll-peri0-16m",
+      "type": "fixed_factor",
+      "parent": "pll-peri0-160m",
+      "mult": 10,
+      "div": 1,
+      "id": "PLL_PERI0_16M"
+    },
+    {
+      "name": "pll-peri0-25m",
+      "type": "fixed_factor",
+      "parent": "pll-peri0-150m",
+      "mult": 6,
+      "div": 1,
+      "id": "PLL_PERI0_25M"
+    },
+    {
+      "name": "pll-audio0-sdm-pat0",
+      "type": "nm",
+      "reg": "0x268",
+      "parent": "osc24M"
+    },
+    {
+      "name": "pll-audio0-sdm-pat1",
+      "type": "nm",
+      "reg": "0x26c",
+      "parent": "osc24M"
+    },
+    {
+      "name": "pll-audio1-sdm-pat0",
+      "type": "nm",
+      "reg": "0x288",
+      "parent": "osc24M"
+    }
+  ],
+  "resets": []
+}

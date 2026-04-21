@@ -270,7 +270,7 @@ This repo uses the following git identity. Do NOT use fake emails.
 
 ```bash
 git config user.name "GrecAndrei"
-git config user.email "andreigrecay@gmail.com"
+git config user.email "alex092lap@duck.com"
 ```
 
 ## Critical Notes for AI Agents

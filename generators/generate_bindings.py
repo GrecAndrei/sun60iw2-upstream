@@ -190,7 +190,7 @@ $schema: http://devicetree.org/meta-schemas/core.yaml#
 title: {binding["title"]}
 
 maintainers:
-  - Alexander Grec <andreigrecay@gmail.com>
+  - Alexander Grec <alex092lap@duck.com>
 
 description: |
   {binding["description"]}

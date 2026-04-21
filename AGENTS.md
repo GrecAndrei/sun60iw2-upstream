@@ -51,20 +51,26 @@ sun60iw2-upstream/
 ### Sunxi Semantic Extraction Engine (SSEE)
 
 A modular, self-improving tool that understands vendor BSP C code semantically.
+The semantic map is PERSISTENT — it lives on disk and learns from every run.
 
 ```python
 from generators.extractor import Engine
-engine = Engine()
+engine = Engine()  # Auto-loads semantic map from disk
 result = engine.extract('clocks', source_file=Path('vendor/ccu-sun60iw2.c'))
 print(engine.report(result))  # 160 clocks, 82.90% confidence
+# Map is auto-saved with vendor history + stats
 ```
 
 **Architecture:**
 - **Core parser**: Tokenizes C into blocks (structs, macros, comments)
-- **Semantic map**: Knowledge base of what SUNXI_* macros mean
+- **Semantic map**: Persistent JSON knowledge base (`data/semantic_map.json`)
+  - Macros: Signatures for each SUNXI_* macro
+  - Types: Mappings from C types to semantic types
+  - Vendor history: Which files processed, with SHA256 checksums
+  - Learned patterns: Manual corrections stored permanently
 - **Plugin registry**: Modular extractors per subsystem
 - **Validation**: Cross-checks against semantic rules
-- **Learning**: Tracks failures for pattern improvement
+- **CLI**: `python3 -m generators.extractor.cli {status|history|learn|reset}`
 
 **Plugins:**
 - `clocks`: Extracts PLLs, dividers, gates, fixed-factors

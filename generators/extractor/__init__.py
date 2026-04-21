@@ -1,34 +1,46 @@
 #!/usr/bin/env python3
 """
-Sunxi Semantic Extraction Engine (SSEE)
+Sunxi Semantic Extraction Engine (SSEE) v2
 
-A modular, self-improving code extraction tool for Allwinner BSP sources.
-Understands C code semantically rather than just pattern matching.
-
-Architecture:
-- Core parser: Tokenizes and builds AST-like blocks from vendor C
-- Semantic Map: Knowledge base of what patterns mean
-- Plugin Registry: Modular extractors per subsystem
-- Validation: Cross-checks extracted data against known constraints
-- Learning: Tracks failed extractions for pattern improvement
+Major upgrades:
+- Symbol Table: Resolves C variable names to semantic entities
+- Cross-Reference Validator: Ensures all parent references exist
+- Conflict Detector: Finds register/bit collisions
+- Relationship Builder: Auto-discovers clock hierarchies
+- Export System: JSON, YAML, CSV, Markdown
+- Batch Processor: Process entire vendor trees
 
 Usage:
     from generators.extractor import Engine
     engine = Engine()
-    engine.load_semantic_map('generators/extractor/data/semantic_map.json')
+    result = engine.extract('clocks', source_file=Path('vendor/ccu.c'))
 
-    # Extract clocks
-    result = engine.extract('clocks', source_file='vendor/ccu-sun60iw2.c')
+    # Build symbol table for parent resolution
+    symtab = engine.build_symbol_table(result.items)
+    resolved = engine.resolve_parents(result.items, symtab)
 
-    # Extract with validation
-    result = engine.extract('clocks', validate=True)
+    # Validate cross-references
+    engine.validate_crossrefs(resolved)
+
+    # Detect hardware conflicts
+    conflicts = engine.detect_conflicts(resolved)
+
+    # Build clock tree
+    tree = engine.build_clock_tree(resolved)
+
+    # Export
+    engine.export(resolved, format='json', path='out.json')
+    engine.export(resolved, format='markdown', path='out.md')
 """
 
 import json
 import re
+import csv
+import hashlib
 from pathlib import Path
-from typing import Dict, List, Optional, Any
-from dataclasses import dataclass, field
+from typing import Dict, List, Optional, Any, Set, Tuple
+from dataclasses import dataclass, field, asdict
+from collections import defaultdict
 
 
 @dataclass
@@ -41,9 +53,10 @@ class ExtractionResult:
     errors: List[str] = field(default_factory=list)
     warnings: List[str] = field(default_factory=list)
     raw_blocks: List[str] = field(default_factory=list)
+    symbol_table: Dict[str, str] = field(default_factory=dict)
+    relationships: Dict[str, List[str]] = field(default_factory=dict)
 
     def merge(self, other: "ExtractionResult"):
-        """Merge another result into this one."""
         self.items.extend(other.items)
         self.errors.extend(other.errors)
         self.warnings.extend(other.warnings)
@@ -52,20 +65,7 @@ class ExtractionResult:
 
 
 class SemanticMap:
-    """
-    Persistent knowledge base of what C patterns mean in sunxi drivers.
-
-    This is the BRAIN of the extraction engine. It lives on disk,
-    learns from every extraction run, and grows smarter over time.
-
-    Sections:
-    - macros: Signatures for each SUNXI_* macro
-    - types: Mapping from C types to semantic types
-    - validation_rules: Constraints extracted data must satisfy
-    - relationships: Clock/pin parent-child hierarchies
-    - learned_patterns: Patterns discovered from failed extractions
-    - vendor_history: Which vendor files were processed and when
-    """
+    """Persistent knowledge base stored on disk."""
 
     DEFAULT_PATH = Path(__file__).parent / "data" / "semantic_map.json"
 
@@ -85,7 +85,6 @@ class SemanticMap:
             self.save(self._path)
 
     def _init_defaults(self):
-        """Initialize with default sunxi knowledge."""
         self.macros = {
             "SUNXI_CCU_M": {
                 "type": "divider",
@@ -127,15 +126,7 @@ class SemanticMap:
                 "type": "pll",
                 "args": [],
                 "creates": "ccu_nkmp",
-                "fields": [
-                    ".enable",
-                    ".lock",
-                    ".n",
-                    ".k",
-                    ".m",
-                    ".p",
-                    ".common.reg",
-                ],
+                "fields": [".enable", ".lock", ".n", ".k", ".m", ".p", ".common.reg"],
             },
         }
 
@@ -161,7 +152,6 @@ class SemanticMap:
         ]
 
     def load(self, path: Path):
-        """Load semantic map from JSON on disk."""
         with open(path) as f:
             data = json.load(f)
         self.macros = data.get("macros", {})
@@ -172,7 +162,6 @@ class SemanticMap:
         self.vendor_history = data.get("vendor_history", {})
 
     def save(self, path: Optional[Path] = None):
-        """Save semantic map to JSON on disk."""
         save_path = path or self._path
         data = {
             "macros": self.macros,
@@ -187,9 +176,6 @@ class SemanticMap:
             json.dump(data, f, indent=2)
 
     def record_vendor_run(self, filepath: Path, stats: Dict):
-        """Record that we processed a vendor file."""
-        import hashlib
-
         content = filepath.read_bytes()
         checksum = hashlib.sha256(content).hexdigest()[:16]
         self.vendor_history[str(filepath)] = {
@@ -200,9 +186,6 @@ class SemanticMap:
         self.save()
 
     def add_learned_pattern(self, raw_block: str, expected: Dict, context: str = ""):
-        """Add a pattern learned from manual correction."""
-        import hashlib
-
         block_hash = hashlib.sha256(raw_block.encode()).hexdigest()[:16]
         self.learned_patterns.append(
             {
@@ -215,71 +198,52 @@ class SemanticMap:
         self.save()
 
     def has_seen_vendor(self, filepath: Path) -> bool:
-        """Check if we've already processed this vendor file."""
         return str(filepath) in self.vendor_history
 
     def resolve_type(self, pattern: str) -> Optional[str]:
-        """Resolve a C pattern to its semantic type."""
         return self.types.get(pattern)
 
     def get_macro_signature(self, macro_name: str) -> Optional[Dict]:
-        """Get the argument signature for a macro."""
         return self.macros.get(macro_name)
 
 
 class CBlockParser:
-    """
-    Parses C source into semantic blocks.
-
-    Handles:
-    - Multi-line struct definitions
-    - Multi-line macro invocations
-    - Block comments
-    - Preprocessor directives
-    """
+    """Parses C source into semantic blocks."""
 
     def __init__(self):
         self.blocks: List[Dict] = []
 
     def parse_file(self, filepath: Path) -> List[Dict]:
-        """Parse a C file into blocks."""
         with open(filepath) as f:
             content = f.read()
         return self.parse(content)
 
     def parse(self, content: str) -> List[Dict]:
-        """Parse C content into structured blocks."""
         blocks = []
         lines = content.split("\n")
         i = 0
 
         while i < len(lines):
             line = lines[i].strip()
-
-            # Skip empty lines and single-line comments
             if not line or line.startswith("//"):
                 i += 1
                 continue
 
-            # Multi-line comment
             if line.startswith("/*"):
-                comment_block, i = self._extract_multiline_comment(lines, i)
-                blocks.append({"type": "comment", "content": comment_block})
+                comment, i = self._extract_multiline_comment(lines, i)
+                blocks.append({"type": "comment", "content": comment, "raw": comment})
                 continue
 
-            # Preprocessor directive
             if line.startswith("#"):
-                blocks.append({"type": "preprocessor", "content": line})
+                blocks.append({"type": "preprocessor", "content": line, "raw": line})
                 i += 1
                 continue
 
-            # Struct definition
             if "struct " in line and "{" in line:
                 struct_block, i = self._extract_struct(lines, i)
                 blocks.append(struct_block)
                 continue
 
-            # Static variable with macro
             if line.startswith("static "):
                 macro_block, i = self._extract_macro_invocation(lines, i)
                 if macro_block:
@@ -292,7 +256,6 @@ class CBlockParser:
         return blocks
 
     def _extract_multiline_comment(self, lines, start_idx):
-        """Extract a /* ... */ comment block."""
         block = []
         i = start_idx
         while i < len(lines):
@@ -303,13 +266,10 @@ class CBlockParser:
         return "\n".join(block), i + 1
 
     def _extract_struct(self, lines, start_idx):
-        """Extract a struct definition block."""
         block_lines = []
         brace_count = 0
         i = start_idx
         var_name = None
-
-        # Get variable name from first line
         first_line = lines[i]
         var_match = re.search(r"(\w+)\s*=", first_line)
         if var_match:
@@ -319,21 +279,17 @@ class CBlockParser:
             line = lines[i]
             block_lines.append(line)
             brace_count += line.count("{") - line.count("}")
-
             if brace_count == 0 and "{" in "".join(block_lines):
                 break
             i += 1
 
-        # Check for semicolon termination
         while i < len(lines) and ";" not in lines[i]:
             block_lines.append(lines[i])
             i += 1
-
         if i < len(lines):
             block_lines.append(lines[i])
 
         content = "\n".join(block_lines)
-
         return {
             "type": "struct",
             "var_name": var_name,
@@ -342,7 +298,6 @@ class CBlockParser:
         }, i + 1
 
     def _extract_macro_invocation(self, lines, start_idx):
-        """Extract a multi-line macro invocation."""
         block_lines = []
         i = start_idx
         paren_depth = 0
@@ -350,25 +305,19 @@ class CBlockParser:
         while i < len(lines):
             line = lines[i]
             block_lines.append(line)
-
             for char in line:
                 if char == "(":
                     paren_depth += 1
                 elif char == ")":
                     paren_depth -= 1
-
-            # Check if macro ends with );
             if paren_depth == 0 and ");" in line:
                 break
             i += 1
 
         content = "\n".join(block_lines)
-
-        # Detect macro name
         macro_match = re.search(r"static\s+\w+\s*\(\s*(\w+)", content)
         if not macro_match:
             macro_match = re.search(r"static\s+(\w+)\s*\(", content)
-
         macro_name = macro_match.group(1) if macro_match else "unknown"
 
         return {
@@ -379,6 +328,218 @@ class CBlockParser:
         }, i + 1
 
 
+class SymbolTable:
+    """
+    Maps C variable names to semantic clock names.
+
+    Vendor code uses variable names as parents:
+        static struct ccu_nm pll_peri0_clk = { ... name: "pll-peri0" ... };
+        static SUNXI_CCU_GATE(uart0_clk, "uart0", pll_peri0_clk, ...);
+                                              ^^^^^^^^^^^^^^
+    The symbol table resolves pll_peri0_clk -> "pll-peri0"
+    """
+
+    def __init__(self):
+        self.symbols: Dict[str, str] = {}  # var_name -> clock_name
+        self.by_name: Dict[str, Dict] = {}  # clock_name -> item
+
+    def index(self, items: List[Dict]):
+        """Build index from extracted items."""
+        for item in items:
+            name = item.get("name", "")
+            if not name:
+                continue
+            self.by_name[name] = item
+            # Also index by normalized variable name
+            var_name = name.replace("-", "_") + "_clk"
+            self.symbols[var_name] = name
+            # And without _clk suffix
+            self.symbols[name.replace("-", "_")] = name
+
+    def resolve(self, parent_ref: str) -> Optional[str]:
+        """Resolve a parent reference to a clock name."""
+        # Already a quoted string name
+        if parent_ref.startswith('"') and parent_ref.endswith('"'):
+            return parent_ref.strip('"')
+        # Variable name
+        return self.symbols.get(parent_ref)
+
+    def get_item(self, name: str) -> Optional[Dict]:
+        return self.by_name.get(name)
+
+
+class CrossReferenceValidator:
+    """Validates that all parent/child references exist."""
+
+    def validate(self, items: List[Dict], symtab: SymbolTable) -> List[str]:
+        errors = []
+        all_names = {item.get("name", "") for item in items}
+
+        for item in items:
+            parent = item.get("parent", "")
+            if not parent:
+                continue
+
+            # Resolve through symbol table
+            resolved = symtab.resolve(parent)
+            if resolved and resolved in all_names:
+                continue
+            if parent in all_names:
+                continue
+
+            # Check if it's a known root source
+            if parent in ("osc24M", "dcxo", "hosc", "losc", "ext-osc32k"):
+                continue
+
+            errors.append(
+                f"Clock '{item.get('name')}' references unknown parent: '{parent}'"
+            )
+
+        return errors
+
+
+class ConflictDetector:
+    """Detects register offset and bit collisions."""
+
+    def detect(self, items: List[Dict]) -> List[str]:
+        conflicts = []
+
+        # Group gates by register
+        gates_by_reg: Dict[str, List[Tuple[str, int]]] = defaultdict(list)
+        for item in items:
+            if item.get("type") == "gate":
+                reg = str(item.get("reg", ""))
+                bit = item.get("bit")
+                if reg and bit is not None:
+                    gates_by_reg[reg].append((item.get("name", ""), bit))
+
+        # Check for bit collisions
+        for reg, gates in gates_by_reg.items():
+            bits_used: Dict[int, List[str]] = defaultdict(list)
+            for name, bit in gates:
+                bits_used[bit].append(name)
+
+            for bit, names in bits_used.items():
+                if len(names) > 1:
+                    conflicts.append(
+                        f"BIT CONFLICT at reg={reg}, bit={bit}: {', '.join(names)}"
+                    )
+
+        # Check for overlapping PLL registers
+        pll_regs: Dict[str, str] = {}
+        for item in items:
+            if item.get("type") in ("nm", "nkmp", "pll"):
+                reg = str(item.get("reg", ""))
+                if reg in pll_regs:
+                    conflicts.append(
+                        f"PLL REGISTER OVERLAP at {reg}: "
+                        f"'{pll_regs[reg]}' and '{item.get('name')}'"
+                    )
+                pll_regs[reg] = item.get("name", "")
+
+        return conflicts
+
+
+class RelationshipBuilder:
+    """Builds clock tree relationships from parent references."""
+
+    def build(self, items: List[Dict], symtab: SymbolTable) -> Dict[str, List[str]]:
+        tree: Dict[str, List[str]] = defaultdict(list)
+
+        for item in items:
+            name = item.get("name", "")
+            parent = item.get("parent", "")
+            if not parent:
+                continue
+
+            resolved = symtab.resolve(parent)
+            if resolved:
+                tree[resolved].append(name)
+            else:
+                tree[parent].append(name)
+
+        return dict(tree)
+
+
+class ExportSystem:
+    """Exports extracted data to multiple formats."""
+
+    def export(self, items: List[Dict], fmt: str, path: Path):
+        """Export items to the specified format."""
+        if fmt == "json":
+            self._export_json(items, path)
+        elif fmt == "yaml":
+            self._export_yaml(items, path)
+        elif fmt == "csv":
+            self._export_csv(items, path)
+        elif fmt == "markdown":
+            self._export_markdown(items, path)
+        else:
+            raise ValueError(f"Unknown export format: {fmt}")
+
+    def _export_json(self, items: List[Dict], path: Path):
+        with open(path, "w") as f:
+            json.dump({"clocks": items}, f, indent=2)
+
+    def _export_yaml(self, items: List[Dict], path: Path):
+        lines = ["clocks:"]
+        for item in items:
+            lines.append(f"  - name: {item.get('name', '')}")
+            for key, val in item.items():
+                if key != "name":
+                    lines.append(f"    {key}: {val}")
+        path.write_text("\n".join(lines))
+
+    def _export_csv(self, items: List[Dict], path: Path):
+        if not items:
+            return
+        keys = list(items[0].keys())
+        with open(path, "w", newline="") as f:
+            writer = csv.DictWriter(f, fieldnames=keys)
+            writer.writeheader()
+            writer.writerows(items)
+
+    def _export_markdown(self, items: List[Dict], path: Path):
+        lines = [
+            "# Extracted Clocks\n",
+            "| Name | Type | Reg | Parent |",
+            "|------|------|-----|--------|",
+        ]
+        for item in items:
+            lines.append(
+                f"| {item.get('name', '')} | {item.get('type', '')} | "
+                f"{item.get('reg', '')} | {item.get('parent', '')} |"
+            )
+        path.write_text("\n".join(lines))
+
+
+class BatchProcessor:
+    """Process multiple vendor files at once."""
+
+    def __init__(self, engine: "Engine"):
+        self.engine = engine
+
+    def process_directory(
+        self, directory: Path, subsystem: str
+    ) -> Dict[str, ExtractionResult]:
+        """Process all .c files in a directory."""
+        results = {}
+        for source_file in directory.rglob("*.c"):
+            print(f"Processing {source_file}...")
+            result = self.engine.extract(subsystem, source_file=source_file)
+            results[str(source_file)] = result
+        return results
+
+    def process_file_list(
+        self, files: List[Path], subsystem: str
+    ) -> Dict[str, ExtractionResult]:
+        results = {}
+        for source_file in files:
+            result = self.engine.extract(subsystem, source_file=source_file)
+            results[str(source_file)] = result
+        return results
+
+
 class PluginRegistry:
     """Registry of extraction plugins."""
 
@@ -386,15 +547,12 @@ class PluginRegistry:
         self.plugins: Dict[str, "ExtractorPlugin"] = {}
 
     def register(self, name: str, plugin: "ExtractorPlugin"):
-        """Register a plugin."""
         self.plugins[name] = plugin
 
     def get(self, name: str) -> Optional["ExtractorPlugin"]:
-        """Get a plugin by name."""
         return self.plugins.get(name)
 
     def list_plugins(self) -> List[str]:
-        """List all registered plugins."""
         return list(self.plugins.keys())
 
 
@@ -406,37 +564,31 @@ class ExtractorPlugin:
         self.confidence_threshold = 0.8
 
     def can_extract(self, block: Dict) -> bool:
-        """Check if this plugin can extract from the given block."""
         raise NotImplementedError
 
     def extract(self, block: Dict) -> Optional[Dict]:
-        """Extract structured data from a block."""
         raise NotImplementedError
 
     def validate(self, items: List[Dict]) -> List[str]:
-        """Validate extracted items."""
         return []
 
 
 class Engine:
-    """
-    Main extraction engine.
-
-    Coordinates parsing, plugin execution, validation, and learning.
-    The semantic map is ALWAYS loaded from disk and saved back after runs.
-    """
+    """Main extraction engine with full analysis pipeline."""
 
     def __init__(self):
-        # Always load from disk so knowledge persists across runs
         self.semantic_map = SemanticMap()
         self.parser = CBlockParser()
         self.registry = PluginRegistry()
-
-        # Load built-in plugins
+        self.symbol_table = SymbolTable()
+        self.xref_validator = CrossReferenceValidator()
+        self.conflict_detector = ConflictDetector()
+        self.relationship_builder = RelationshipBuilder()
+        self.exporter = ExportSystem()
+        self.batch = BatchProcessor(self)
         self._load_plugins()
 
     def _load_plugins(self):
-        """Load built-in extraction plugins."""
         from generators.extractor.plugins.clocks import ClockExtractor
         from generators.extractor.plugins.resets import ResetExtractor
         from generators.extractor.plugins.registers import RegisterExtractor
@@ -452,15 +604,6 @@ class Engine:
         blocks: Optional[List[Dict]] = None,
         validate: bool = False,
     ) -> ExtractionResult:
-        """
-        Extract data for a subsystem.
-
-        Args:
-            subsystem: Plugin name (clocks, resets, registers, etc.)
-            source_file: Path to C source file (optional if blocks provided)
-            blocks: Pre-parsed blocks (optional if source_file provided)
-            validate: Whether to run validation
-        """
         plugin = self.registry.get(subsystem)
         if not plugin:
             return ExtractionResult(
@@ -468,7 +611,6 @@ class Engine:
                 errors=[f"No plugin registered for subsystem: {subsystem}"],
             )
 
-        # Parse source if needed
         if blocks is None:
             if source_file is None:
                 return ExtractionResult(
@@ -477,7 +619,6 @@ class Engine:
                 )
             blocks = self.parser.parse_file(source_file)
 
-        # Extract
         result = ExtractionResult(subsystem=subsystem)
         extracted_count = 0
         failed_count = 0
@@ -492,21 +633,35 @@ class Engine:
                     failed_count += 1
                     result.raw_blocks.append(block.get("raw", ""))
 
-        # Calculate confidence
-        total_attempts = extracted_count + failed_count
-        if total_attempts > 0:
-            result.confidence = extracted_count / total_attempts
+        total = extracted_count + failed_count
+        if total > 0:
+            result.confidence = extracted_count / total
 
-        # Validate if requested
+        # Post-extraction analysis
+        self.symbol_table.index(result.items)
+        result.symbol_table = dict(self.symbol_table.symbols)
+
+        # Resolve parents
+        result.items = self.resolve_parents(result.items)
+
+        # Build relationships
+        result.relationships = self.relationship_builder.build(
+            result.items, self.symbol_table
+        )
+
+        # Validation
         if validate:
-            errors = plugin.validate(result.items)
-            result.errors.extend(errors)
+            result.errors.extend(plugin.validate(result.items))
+            result.errors.extend(self._semantic_validate(subsystem, result.items))
+            result.errors.extend(
+                self.xref_validator.validate(result.items, self.symbol_table)
+            )
 
-            # Run semantic map validation rules
-            semantic_errors = self._semantic_validate(subsystem, result.items)
-            result.errors.extend(semantic_errors)
+            conflicts = self.conflict_detector.detect(result.items)
+            if conflicts:
+                result.warnings.extend(conflicts)
 
-        # Record this run in the semantic map's persistent history
+        # Record history
         if source_file:
             self.semantic_map.record_vendor_run(
                 source_file,
@@ -521,11 +676,34 @@ class Engine:
 
         return result
 
-    def _semantic_validate(self, subsystem: str, items: List[Dict]) -> List[str]:
-        """Validate items against semantic map rules."""
-        errors = []
+    def resolve_parents(self, items: List[Dict]) -> List[Dict]:
+        """Resolve variable-name parents to actual clock names."""
+        for item in items:
+            parent = item.get("parent", "")
+            if parent and not parent.startswith('"'):
+                resolved = self.symbol_table.resolve(parent)
+                if resolved:
+                    item["parent"] = resolved
+        return items
 
-        # Check for duplicate names
+    def build_clock_tree(self, items: List[Dict]) -> Dict[str, List[str]]:
+        """Build full clock hierarchy."""
+        return self.relationship_builder.build(items, self.symbol_table)
+
+    def validate_crossrefs(self, items: List[Dict]) -> List[str]:
+        """Validate all cross-references."""
+        return self.xref_validator.validate(items, self.symbol_table)
+
+    def detect_conflicts(self, items: List[Dict]) -> List[str]:
+        """Detect register/bit conflicts."""
+        return self.conflict_detector.detect(items)
+
+    def export(self, items: List[Dict], fmt: str, path: Path):
+        """Export to specified format."""
+        self.exporter.export(items, fmt, path)
+
+    def _semantic_validate(self, subsystem: str, items: List[Dict]) -> List[str]:
+        errors = []
         names = [item.get("name", "") for item in items]
         seen = set()
         for name in names:
@@ -533,7 +711,6 @@ class Engine:
                 errors.append(f"Duplicate {subsystem} name: {name}")
             seen.add(name)
 
-        # Check gates have parents
         if subsystem == "clocks":
             for item in items:
                 if item.get("type") == "gate" and "parent" not in item:
@@ -542,58 +719,46 @@ class Engine:
         return errors
 
     def learn(self, subsystem: str, raw_block: str, expected: Dict):
-        """
-        Learn from a manual correction and persist to disk.
-
-        When the engine fails to extract something correctly,
-        provide the raw block and expected output to improve patterns.
-        This is stored permanently in the semantic map JSON.
-        """
-        self.semantic_map.add_learned_pattern(
-            raw_block=raw_block,
-            expected=expected,
-            context=subsystem,
-        )
+        self.semantic_map.add_learned_pattern(raw_block, expected, subsystem)
 
     def report(self, result: ExtractionResult) -> str:
-        """Generate a human-readable extraction report."""
         lines = [
             f"Extraction Report: {result.subsystem}",
-            f"=" * 40,
+            "=" * 40,
             f"Items extracted: {len(result.items)}",
             f"Confidence: {result.confidence:.2%}",
             f"Errors: {len(result.errors)}",
             f"Warnings: {len(result.warnings)}",
             "",
         ]
-
         if result.errors:
             lines.append("Errors:")
             for err in result.errors:
                 lines.append(f"  - {err}")
             lines.append("")
-
         if result.warnings:
             lines.append("Warnings:")
             for warn in result.warnings:
                 lines.append(f"  - {warn}")
             lines.append("")
-
+        if result.relationships:
+            lines.append(
+                f"Relationships discovered: {len(result.relationships)} parents"
+            )
         if result.raw_blocks:
             lines.append(f"Unparsed blocks: {len(result.raw_blocks)}")
-
         return "\n".join(lines)
 
     def save_semantic_map(self, path: Path):
-        """Save the current semantic map."""
         self.semantic_map.save(path)
 
 
 if __name__ == "__main__":
-    # Self-test
-    print("Sunxi Semantic Extraction Engine")
-    print("=================================")
-
-    engine = Engine()
-    print(f"Loaded plugins: {engine.registry.list_plugins()}")
-    print(f"Semantic map macros: {list(engine.semantic_map.macros.keys())}")
+    print("Sunxi Semantic Extraction Engine v2")
+    print("New features:")
+    print("  - Symbol table with parent resolution")
+    print("  - Cross-reference validation")
+    print("  - Register/bit conflict detection")
+    print("  - Clock tree relationship builder")
+    print("  - Multi-format export (json, yaml, csv, markdown)")
+    print("  - Batch processor for entire vendor trees")

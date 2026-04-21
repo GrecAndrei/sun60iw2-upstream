@@ -98,12 +98,12 @@
   "vendor_history": {
     "/home/grec-alexander/Documents/porting/linux-orangepi/bsp/drivers/clk/sunxi-ng/ccu-sun60iw2.c": {
       "checksum": "1d32bb8555f8ff20",
-      "last_run": "1776804020.3128276",
+      "last_run": "1776804314.9346716",
       "stats": {
         "subsystem": "clocks",
         "items": 160,
         "confidence": 0.8290155440414507,
-        "errors": 0,
+        "errors": 20,
         "unparsed": 33
       }
     }

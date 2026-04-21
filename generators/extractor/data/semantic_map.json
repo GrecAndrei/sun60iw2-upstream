@@ -1,0 +1,97 @@
+{
+  "macros": {
+    "SUNXI_CCU_M": {
+      "type": "divider",
+      "args": [
+        "var_name",
+        "clock_name",
+        "parent",
+        "reg",
+        "shift",
+        "width",
+        "flags"
+      ],
+      "creates": "ccu_div"
+    },
+    "SUNXI_CCU_GATE": {
+      "type": "gate",
+      "args": [
+        "var_name",
+        "clock_name",
+        "parent",
+        "reg",
+        "bit",
+        "flags"
+      ],
+      "creates": "ccu_gate"
+    },
+    "CLK_FIXED_FACTOR": {
+      "type": "fixed_factor",
+      "args": [
+        "var_name",
+        "clock_name",
+        "parent",
+        "mult",
+        "div",
+        "flags"
+      ],
+      "creates": "clk_fixed_factor"
+    },
+    "ccu_nm": {
+      "type": "pll",
+      "args": [],
+      "creates": "ccu_nm",
+      "fields": [
+        ".enable",
+        ".lock",
+        ".n",
+        ".m",
+        ".common.reg",
+        ".common.hw.init"
+      ]
+    },
+    "ccu_nkmp": {
+      "type": "pll",
+      "args": [],
+      "creates": "ccu_nkmp",
+      "fields": [
+        ".enable",
+        ".lock",
+        ".n",
+        ".k",
+        ".m",
+        ".p",
+        ".common.reg"
+      ]
+    }
+  },
+  "types": {
+    "ccu_nm": "pll",
+    "ccu_nkmp": "pll",
+    "ccu_div": "divider",
+    "ccu_gate": "gate",
+    "clk_fixed_factor": "fixed_factor",
+    "SUNXI_CCU_M": "divider",
+    "SUNXI_CCU_GATE": "gate",
+    "CLK_FIXED_FACTOR": "fixed_factor"
+  },
+  "validation_rules": [
+    {
+      "rule": "all_clocks_have_name",
+      "check": "name in item"
+    },
+    {
+      "rule": "gates_have_parent",
+      "check": "type == 'gate' implies 'parent' in item"
+    },
+    {
+      "rule": "plls_have_reg",
+      "check": "type == 'pll' implies 'reg' in item"
+    },
+    {
+      "rule": "names_unique",
+      "check": "all names are unique"
+    }
+  ],
+  "relationships": {}
+}

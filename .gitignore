@@ -36,6 +36,11 @@ Module.symvers
 .DS_Store
 Thumbs.db
 
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
 # Build scripts output
 build/
 out/

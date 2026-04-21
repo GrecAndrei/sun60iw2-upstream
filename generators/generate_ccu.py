@@ -115,6 +115,22 @@ def generate_divider(clk):
 '''
 
 
+def generate_fixed_factor(clk):
+    """Generate a fixed factor clock."""
+    name = clk["name"]
+    parent = clk["parent"]
+    mult = clk["mult"]
+    div = clk["div"]
+
+    parent_hws = f"{parent.replace('-', '_')}_hws"
+
+    return f'''static CLK_FIXED_FACTOR_HWS({name.replace("-", "_")}_clk, "{name}",
+				{parent_hws}, {mult}, {div},
+				CLK_SET_RATE_PARENT);
+
+'''
+
+
 def generate_gate(clk):
     """Generate a gate clock."""
     name = clk["name"]

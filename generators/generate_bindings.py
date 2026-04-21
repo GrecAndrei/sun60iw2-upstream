@@ -190,7 +190,7 @@ $schema: http://devicetree.org/meta-schemas/core.yaml#
 title: {binding["title"]}
 
 maintainers:
-  - sun60iw2-upstream contributors <dev@sun60iw2.local>
+  - Alexander Grec <andreigrecay@gmail.com>
 
 description: |
   {binding["description"]}

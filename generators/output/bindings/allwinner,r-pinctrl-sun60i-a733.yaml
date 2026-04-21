@@ -7,7 +7,7 @@ $schema: http://devicetree.org/meta-schemas/core.yaml#
 title: Allwinner A733 R-Domain Pin Controller
 
 maintainers:
-  - sun60iw2-upstream contributors <dev@sun60iw2.local>
+  - Alexander Grec <andreigrecay@gmail.com>
 
 description: |
   The R-domain pin controller manages GPIO for the always-on PL-PM banks.

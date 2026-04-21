@@ -103,7 +103,7 @@ Tested on Orange Pi 4 Pro (8GB).
 Depends on: [PATCH v2] clk: sunxi-ng: sun55i-a523 fixes
 
 Regards,
-Your Name
+Alexander Grec
 ```
 
 ---

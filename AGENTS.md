@@ -245,13 +245,33 @@ Always update `docs/status.md` when completing work. Use the legend:
 
 ---
 
+## Workflow
+
+This is a **personal project** by Alexander Grec. All changes go through GitHub PRs.
+
+1. Create a feature branch: `git checkout -b feature/name`
+2. Make changes, commit with descriptive messages
+3. Open a Pull Request on GitHub
+4. Review, iterate, merge
+
+**Do not push directly to `main`.**
+
 ## Communication
 
 - **GitHub Issues:** Task tracking, bugs
 - **GitHub Discussions:** General chat
-- **Mail:** `linux-sunxi@lists.linux.dev` for patches
+- **Mail:** `linux-sunxi@lists.linux.dev` for upstream patches (later)
 
 ---
+
+## Git Identity
+
+This repo uses the following git identity. Do NOT use fake emails.
+
+```bash
+git config user.name "GrecAndrei"
+git config user.email "andreigrecay@gmail.com"
+```
 
 ## Critical Notes for AI Agents
 

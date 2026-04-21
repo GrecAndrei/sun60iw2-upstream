@@ -106,7 +106,7 @@ Longer explanation of what and why. Wrap at 72 chars.
 
 Include hardware details, register references, and testing notes.
 
-Signed-off-by: Your Name <your@email.com>
+
 ```
 
 Example:
@@ -119,7 +119,7 @@ peripheral nodes for the Allwinner A733 SoC.
 Based on the vendor device tree and verified against the
 sun55i-a523 mainline device tree.
 
-Signed-off-by: Your Name <your@email.com>
+
 ```
 
 ### Submitting Patches
@@ -230,7 +230,7 @@ The A733 has four CCUs: main, R-domain, RTC, and CPUPLL. This
 patch adds the main CCU with 333 clocks including PLLs, muxes,
 dividers, and gates.
 
-Signed-off-by: Your Name <your@email.com>"
+"
 
 # Export patches for review
 git format-patch main
@@ -254,5 +254,5 @@ All contributions must be licensed under GPL-2.0+.
 By contributing, you agree to the [Developer Certificate of Origin](https://developercertificate.org/):
 
 ```
-Signed-off-by: Your Name <your@email.com>
+
 ```

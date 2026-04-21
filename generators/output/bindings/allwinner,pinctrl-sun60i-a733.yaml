@@ -7,7 +7,7 @@ $schema: http://devicetree.org/meta-schemas/core.yaml#
 title: Allwinner A733 Pin Controller
 
 maintainers:
-  - sun60iw2-upstream contributors <dev@sun60iw2.local>
+  - Alexander Grec <andreigrecay@gmail.com>
 
 description: |
   The Allwinner A733 pin controller manages GPIO and pin multiplexing for PA-PK banks.

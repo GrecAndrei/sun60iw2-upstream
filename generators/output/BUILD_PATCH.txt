@@ -1,0 +1,40 @@
+# Build System Integration Patches
+#
+# Apply these to the mainline Linux tree:
+#
+# --- drivers/clk/sunxi-ng/Kconfig ---
+# Add at the end of the file:
+
+
+# --- drivers/clk/sunxi-ng/Kconfig (for clk) or drivers/clk/sunxi/Kconfig ---
+# Allwinner A733 Clock Controller Unit
+config SUN60I_A733_CCU
+	tristate "Allwinner A733 Clock Controller Unit"
+	depends on CONFIG_ARCH_SUNXI && CONFIG_CLK_SUNXI
+	default y if ARCH_SUNXI
+	help
+	  Support for the Allwinner A733 Clock Controller Unit found on Allwinner A733 SoC.
+
+# --- drivers/clk/sunxi-ng/Makefile (for clk) or drivers/clk/sunxi/Makefile ---
+# Allwinner A733 Clock Controller Unit
+obj-$(CONFIG_SUN60I_A733_CCU) += ccu-sun60i-a733.o
+
+
+# --- drivers/pinctrl/sunxi-ng/Kconfig (for clk) or drivers/pinctrl/sunxi/Kconfig ---
+# Allwinner A733 Pin Controller
+config PINCTRL_SUN60I_A733
+	tristate "Allwinner A733 Pin Controller"
+	depends on CONFIG_ARCH_SUNXI && CONFIG_PINCTRL_SUNXI
+	default y if ARCH_SUNXI
+	help
+	  Support for the Allwinner A733 Pin Controller found on Allwinner A733 SoC.
+
+# --- drivers/pinctrl/sunxi-ng/Makefile (for clk) or drivers/pinctrl/sunxi/Makefile ---
+# Allwinner A733 Pin Controller
+obj-$(CONFIG_PINCTRL_SUN60I_A733) += pinctrl-sun60i-a733.o
+
+
+# --- arch/arm64/boot/dts/allwinner/Makefile ---
+# Add to existing dtb-$(CONFIG_ARCH_SUNXI) list:
+
+dtb-$(CONFIG_ARCH_SUNXI) += sun60i-a733-orangepi-4-pro.dtb

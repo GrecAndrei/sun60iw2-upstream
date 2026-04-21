@@ -1,0 +1,33 @@
+# sun60iw2 SoC family configuration
+# Include this in drivers/soc/sunxi/Kconfig or create arch/arm64/Kconfig.platforms entry
+
+menuconfig ARCH_SUN60IW2
+	bool "Allwinner sun60iw2 (A733) SoC Family"
+	depends on ARCH_SUNXI
+	default n
+	help
+	  Support for Allwinner sun60iw2 SoC family (A733 and variants).
+	  This includes the Orange Pi 4 Pro and other boards based on
+	  the A733 SoC.
+
+if ARCH_SUN60IW2
+
+config SUN60I_A733_CCU
+	bool "Allwinner A733 Clock Controller"
+	default y
+	help
+	  Support for the Clock Controller Unit (CCU) on Allwinner A733.
+
+config SUN60I_A733_PINCTRL
+	bool "Allwinner A733 Pin Controller"
+	default y
+	help
+	  Support for the pin controller on Allwinner A733.
+
+config SUN60I_A733_WATCHDOG
+	bool "Allwinner A733 Watchdog"
+	default y
+	help
+	  Support for the watchdog timer on Allwinner A733.
+
+endif # ARCH_SUN60IW2

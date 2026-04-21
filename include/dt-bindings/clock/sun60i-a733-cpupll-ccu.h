@@ -1,0 +1,15 @@
+/* SPDX-License-Identifier: GPL-2.0+ OR MIT */
+#ifndef _DT_BINDINGS_CLK_SUN60I_A733_CPUPLL_H_
+#define _DT_BINDINGS_CLK_SUN60I_A733_CPUPLL_H_
+
+#define CLK_PLL_CPU_BACK	0
+#define CLK_PLL_CPU_L		1
+#define CLK_PLL_CPU_B		2
+#define CLK_PLL_CPU_DSU		3
+#define CLK_CPU_L		4
+#define CLK_CPU_B		5
+#define CLK_CPU_DSU		6
+
+#define CLK_CPUPLL_NUMBER	(CLK_CPU_DSU + 1)
+
+#endif /* _DT_BINDINGS_CLK_SUN60I_A733_CPUPLL_H_ */

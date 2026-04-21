@@ -1,0 +1,12 @@
+# This file shows the required changes to arch/arm64/Kconfig.platforms
+# in the mainline Linux kernel to enable sun60i-a733 support.
+#
+# The ARCH_SUNXI entry already exists and covers all sunxi SoCs.
+# No changes are needed to Kconfig.platforms for the SoC itself.
+#
+# However, you must ensure the following are enabled in your kernel config:
+#
+# CONFIG_ARCH_SUNXI=y
+# CONFIG_ARCH_ALLWINNER=y (if it exists in your kernel version)
+#
+# Device-specific options will be added as drivers are implemented.

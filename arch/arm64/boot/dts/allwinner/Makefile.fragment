@@ -1,0 +1,6 @@
+# This file shows the required changes to arch/arm64/boot/dts/allwinner/Makefile
+# in the mainline Linux kernel to build the sun60i-a733 device trees.
+#
+# Add these lines to the existing Makefile:
+
+dtb-$(CONFIG_ARCH_SUNXI) += sun60i-a733-orangepi-4-pro.dtb

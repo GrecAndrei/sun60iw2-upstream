@@ -53,25 +53,36 @@ class ExtractionResult:
 
 class SemanticMap:
     """
-    Knowledge base of what C patterns mean in sunxi drivers.
+    Persistent knowledge base of what C patterns mean in sunxi drivers.
 
-    Contains:
-    - Macro signatures: What each SUNXI_* macro creates
-    - Type mappings: ccu_nm = PLL, SUNXI_CCU_GATE = gate clock, etc.
-    - Validation rules: e.g., every gate must have a parent
-    - Relationships: Which clocks derive from which PLLs
+    This is the BRAIN of the extraction engine. It lives on disk,
+    learns from every extraction run, and grows smarter over time.
+
+    Sections:
+    - macros: Signatures for each SUNXI_* macro
+    - types: Mapping from C types to semantic types
+    - validation_rules: Constraints extracted data must satisfy
+    - relationships: Clock/pin parent-child hierarchies
+    - learned_patterns: Patterns discovered from failed extractions
+    - vendor_history: Which vendor files were processed and when
     """
 
+    DEFAULT_PATH = Path(__file__).parent / "data" / "semantic_map.json"
+
     def __init__(self, map_path: Optional[Path] = None):
+        self._path = map_path or self.DEFAULT_PATH
         self.macros: Dict[str, Dict] = {}
         self.types: Dict[str, str] = {}
         self.validation_rules: List[Dict] = []
         self.relationships: Dict[str, List[str]] = {}
+        self.learned_patterns: List[Dict] = []
+        self.vendor_history: Dict[str, Dict] = {}
 
-        if map_path and map_path.exists():
-            self.load(map_path)
+        if self._path.exists():
+            self.load(self._path)
         else:
             self._init_defaults()
+            self.save(self._path)
 
     def _init_defaults(self):
         """Initialize with default sunxi knowledge."""
@@ -116,7 +127,15 @@ class SemanticMap:
                 "type": "pll",
                 "args": [],
                 "creates": "ccu_nkmp",
-                "fields": [".enable", ".lock", ".n", ".k", ".m", ".p", ".common.reg"],
+                "fields": [
+                    ".enable",
+                    ".lock",
+                    ".n",
+                    ".k",
+                    ".m",
+                    ".p",
+                    ".common.reg",
+                ],
             },
         }
 
@@ -142,24 +161,62 @@ class SemanticMap:
         ]
 
     def load(self, path: Path):
-        """Load semantic map from JSON."""
+        """Load semantic map from JSON on disk."""
         with open(path) as f:
             data = json.load(f)
-        self.macros = data.get("macros", self.macros)
-        self.types = data.get("types", self.types)
-        self.validation_rules = data.get("validation_rules", self.validation_rules)
-        self.relationships = data.get("relationships", self.relationships)
+        self.macros = data.get("macros", {})
+        self.types = data.get("types", {})
+        self.validation_rules = data.get("validation_rules", [])
+        self.relationships = data.get("relationships", {})
+        self.learned_patterns = data.get("learned_patterns", [])
+        self.vendor_history = data.get("vendor_history", {})
 
-    def save(self, path: Path):
-        """Save semantic map to JSON."""
+    def save(self, path: Optional[Path] = None):
+        """Save semantic map to JSON on disk."""
+        save_path = path or self._path
         data = {
             "macros": self.macros,
             "types": self.types,
             "validation_rules": self.validation_rules,
             "relationships": self.relationships,
+            "learned_patterns": self.learned_patterns,
+            "vendor_history": self.vendor_history,
         }
-        with open(path, "w") as f:
+        save_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(save_path, "w") as f:
             json.dump(data, f, indent=2)
+
+    def record_vendor_run(self, filepath: Path, stats: Dict):
+        """Record that we processed a vendor file."""
+        import hashlib
+
+        content = filepath.read_bytes()
+        checksum = hashlib.sha256(content).hexdigest()[:16]
+        self.vendor_history[str(filepath)] = {
+            "checksum": checksum,
+            "last_run": str(__import__("time").time()),
+            "stats": stats,
+        }
+        self.save()
+
+    def add_learned_pattern(self, raw_block: str, expected: Dict, context: str = ""):
+        """Add a pattern learned from manual correction."""
+        import hashlib
+
+        block_hash = hashlib.sha256(raw_block.encode()).hexdigest()[:16]
+        self.learned_patterns.append(
+            {
+                "hash": block_hash,
+                "context": context,
+                "raw_preview": raw_block[:200],
+                "expected": expected,
+            }
+        )
+        self.save()
+
+    def has_seen_vendor(self, filepath: Path) -> bool:
+        """Check if we've already processed this vendor file."""
+        return str(filepath) in self.vendor_history
 
     def resolve_type(self, pattern: str) -> Optional[str]:
         """Resolve a C pattern to its semantic type."""
@@ -366,13 +423,14 @@ class Engine:
     Main extraction engine.
 
     Coordinates parsing, plugin execution, validation, and learning.
+    The semantic map is ALWAYS loaded from disk and saved back after runs.
     """
 
-    def __init__(self, semantic_map_path: Optional[Path] = None):
-        self.semantic_map = SemanticMap(semantic_map_path)
+    def __init__(self):
+        # Always load from disk so knowledge persists across runs
+        self.semantic_map = SemanticMap()
         self.parser = CBlockParser()
         self.registry = PluginRegistry()
-        self.learning_log: List[Dict] = []
 
         # Load built-in plugins
         self._load_plugins()
@@ -448,6 +506,19 @@ class Engine:
             semantic_errors = self._semantic_validate(subsystem, result.items)
             result.errors.extend(semantic_errors)
 
+        # Record this run in the semantic map's persistent history
+        if source_file:
+            self.semantic_map.record_vendor_run(
+                source_file,
+                stats={
+                    "subsystem": subsystem,
+                    "items": len(result.items),
+                    "confidence": result.confidence,
+                    "errors": len(result.errors),
+                    "unparsed": len(result.raw_blocks),
+                },
+            )
+
         return result
 
     def _semantic_validate(self, subsystem: str, items: List[Dict]) -> List[str]:
@@ -472,22 +543,17 @@ class Engine:
 
     def learn(self, subsystem: str, raw_block: str, expected: Dict):
         """
-        Learn from a manual correction.
+        Learn from a manual correction and persist to disk.
 
         When the engine fails to extract something correctly,
         provide the raw block and expected output to improve patterns.
+        This is stored permanently in the semantic map JSON.
         """
-        self.learning_log.append(
-            {
-                "subsystem": subsystem,
-                "raw": raw_block,
-                "expected": expected,
-                "timestamp": str(Path().stat().st_mtime),  # placeholder
-            }
+        self.semantic_map.add_learned_pattern(
+            raw_block=raw_block,
+            expected=expected,
+            context=subsystem,
         )
-
-        # TODO: Analyze patterns to improve semantic map
-        pass
 
     def report(self, result: ExtractionResult) -> str:
         """Generate a human-readable extraction report."""

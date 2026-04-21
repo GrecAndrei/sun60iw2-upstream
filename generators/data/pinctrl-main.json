@@ -1,0 +1,19 @@
+{
+  "_comment": "Allwinner A733 main pinctrl data. Extracted from vendor sun60iw2p1.dtsi",
+  "banks": {
+    "PA": 0,
+    "PB": 11,
+    "PC": 17,
+    "PD": 22,
+    "PE": 11,
+    "PF": 6,
+    "PG": 6,
+    "PH": 0,
+    "PI": 0,
+    "PJ": 28,
+    "PK": 26
+  },
+  "irq_bank_map": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+  "irq_bank_muxes": [0, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14],
+  "flags": ["new_reg_layout", "eleven_banks"]
+}

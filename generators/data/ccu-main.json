@@ -1,0 +1,44 @@
+{
+  "_comment": "Minimal CCU data for sun60i-a733 UART bringup. Full table TBD.",
+  "clocks": [
+    {
+      "name": "pll-periph0",
+      "type": "nm",
+      "reg": "0x020",
+      "id": "PLL_PERI0"
+    },
+    {
+      "name": "pll-periph0-2x",
+      "type": "divider",
+      "parent": "pll-periph0",
+      "reg": "0x020",
+      "shift": 16,
+      "width": 3,
+      "id": "PLL_PERI0_2X"
+    },
+    {
+      "name": "apb1",
+      "type": "gate",
+      "parent": "pll-periph0-2x",
+      "reg": "0x0",
+      "bit": 0,
+      "id": "APB1",
+      "flags": ["critical"]
+    },
+    {
+      "name": "uart0",
+      "type": "gate",
+      "parent": "apb1",
+      "reg": "0x0",
+      "bit": 1,
+      "id": "UART0"
+    }
+  ],
+  "resets": [
+    {
+      "id": "BUS_UART0",
+      "reg": "0x0",
+      "bit": 0
+    }
+  ]
+}

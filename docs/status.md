@@ -17,19 +17,19 @@ Last updated: 2026-04-21
 
 | Component | Status | Notes | Assignee |
 |-----------|--------|-------|----------|
-| Base DTSI (`sun60i-a733.dtsi`) | :x: | Not started | - |
-| Board DTS (`sun60i-a733-orangepi-4-pro.dts`) | :x: | Blocked on base DTSI | - |
+| Base DTSI (`sun60i-a733.dtsi`) | :construction: | WIP - basic structure done | - |
+| Board DTS (`sun60i-a733-orangepi-4-pro.dts`) | :construction: | WIP - basic structure done | - |
 | Main CCU driver | :x: | Not started | - |
 | R-CCU driver | :x: | Not started | - |
 | RTC CCU driver | :x: | Not started | - |
 | CPUPLL driver | :x: | Not started | - |
 | Pinctrl (main) | :x: | Not started | - |
 | Pinctrl (R-domain) | :x: | Not started | - |
-| dt-bindings headers | :x: | Not started | - |
+| dt-bindings headers | :white_check_mark: | All clock/reset/power IDs defined | - |
 | UART earlyprintk | :x: | Blocked on clocks + pinctrl | - |
-| Timer | :x: | Should work with generic sun50i-timer | - |
-| GICv3 + ITS | :x: | Generic ARM, should work | - |
-| **Phase 1 Goal** | :x: | UART boot messages | - |
+| Timer | :construction: | Node added, needs driver verification | - |
+| GICv3 + ITS | :white_check_mark: | Generic ARM - should work | - |
+| **Phase 1 Goal** | :construction: | UART boot messages | - |
 
 ---
 

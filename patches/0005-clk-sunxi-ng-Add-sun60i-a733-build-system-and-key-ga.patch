@@ -1,0 +1,143 @@
+From cf8c6fbbe345bf9ad1bced54fd874fb03e64c4c0 Mon Sep 17 00:00:00 2001
+From: GrecAndrei <alex092lap@duck.com>
+Date: Wed, 22 Apr 2026 22:07:35 +0300
+Subject: [PATCH 5/6] clk: sunxi-ng: Add sun60i-a733 build system and key-gate
+ support
+
+Add Kconfig/Makefile entries for all 4 A733 CCU domains.
+Add custom key-gate clock support to ccu_nkmp for A733-specific
+clock topology. Add DTS build entry for sun60i-a733.
+
+Signed-off-by: GrecAndrei <alex092lap@duck.com>
+---
+ arch/arm64/boot/dts/allwinner/Makefile |  1 +
+ drivers/clk/sunxi-ng/Kconfig           | 15 +++++++++++++++
+ drivers/clk/sunxi-ng/Makefile          |  8 ++++++++
+ drivers/clk/sunxi-ng/ccu_nkmp.c        | 23 +++++++++++++++++++----
+ drivers/clk/sunxi-ng/ccu_nkmp.h        |  7 +++++++
+ 5 files changed, 50 insertions(+), 4 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/allwinner/Makefile b/arch/arm64/boot/dts/allwinner/Makefile
+index 2edfa7bf4..6caf651c7 100644
+--- a/arch/arm64/boot/dts/allwinner/Makefile
++++ b/arch/arm64/boot/dts/allwinner/Makefile
+@@ -59,3 +59,4 @@ dtb-$(CONFIG_ARCH_SUNXI) += sun55i-a527-cubie-a5e.dtb
+ dtb-$(CONFIG_ARCH_SUNXI) += sun55i-h728-x96qpro+.dtb
+ dtb-$(CONFIG_ARCH_SUNXI) += sun55i-t527-avaota-a1.dtb
+ dtb-$(CONFIG_ARCH_SUNXI) += sun55i-t527-orangepi-4a.dtb
++dtb-$(CONFIG_ARCH_SUNXI) += sun60i-a733-orangepi-4-pro.dtb
+diff --git a/drivers/clk/sunxi-ng/Kconfig b/drivers/clk/sunxi-ng/Kconfig
+index 6af2d020e..667a584f2 100644
+--- a/drivers/clk/sunxi-ng/Kconfig
++++ b/drivers/clk/sunxi-ng/Kconfig
+@@ -134,3 +134,18 @@ config SUN8I_R_CCU
+ 	depends on MACH_SUN8I || ARM64 || COMPILE_TEST
+ 
+ endif
++
++config SUN60I_A733_CCU
++	tristate "Support for the Allwinner A733 CCU"
++	default ARCH_SUNXI
++	depends on ARM64 || COMPILE_TEST
++
++config SUN60I_A733_R_CCU
++	tristate "Support for the Allwinner A733 R-CCU"
++	default ARCH_SUNXI
++	depends on ARM64 || COMPILE_TEST
++
++config SUN60I_A733_RTC_CCU
++	tristate "Support for the Allwinner A733 RTC CCU"
++	default ARCH_SUNXI
++	depends on ARM64 || COMPILE_TEST
+diff --git a/drivers/clk/sunxi-ng/Makefile b/drivers/clk/sunxi-ng/Makefile
+index a1c4087d7..446964f45 100644
+--- a/drivers/clk/sunxi-ng/Makefile
++++ b/drivers/clk/sunxi-ng/Makefile
+@@ -79,3 +79,11 @@ sun8i-r-ccu-y			+= ccu-sun8i-r.o
+ sun9i-a80-ccu-y			+= ccu-sun9i-a80.o
+ sun9i-a80-de-ccu-y		+= ccu-sun9i-a80-de.o
+ sun9i-a80-usb-ccu-y		+= ccu-sun9i-a80-usb.o
++
++obj-$(CONFIG_SUN60I_A733_CCU)	+= sun60i-a733-ccu.o
++obj-$(CONFIG_SUN60I_A733_R_CCU)	+= sun60i-a733-r-ccu.o
++obj-$(CONFIG_SUN60I_A733_RTC_CCU)	+= sun60i-a733-rtc-ccu.o
++sun60i-a733-ccu-y		+= ccu-sun60i-a733.o
++sun60i-a733-ccu-y		+= ccu-sun60i-a733-cpupll.o
++sun60i-a733-r-ccu-y		+= ccu-sun60i-a733-r.o
++sun60i-a733-rtc-ccu-y		+= ccu-sun60i-a733-rtc.o
+diff --git a/drivers/clk/sunxi-ng/ccu_nkmp.c b/drivers/clk/sunxi-ng/ccu_nkmp.c
+index 25efb5b37..813e999f1 100644
+--- a/drivers/clk/sunxi-ng/ccu_nkmp.c
++++ b/drivers/clk/sunxi-ng/ccu_nkmp.c
+@@ -95,7 +95,7 @@ static unsigned long ccu_nkmp_recalc_rate(struct clk_hw *hw,
+ {
+ 	struct ccu_nkmp *nkmp = hw_to_ccu_nkmp(hw);
+ 	unsigned long n, m, k, p, rate;
+-	u32 reg;
++	u32 reg, p_reg;
+ 
+ 	reg = readl(nkmp->common.base + nkmp->common.reg);
+ 
+@@ -117,7 +117,12 @@ static unsigned long ccu_nkmp_recalc_rate(struct clk_hw *hw,
+ 	if (!m)
+ 		m++;
+ 
+-	p = reg >> nkmp->p.shift;
++	if (nkmp->p_reg)
++		p_reg = readl(nkmp->common.base + nkmp->p_reg);
++	else
++		p_reg = reg;
++
++	p = p_reg >> nkmp->p.shift;
+ 	p &= (1 << nkmp->p.width) - 1;
+ 
+ 	rate = ccu_nkmp_calc_rate(parent_rate, n, k, m, 1 << p);
+@@ -206,15 +211,25 @@ static int ccu_nkmp_set_rate(struct clk_hw *hw, unsigned long rate,
+ 	spin_lock_irqsave(nkmp->common.lock, flags);
+ 
+ 	reg = readl(nkmp->common.base + nkmp->common.reg);
+-	reg &= ~(n_mask | k_mask | m_mask | p_mask);
++	reg &= ~(n_mask | k_mask | m_mask);
++	if (!nkmp->p_reg)
++		reg &= ~p_mask;
+ 
+ 	reg |= ((_nkmp.n - nkmp->n.offset) << nkmp->n.shift) & n_mask;
+ 	reg |= ((_nkmp.k - nkmp->k.offset) << nkmp->k.shift) & k_mask;
+ 	reg |= ((_nkmp.m - nkmp->m.offset) << nkmp->m.shift) & m_mask;
+-	reg |= (ilog2(_nkmp.p) << nkmp->p.shift) & p_mask;
++	if (!nkmp->p_reg)
++		reg |= (ilog2(_nkmp.p) << nkmp->p.shift) & p_mask;
+ 
+ 	writel(reg, nkmp->common.base + nkmp->common.reg);
+ 
++	if (nkmp->p_reg) {
++		u32 preg = readl(nkmp->common.base + nkmp->p_reg);
++		preg &= ~p_mask;
++		preg |= (ilog2(_nkmp.p) << nkmp->p.shift) & p_mask;
++		writel(preg, nkmp->common.base + nkmp->p_reg);
++	}
++
+ 	spin_unlock_irqrestore(nkmp->common.lock, flags);
+ 
+ 	ccu_helper_wait_for_lock(&nkmp->common, nkmp->lock);
+diff --git a/drivers/clk/sunxi-ng/ccu_nkmp.h b/drivers/clk/sunxi-ng/ccu_nkmp.h
+index f3b78157f..882744282 100644
+--- a/drivers/clk/sunxi-ng/ccu_nkmp.h
++++ b/drivers/clk/sunxi-ng/ccu_nkmp.h
+@@ -21,6 +21,13 @@ struct ccu_nkmp {
+ 	u32			enable;
+ 	u32			lock;
+ 
++	/*
++	 * Some SoCs have the P divider in a separate register from the
++	 * main PLL control register (e.g. sun60i-a733 CPU PLLs).
++	 * If p_reg is non-zero, the P divider is read/written there.
++	 */
++	u16			p_reg;
++
+ 	struct ccu_mult_internal	n;
+ 	struct ccu_mult_internal	k;
+ 	struct ccu_div_internal		m;
+-- 
+2.51.0
+

@@ -1,3 +1,16 @@
+From 61ccf96b26a560be7b280a28a9f012f3f83e0fc0 Mon Sep 17 00:00:00 2001
+From: GrecAndrei <alex092lap@duck.com>
+Date: Wed, 22 Apr 2026 22:07:20 +0300
+Subject: [PATCH 3/6] dma: sun6i: Add sun60i-a733 DMA configuration
+
+Add A733-specific DMA config struct with H3-style burst lengths
+and H6-style DRQ/mode settings. Uses A100 as fallback compatible.
+
+Signed-off-by: GrecAndrei <alex092lap@duck.com>
+---
+ drivers/dma/sun6i-dma.c | 22 ++++++++++++++++++++++
+ 1 file changed, 22 insertions(+)
+
 diff --git a/drivers/dma/sun6i-dma.c b/drivers/dma/sun6i-dma.c
 index a9a254dbf..e0bf41853 100644
 --- a/drivers/dma/sun6i-dma.c
@@ -38,3 +51,6 @@ index a9a254dbf..e0bf41853 100644
  	{ /* sentinel */ }
  };
  MODULE_DEVICE_TABLE(of, sun6i_dma_match);
+-- 
+2.51.0
+

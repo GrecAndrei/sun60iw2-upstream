@@ -1,3 +1,17 @@
+From 759783b23022a8ea17fdab65380eed0c09a46c2f Mon Sep 17 00:00:00 2001
+From: GrecAndrei <alex092lap@duck.com>
+Date: Wed, 22 Apr 2026 22:07:26 +0300
+Subject: [PATCH 4/6] thermal: sun8i: Add sun60i-a733 thermal sensor support
+
+Add A733 chip descriptor with 5 sensors, custom piecewise-linear
+calc_temp, EFUSE-based calibration, and H6-style register init.
+Supports optional IRQ (no dedicated THS interrupt on A733).
+
+Signed-off-by: GrecAndrei <alex092lap@duck.com>
+---
+ drivers/thermal/sun8i_thermal.c | 128 ++++++++++++++++++++++++++++++--
+ 1 file changed, 120 insertions(+), 8 deletions(-)
+
 diff --git a/drivers/thermal/sun8i_thermal.c b/drivers/thermal/sun8i_thermal.c
 index 226747906..aba10e4ba 100644
 --- a/drivers/thermal/sun8i_thermal.c
@@ -183,3 +197,6 @@ index 226747906..aba10e4ba 100644
  	{ /* sentinel */ },
  };
  MODULE_DEVICE_TABLE(of, of_ths_match);
+-- 
+2.51.0
+

@@ -1,3 +1,15 @@
+From a0d6550bbe4a309b63f96654b3f818e30106d4fa Mon Sep 17 00:00:00 2001
+From: GrecAndrei <alex092lap@duck.com>
+Date: Wed, 22 Apr 2026 18:55:25 +0300
+Subject: [PATCH 1/6] mmc: sunxi: Add allwinner,sun60i-a733-mmc compatible
+
+Add the A733 MMC compatible string mapping to the existing
+sun20i_d1_cfg quirks. The A733 MMC controllers are compatible
+with the D1/A100 variant and do not require new quirks.
+---
+ drivers/mmc/host/sunxi-mmc.c | 1 +
+ 1 file changed, 1 insertion(+)
+
 diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
 index 8dbcff53a..bea6cfde7 100644
 --- a/drivers/mmc/host/sunxi-mmc.c
@@ -10,3 +22,6 @@ index 8dbcff53a..bea6cfde7 100644
  	{ /* sentinel */ }
  };
  MODULE_DEVICE_TABLE(of, sunxi_mmc_of_match);
+-- 
+2.51.0
+

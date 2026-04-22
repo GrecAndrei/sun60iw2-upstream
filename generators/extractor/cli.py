@@ -12,6 +12,7 @@ Usage:
 import json
 import argparse
 from pathlib import Path
+from generators.extractor import DEFAULT_ROOT_SOURCES
 
 
 def cmd_status(args):
@@ -31,13 +32,7 @@ def cmd_status(args):
     print(f"Validation rules: {len(data.get('validation_rules', []))}")
     print(f"Learned patterns: {len(data.get('learned_patterns', []))}")
     print(f"Vendor files processed: {len(data.get('vendor_history', {}))}")
-    root_sources = data.get("root_sources") or [
-        "osc24M",
-        "dcxo",
-        "hosc",
-        "losc",
-        "ext-osc32k",
-    ]
+    root_sources = data.get("root_sources") or list(DEFAULT_ROOT_SOURCES)
     print(f"Root sources tracked: {len(root_sources)}")
 
 

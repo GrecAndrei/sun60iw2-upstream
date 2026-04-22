@@ -44,6 +44,10 @@ from typing import Dict, List, Optional, Any, Set, Tuple
 from dataclasses import dataclass, field, asdict
 from collections import defaultdict
 
+DEFAULT_ROOT_SOURCES = ("osc24M", "dcxo", "hosc", "losc", "ext-osc32k")
+PATTERN_PREVIEW_LENGTH = 200
+LEARNED_PATTERN_MIN_SIMILARITY = 0.92
+
 
 @dataclass
 class ExtractionResult:
@@ -157,7 +161,7 @@ class SemanticMap:
             {"rule": "plls_have_reg", "check": "type == 'pll' implies 'reg' in item"},
             {"rule": "names_unique", "check": "all names are unique"},
         ]
-        self.root_sources = {"osc24M", "dcxo", "hosc", "losc", "ext-osc32k"}
+        self.root_sources = set(DEFAULT_ROOT_SOURCES)
 
     def load(self, path: Path):
         with open(path) as f:
@@ -168,9 +172,7 @@ class SemanticMap:
         self.relationships = data.get("relationships", {})
         self.learned_patterns = data.get("learned_patterns", [])
         self.vendor_history = data.get("vendor_history", {})
-        self.root_sources = set(
-            data.get("root_sources", ["osc24M", "dcxo", "hosc", "losc", "ext-osc32k"])
-        )
+        self.root_sources = set(data.get("root_sources", list(DEFAULT_ROOT_SOURCES)))
 
     def save(self, path: Optional[Path] = None):
         save_path = path or self._path
@@ -208,8 +210,8 @@ class SemanticMap:
                 "hash": block_hash,
                 "normalized_hash": normalized_hash,
                 "context": context,
-                "raw_preview": raw_block[:200],
-                "normalized_preview": normalized[:200],
+                "raw_preview": raw_block[:PATTERN_PREVIEW_LENGTH],
+                "normalized_preview": normalized[:PATTERN_PREVIEW_LENGTH],
                 "expected": expected,
             }
         )
@@ -445,7 +447,7 @@ class CrossReferenceValidator:
     ) -> List[str]:
         errors = []
         all_names = {item.get("name", "") for item in items}
-        known_roots = root_sources or {"osc24M", "dcxo", "hosc", "losc", "ext-osc32k"}
+        known_roots = root_sources or set(DEFAULT_ROOT_SOURCES)
 
         for item in items:
             parent = item.get("parent", "")
@@ -815,12 +817,14 @@ class Engine:
             preview = pattern.get("normalized_preview", "")
             if not preview:
                 continue
-            score = SequenceMatcher(None, normalized[:200], preview).ratio()
+            score = SequenceMatcher(
+                None, normalized[:PATTERN_PREVIEW_LENGTH], preview
+            ).ratio()
             if score > best_score:
                 best_score = score
                 best = pattern
 
-        if best and best_score >= 0.92:
+        if best and best_score >= LEARNED_PATTERN_MIN_SIMILARITY:
             return dict(best.get("expected", {}))
         return None
 

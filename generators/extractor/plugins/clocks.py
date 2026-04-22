@@ -154,7 +154,7 @@ class ClockExtractor(ExtractorPlugin):
         if not self._is_safe_int_ast(node):
             return None
         try:
-            return int(eval(compile(node, "<ast>", "eval"), {"__builtins__": {}}, {}))
+            return int(self._eval_safe_int_node(node.body))
         except Exception:
             return None
 
@@ -179,6 +179,48 @@ class ClockExtractor(ExtractorPlugin):
             ast.Constant,
         )
         return all(isinstance(n, allowed) for n in ast.walk(node))
+
+    def _eval_safe_int_node(self, node: ast.AST) -> int:
+        if isinstance(node, ast.Constant):
+            if not isinstance(node.value, (int, float)):
+                raise ValueError("Unsupported constant type")
+            return int(node.value)
+        if isinstance(node, ast.UnaryOp):
+            operand = self._eval_safe_int_node(node.operand)
+            if isinstance(node.op, ast.USub):
+                return -operand
+            if isinstance(node.op, ast.UAdd):
+                return operand
+            raise ValueError("Unsupported unary operator")
+        if isinstance(node, ast.BinOp):
+            left = self._eval_safe_int_node(node.left)
+            right = self._eval_safe_int_node(node.right)
+            if isinstance(node.op, ast.Add):
+                return left + right
+            if isinstance(node.op, ast.Sub):
+                return left - right
+            if isinstance(node.op, ast.Mult):
+                return left * right
+            if isinstance(node.op, (ast.Div, ast.FloorDiv)):
+                if right == 0:
+                    raise ValueError("Division by zero")
+                return left // right
+            if isinstance(node.op, ast.Mod):
+                if right == 0:
+                    raise ValueError("Modulo by zero")
+                return left % right
+            if isinstance(node.op, ast.LShift):
+                return left << right
+            if isinstance(node.op, ast.RShift):
+                return left >> right
+            if isinstance(node.op, ast.BitAnd):
+                return left & right
+            if isinstance(node.op, ast.BitOr):
+                return left | right
+            if isinstance(node.op, ast.BitXor):
+                return left ^ right
+            raise ValueError("Unsupported binary operator")
+        raise ValueError("Unsupported AST node")
 
     def validate(self, items: list) -> list:
         """Validate extracted clock items."""

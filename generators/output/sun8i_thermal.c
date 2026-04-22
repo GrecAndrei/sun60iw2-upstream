@@ -244,19 +244,19 @@ static int sun60i_a733_ths_calibrate(struct ths_device *tmdev,
 
 		switch (i) {
 		case 0:
-			reg = (ths_cal[0] >> 12) & TEMP_CALIB_MASK;
+			sensor_reg = (ths_cal[0] >> 12) & TEMP_CALIB_MASK;
 			break;
 		case 1:
-			reg = ((ths_cal[0] >> 24) | (ths_cal[1] << 8)) & TEMP_CALIB_MASK;
+			sensor_reg = ((ths_cal[0] >> 24) | (ths_cal[1] << 8)) & TEMP_CALIB_MASK;
 			break;
 		case 2:
-			reg = (ths_cal[1] >> 4) & TEMP_CALIB_MASK;
+			sensor_reg = (ths_cal[1] >> 4) & TEMP_CALIB_MASK;
 			break;
 		case 3:
-			reg = (ths_cal[1] >> 16) & TEMP_CALIB_MASK;
+			sensor_reg = (ths_cal[1] >> 16) & TEMP_CALIB_MASK;
 			break;
 		case 4:
-			reg = ((ths_cal[1] >> 28) | (ths_cal[2] << 4)) & TEMP_CALIB_MASK;
+			sensor_reg = ((ths_cal[1] >> 28) | (ths_cal[2] << 4)) & TEMP_CALIB_MASK;
 			break;
 		default:
 			continue;

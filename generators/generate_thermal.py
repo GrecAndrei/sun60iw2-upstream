@@ -50,7 +50,7 @@ def generate_calibrate(chip):
 
     if cal["type"] == "custom":
         sensor_cases = "\n".join(
-            f"\t\tcase {s['id']}:\n\t\t\treg = {s['reg_extract']};\n\t\t\tbreak;"
+            f"\t\tcase {s['id']}:\n\t\t\tsensor_reg = {s['reg_extract']};\n\t\t\tbreak;"
             for s in cal["sensors"]
         )
         return f"""\

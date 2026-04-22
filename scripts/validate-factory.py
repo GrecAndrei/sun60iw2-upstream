@@ -20,8 +20,9 @@ def check(report: list, name: str, cond: bool, detail: str = ""):
 
 
 def run_gen(script: str) -> str:
+    parts = script.split()
     result = subprocess.run(
-        ["python3", str(ROOT / script)],
+        ["python3"] + parts,
         capture_output=True,
         text=True,
         cwd=ROOT,
@@ -49,8 +50,8 @@ def main() -> int:
     ccu2 = run_gen("generators/generate_ccu.py")
     check(checks, "ccu_determinism", ccu1 == ccu2, f"len={len(ccu1)}")
 
-    pin1 = run_gen("generators/generate_pinctrl.py")
-    pin2 = run_gen("generators/generate_pinctrl.py")
+    pin1 = run_gen("generators/generate_pinctrl.py --with-pinmux=c")
+    pin2 = run_gen("generators/generate_pinctrl.py --with-pinmux=c")
     check(checks, "pinctrl_determinism", pin1 == pin2, f"len={len(pin1)}")
 
     # 3. Committed files match fresh output

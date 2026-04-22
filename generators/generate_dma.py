@@ -18,7 +18,7 @@ DATA_PATH = Path(__file__).with_name("data") / "dma.json"
 
 def emit_burst_lengths(lengths: list) -> str:
     parts = [f"BIT({v})" for v in lengths]
-    return " |\n\t\t\t     ".join(parts)
+    return " | ".join(parts)
 
 
 def emit_addr_widths(widths: list) -> str:
@@ -29,7 +29,7 @@ def emit_addr_widths(widths: list) -> str:
         8: "DMA_SLAVE_BUSWIDTH_8_BYTES",
     }
     parts = [f"BIT({mapping[w]})" for w in widths]
-    return " |\n\t\t\t     ".join(parts)
+    return " | ".join(parts)
 
 
 def generate_driver_patch(data: dict) -> str:
@@ -39,11 +39,11 @@ def generate_driver_patch(data: dict) -> str:
 
     lines = [
         f"/*\n * {soc.upper()} binding uses the number of dma channels from the\n * device tree node.\n */",
-        f"static struct sun6i_dma_config {soc.replace('-', '_')}_cfg = {{",
+        f"static struct sun6i_dma_config {soc.replace('-', '_')}_dma_cfg = {{",
         f"\t.clock_autogate_enable = {cfg['clock_autogate_enable']},",
         f"\t.set_burst_length = {cfg['set_burst_length']},",
-        f"\t.set_drq          = {cfg['set_drq']},",
-        f"\t.set_mode         = {cfg['set_mode']},",
+        f"\t.set_drq = {cfg['set_drq']},",
+        f"\t.set_mode = {cfg['set_mode']},",
         f"\t.src_burst_lengths = {emit_burst_lengths(cfg['src_burst_lengths'])},",
         f"\t.dst_burst_lengths = {emit_burst_lengths(cfg['dst_burst_lengths'])},",
         f"\t.src_addr_widths   = {emit_addr_widths(cfg['src_addr_widths'])},",
@@ -57,7 +57,7 @@ def generate_driver_patch(data: dict) -> str:
     lines.append("")
     lines.append("/* Add to sun6i_dma_match[]:")
     lines.append(
-        f'\t{{ .compatible = "{compatible}", .data = &{soc.replace("-", "_")}_cfg }},'
+        f'\t{{ .compatible = "{compatible}", .data = &{soc.replace("-", "_")}_dma_cfg }},'
     )
     lines.append("*/")
     return "\n".join(lines)

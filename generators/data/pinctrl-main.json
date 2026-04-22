@@ -13,7 +13,33 @@
     "PJ": 28,
     "PK": 26
   },
-  "irq_bank_map": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
-  "irq_bank_muxes": [0, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14],
-  "flags": ["new_reg_layout", "eleven_banks"]
+  "irq_bank_map": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+  ],
+  "irq_bank_muxes": [
+    0,
+    14,
+    14,
+    14,
+    14,
+    14,
+    14,
+    14,
+    14,
+    14,
+    0
+  ],
+  "flags": [
+    "new_reg_layout",
+    "eleven_banks"
+  ]
 }

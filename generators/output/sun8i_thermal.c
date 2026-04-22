@@ -112,6 +112,21 @@ static int sun60i_a733_calc_temp(struct ths_device *tmdev,
 		return (reg + SUN60I_A733_OFFSET_ABOVE) * SUN60I_A733_SCALE_ABOVE;
 }
 
+#define SUN60I_A733_SENSOR_DATA_CODE	(1769)
+#define SUN60I_A733_OFFSET_BELOW	(-2822)
+#define SUN60I_A733_SCALE_BELOW	(-62)
+#define SUN60I_A733_OFFSET_ABOVE	(-2835)
+#define SUN60I_A733_SCALE_ABOVE	(-59)
+
+static int sun60i_a733_calc_temp(struct ths_device *tmdev,
+			       int id, int reg)
+{
+	if (reg > SUN60I_A733_SENSOR_DATA_CODE)
+		return (reg + SUN60I_A733_OFFSET_BELOW) * SUN60I_A733_SCALE_BELOW;
+	else
+		return (reg + SUN60I_A733_OFFSET_ABOVE) * SUN60I_A733_SCALE_ABOVE;
+}
+
 static int sun8i_ths_calc_temp(struct ths_device *tmdev,
 			       int id, int reg)
 {
@@ -219,6 +234,66 @@ static irqreturn_t sun8i_irq_thread(int irq, void *data)
 	}
 
 	return IRQ_HANDLED;
+}
+
+static int sun60i_a733_ths_calibrate(struct ths_device *tmdev,
+				 u16 *caldata, int callen)
+{
+	struct device *dev = tmdev->dev;
+	u32 ths_cal[3];
+	int i, ft_temp;
+
+	if (!caldata[0] || callen < 12)
+		return -EINVAL;
+
+	ths_cal[0] = caldata[0] | (caldata[1] << 16);
+	ths_cal[1] = caldata[2] | (caldata[3] << 16);
+	ths_cal[2] = caldata[4] | (caldata[5] << 16);
+
+	ft_temp = ths_cal[0] & FT_TEMP_MASK;
+	if (!ft_temp)
+		return -EINVAL;
+
+	for (i = 0; i < tmdev->chip->sensor_num; i++) {
+		int sensor_reg, sensor_temp, cdata, offset;
+
+		switch (i) {
+		case 0:
+			sensor_reg = (ths_cal[0] >> 12) & TEMP_CALIB_MASK;
+			break;
+		case 1:
+			sensor_reg = ((ths_cal[0] >> 24) | (ths_cal[1] << 8)) & TEMP_CALIB_MASK;
+			break;
+		case 2:
+			sensor_reg = (ths_cal[1] >> 4) & TEMP_CALIB_MASK;
+			break;
+		case 3:
+			sensor_reg = (ths_cal[1] >> 16) & TEMP_CALIB_MASK;
+			break;
+		case 4:
+			sensor_reg = ((ths_cal[1] >> 28) | (ths_cal[2] << 4)) & TEMP_CALIB_MASK;
+			break;
+		default:
+			continue;
+		}
+
+		sensor_temp = sun60i_a733_calc_temp(tmdev, i, sensor_reg);
+
+		cdata = CALIBRATE_DEFAULT -
+			((sensor_temp - ft_temp * 100) / SUN60I_A733_SCALE_BELOW);
+		if (cdata & ~TEMP_CALIB_MASK) {
+			dev_warn(dev, "sensor%d is not calibrated.\n", i);
+			continue;
+		}
+
+		offset = (i % 2) * 16;
+		regmap_update_bits(tmdev->regmap,
+				   SUN50I_H6_THS_TEMP_CALIB + (i / 2 * 4),
+				   TEMP_CALIB_MASK << offset,
+				   cdata << offset);
+	}
+
+	return 0;
 }
 
 static int sun60i_a733_ths_calibrate(struct ths_device *tmdev,
@@ -532,6 +607,26 @@ static int sun60i_a733_thermal_init(struct ths_device *tmdev)
 	return 0;
 }
 
+static int sun60i_a733_thermal_init(struct ths_device *tmdev)
+{
+	int val;
+
+	regmap_write(tmdev->regmap, SUN50I_THS_CTRL0,
+		     SUN50I_THS_CTRL0_T_ACQ(48) |
+		     SUN50I_THS_CTRL0_T_SAMPLE_PER(480));
+	regmap_write(tmdev->regmap, SUN50I_H6_THS_MFC,
+		     SUN50I_THS_FILTER_EN |
+		     SUN50I_THS_FILTER_TYPE(1));
+	regmap_write(tmdev->regmap, SUN50I_H6_THS_PC,
+		     SUN50I_H6_THS_PC_TEMP_PERIOD(28));
+	val = GENMASK(tmdev->chip->sensor_num - 1, 0);
+	regmap_write(tmdev->regmap, SUN50I_H6_THS_ENABLE, val);
+	val = GENMASK(tmdev->chip->sensor_num - 1, 0);
+	regmap_write(tmdev->regmap, SUN50I_H6_THS_DIC, val);
+
+	return 0;
+}
+
 static int sun8i_h3_thermal_init(struct ths_device *tmdev)
 {
 	int val;
@@ -707,6 +802,18 @@ static const struct ths_thermal_chip sun60i_a733_ths = {
 	.calc_temp = sun60i_a733_calc_temp,
 };
 
+static const struct ths_thermal_chip sun60i_a733_ths = {
+	.sensor_num = 5,
+	.has_bus_clk_reset = true,
+	.has_mod_clk = true,
+	.ft_deviation = 0,
+	.temp_data_base = SUN50I_H6_THS_TEMP_DATA,
+	.calibrate = sun60i_a733_ths_calibrate,
+	.init = sun60i_a733_thermal_init,
+	.irq_ack = sun50i_h6_irq_ack,
+	.calc_temp = sun60i_a733_calc_temp,
+};
+
 static const struct ths_thermal_chip sun8i_a83t_ths = {
 	.sensor_num = 3,
 	.scale = 705,
@@ -830,6 +937,7 @@ static const struct of_device_id of_ths_match[] = {
 	{ .compatible = "allwinner,sun50i-h6-ths", .data = &sun50i_h6_ths },
 	{ .compatible = "allwinner,sun20i-d1-ths", .data = &sun20i_d1_ths },
 	{ .compatible = "allwinner,sun50i-h616-ths", .data = &sun50i_h616_ths },
+	{ .compatible = "allwinner,sun60i-a733-ths", .data = &sun60i_a733_ths },
 	{ .compatible = "allwinner,sun60i-a733-ths", .data = &sun60i_a733_ths },
 	{ /* sentinel */ },
 };

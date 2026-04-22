@@ -6,6 +6,7 @@ data about PLLs, dividers, gates, and fixed-factor clocks.
 """
 
 import re
+import ast
 from typing import Dict, Optional
 from generators.extractor import ExtractorPlugin
 
@@ -20,6 +21,7 @@ class ClockExtractor(ExtractorPlugin):
             r"static\s+struct\s+ccu_nkmp\s+": "pll_nkmp",
             r"static\s+SUNXI_CCU_M\s*\(": "divider",
             r"static\s+SUNXI_CCU_GATE\s*\(": "gate",
+            r"static\s+SUNXI_CCU_GATE_HWS\s*\(": "gate",
             r"static\s+CLK_FIXED_FACTOR\s*\(": "fixed_factor",
         }
 
@@ -85,31 +87,35 @@ class ClockExtractor(ExtractorPlugin):
 
         # SUNXI_CCU_M - divider
         match = re.match(
-            r'.*?SUNXI_CCU_M\s*\(\s*\w+\s*,\s*"([^"]+)"\s*,\s*"([^"]+)"\s*,\s*(0x[0-9a-fA-F]+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)',
+            r'.*?SUNXI_CCU_M\s*\(\s*\w+\s*,\s*"([^"]+)"\s*,\s*("[^"]+"|\w+)\s*,\s*(0x[0-9a-fA-F]+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*[^)]+\)',
             flat,
         )
         if match:
+            parent = match.group(2).strip('"')
             return {
                 "name": match.group(1),
                 "type": "divider",
-                "parent": match.group(2),
+                "parent": parent,
                 "reg": match.group(3),
                 "shift": int(match.group(4)),
                 "width": int(match.group(5)),
             }
 
-        # SUNXI_CCU_GATE
+        # SUNXI_CCU_GATE / SUNXI_CCU_GATE_HWS
         match = re.match(
-            r'.*?SUNXI_CCU_GATE\s*\(\s*\w+\s*,\s*"([^"]+)"\s*,\s*"([^"]+)"\s*,\s*(0x[0-9a-fA-F]+)\s*,\s*(?:BIT\s*\()?([\d]+)\s*\)?\s*,\s*(\d+)\s*\)',
+            r'.*?SUNXI_CCU_GATE(?:_HWS)?\s*\(\s*\w+\s*,\s*"([^"]+)"\s*,\s*("[^"]+"|\w+)\s*,\s*(0x[0-9a-fA-F]+)\s*,\s*([^,]+)\s*,\s*[^)]+\)',
             flat,
         )
         if match:
+            parent = match.group(2).strip('"')
+            bit_raw = match.group(4).strip()
+            bit = self._parse_bit(bit_raw)
             return {
                 "name": match.group(1),
                 "type": "gate",
-                "parent": match.group(2),
+                "parent": parent,
                 "reg": match.group(3),
-                "bit": int(match.group(4)),
+                **({"bit": bit} if bit is not None else {"bit_expr": bit_raw}),
             }
 
         # CLK_FIXED_FACTOR
@@ -127,6 +133,53 @@ class ClockExtractor(ExtractorPlugin):
             }
 
         return None
+
+    def _parse_bit(self, value: str) -> Optional[int]:
+        value = value.strip()
+        if value.isdigit():
+            return int(value)
+        bit_match = re.match(r"BIT\s*\((.+)\)", value)
+        if bit_match:
+            return self._safe_eval_int(bit_match.group(1))
+        return self._safe_eval_int(value)
+
+    def _safe_eval_int(self, expression: str) -> Optional[int]:
+        expression = expression.strip()
+        if not expression:
+            return None
+        try:
+            node = ast.parse(expression, mode="eval")
+        except SyntaxError:
+            return None
+        if not self._is_safe_int_ast(node):
+            return None
+        try:
+            return int(eval(compile(node, "<ast>", "eval"), {"__builtins__": {}}, {}))
+        except Exception:
+            return None
+
+    def _is_safe_int_ast(self, node: ast.AST) -> bool:
+        allowed = (
+            ast.Expression,
+            ast.BinOp,
+            ast.UnaryOp,
+            ast.Add,
+            ast.Sub,
+            ast.Mult,
+            ast.Div,
+            ast.FloorDiv,
+            ast.Mod,
+            ast.LShift,
+            ast.RShift,
+            ast.BitAnd,
+            ast.BitOr,
+            ast.BitXor,
+            ast.USub,
+            ast.UAdd,
+            ast.Constant,
+            ast.Num,
+        )
+        return all(isinstance(n, allowed) for n in ast.walk(node))
 
     def validate(self, items: list) -> list:
         """Validate extracted clock items."""

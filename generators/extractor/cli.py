@@ -31,6 +31,7 @@ def cmd_status(args):
     print(f"Validation rules: {len(data.get('validation_rules', []))}")
     print(f"Learned patterns: {len(data.get('learned_patterns', []))}")
     print(f"Vendor files processed: {len(data.get('vendor_history', {}))}")
+    print(f"Root sources tracked: {len(data.get('root_sources', []))}")
 
 
 def cmd_history(args):
@@ -53,6 +54,7 @@ def cmd_history(args):
     for filepath, info in history.items():
         print(f"\nFile: {filepath}")
         print(f"  Checksum: {info.get('checksum', 'N/A')}")
+        print(f"  Runs: {info.get('run_count', 1)}")
         stats = info.get("stats", {})
         for key, val in stats.items():
             print(f"  {key}: {val}")
@@ -86,6 +88,48 @@ def cmd_reset(args):
     print("Semantic map reset to defaults.")
 
 
+def cmd_extract(args):
+    """Run extraction on a file or directory."""
+    from generators.extractor import Engine
+
+    engine = Engine()
+    target = Path(args.input)
+    if not target.exists():
+        raise SystemExit(f"Input path does not exist: {target}")
+
+    if target.is_dir():
+        results = engine.batch.process_directory(
+            target, args.subsystem, skip_unchanged=args.skip_unchanged
+        )
+        print(f"Processed files: {len(results)}")
+        total_items = sum(len(r.items) for r in results.values())
+        total_errors = sum(len(r.errors) for r in results.values())
+        total_warnings = sum(len(r.warnings) for r in results.values())
+        cached = sum(1 for r in results.values() if r.cached)
+        print(f"Items extracted: {total_items}")
+        print(f"Errors: {total_errors}")
+        print(f"Warnings: {total_warnings}")
+        print(f"Cached skips: {cached}")
+        if args.output and args.export:
+            merged = []
+            for result in results.values():
+                merged.extend(result.items)
+            engine.export(merged, args.export, Path(args.output))
+            print(f"Exported merged output to {args.output} ({args.export})")
+        return
+
+    result = engine.extract(
+        args.subsystem,
+        source_file=target,
+        validate=args.validate,
+        skip_unchanged=args.skip_unchanged,
+    )
+    print(engine.report(result))
+    if args.output and args.export:
+        engine.export(result.items, args.export, Path(args.output))
+        print(f"Exported output to {args.output} ({args.export})")
+
+
 def main():
     parser = argparse.ArgumentParser(description="SSEE Management CLI")
     subparsers = parser.add_subparsers(dest="command")
@@ -100,6 +144,35 @@ def main():
 
     subparsers.add_parser("reset", help="Reset semantic map to defaults")
 
+    extract_parser = subparsers.add_parser(
+        "extract", help="Extract subsystem data from file or directory"
+    )
+    extract_parser.add_argument(
+        "--subsystem",
+        required=True,
+        choices=["clocks", "resets", "registers"],
+        help="Subsystem plugin to use",
+    )
+    extract_parser.add_argument(
+        "--input", required=True, help="Input file or directory path"
+    )
+    extract_parser.add_argument(
+        "--validate", action="store_true", help="Run plugin and semantic validation"
+    )
+    extract_parser.add_argument(
+        "--skip-unchanged",
+        action="store_true",
+        help="Skip files whose checksum matches semantic-map history",
+    )
+    extract_parser.add_argument(
+        "--export",
+        choices=["json", "yaml", "csv", "markdown"],
+        help="Export format for extracted items",
+    )
+    extract_parser.add_argument(
+        "--output", help="Output path for exported data (required with --export)"
+    )
+
     args = parser.parse_args()
 
     if args.command == "status":
@@ -110,6 +183,10 @@ def main():
         cmd_learn(args)
     elif args.command == "reset":
         cmd_reset(args)
+    elif args.command == "extract":
+        if args.export and not args.output:
+            raise SystemExit("--output is required when --export is provided")
+        cmd_extract(args)
     else:
         parser.print_help()
 

@@ -1,6 +1,15 @@
 # Development Status
 
-Last updated: 2026-04-21
+Last updated: 2026-04-22
+
+## Recent Updates
+
+- :white_check_mark: SSEE upgraded with learned-pattern fallback reuse during extraction
+- :white_check_mark: SSEE batch mode can now skip unchanged vendor files via checksum cache
+- :white_check_mark: SSEE parser now preserves multiline preprocessor blocks
+- :white_check_mark: SSEE clock extraction improved for more gate macro/bit expression forms
+- :white_check_mark: SSEE CLI now supports direct file/directory extraction + export
+- :white_check_mark: Added unit tests for SSEE learning, parser, cache, and parent resolution
 
 ## Legend
 
@@ -105,4 +114,3 @@ Last updated: 2026-04-21
 | HDMI output | :x: | :x: | :x: |
 | GPU acceleration | :x: | :x: | :x: |
 | NPU inference | :x: | :x: | :x: |
-

@@ -17,6 +17,41 @@ By defining the hardware in JSON and generating the C, we:
 
 ## Generators
 
+### `extractor/` (SSEE - Sunxi Semantic Extraction Engine)
+
+SSEE extracts structured data from vendor BSP C code and headers, then persists
+learned semantic knowledge in `extractor/data/semantic_map.json`.
+
+**Key capabilities:**
+- Plugin-based extraction (`clocks`, `resets`, `registers`)
+- Persistent learned-pattern fallback for failed blocks
+- Parent symbol normalization and clock relationship graph building
+- Conflict/cross-reference validation and extraction metrics
+- Batch extraction with checksum-based skip for unchanged files
+- Multi-format export (json, yaml, csv, markdown)
+
+**CLI examples:**
+
+```bash
+# Status and vendor history
+python3 -m generators.extractor.cli status
+python3 -m generators.extractor.cli history
+
+# Extract one file with validation
+python3 -m generators.extractor.cli extract \
+  --subsystem clocks \
+  --input /path/to/ccu.c \
+  --validate
+
+# Extract a directory, skip unchanged files, export merged json
+python3 -m generators.extractor.cli extract \
+  --subsystem clocks \
+  --input /path/to/vendor/tree \
+  --skip-unchanged \
+  --export json \
+  --output /tmp/clocks.json
+```
+
 ### `generate_pinctrl.py`
 
 Reads `data/pinctrl-main.json` and generates the main pinctrl driver.

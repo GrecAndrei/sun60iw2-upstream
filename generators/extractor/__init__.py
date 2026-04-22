@@ -37,6 +37,8 @@ import json
 import re
 import csv
 import hashlib
+from datetime import datetime, timezone
+from difflib import SequenceMatcher
 from pathlib import Path
 from typing import Dict, List, Optional, Any, Set, Tuple
 from dataclasses import dataclass, field, asdict
@@ -55,6 +57,8 @@ class ExtractionResult:
     raw_blocks: List[str] = field(default_factory=list)
     symbol_table: Dict[str, str] = field(default_factory=dict)
     relationships: Dict[str, List[str]] = field(default_factory=dict)
+    metrics: Dict[str, Any] = field(default_factory=dict)
+    cached: bool = False
 
     def merge(self, other: "ExtractionResult"):
         self.items.extend(other.items)
@@ -62,6 +66,8 @@ class ExtractionResult:
         self.warnings.extend(other.warnings)
         self.raw_blocks.extend(other.raw_blocks)
         self.confidence = (self.confidence + other.confidence) / 2
+        self.metrics.update(other.metrics)
+        self.cached = self.cached or other.cached
 
 
 class SemanticMap:
@@ -77,6 +83,7 @@ class SemanticMap:
         self.relationships: Dict[str, List[str]] = {}
         self.learned_patterns: List[Dict] = []
         self.vendor_history: Dict[str, Dict] = {}
+        self.root_sources: Set[str] = set()
 
         if self._path.exists():
             self.load(self._path)
@@ -150,6 +157,7 @@ class SemanticMap:
             {"rule": "plls_have_reg", "check": "type == 'pll' implies 'reg' in item"},
             {"rule": "names_unique", "check": "all names are unique"},
         ]
+        self.root_sources = {"osc24M", "dcxo", "hosc", "losc", "ext-osc32k"}
 
     def load(self, path: Path):
         with open(path) as f:
@@ -160,6 +168,9 @@ class SemanticMap:
         self.relationships = data.get("relationships", {})
         self.learned_patterns = data.get("learned_patterns", [])
         self.vendor_history = data.get("vendor_history", {})
+        self.root_sources = set(
+            data.get("root_sources", ["osc24M", "dcxo", "hosc", "losc", "ext-osc32k"])
+        )
 
     def save(self, path: Optional[Path] = None):
         save_path = path or self._path
@@ -170,28 +181,35 @@ class SemanticMap:
             "relationships": self.relationships,
             "learned_patterns": self.learned_patterns,
             "vendor_history": self.vendor_history,
+            "root_sources": sorted(self.root_sources),
         }
         save_path.parent.mkdir(parents=True, exist_ok=True)
         with open(save_path, "w") as f:
             json.dump(data, f, indent=2)
 
     def record_vendor_run(self, filepath: Path, stats: Dict):
-        content = filepath.read_bytes()
-        checksum = hashlib.sha256(content).hexdigest()[:16]
+        checksum = self._file_checksum(filepath)
+        previous = self.vendor_history.get(str(filepath), {})
+        run_count = int(previous.get("run_count", 0)) + 1
         self.vendor_history[str(filepath)] = {
             "checksum": checksum,
-            "last_run": str(__import__("time").time()),
+            "last_run": datetime.now(timezone.utc).isoformat(),
+            "run_count": run_count,
             "stats": stats,
         }
         self.save()
 
     def add_learned_pattern(self, raw_block: str, expected: Dict, context: str = ""):
+        normalized = self._normalize_for_learning(raw_block)
         block_hash = hashlib.sha256(raw_block.encode()).hexdigest()[:16]
+        normalized_hash = hashlib.sha256(normalized.encode()).hexdigest()[:16]
         self.learned_patterns.append(
             {
                 "hash": block_hash,
+                "normalized_hash": normalized_hash,
                 "context": context,
                 "raw_preview": raw_block[:200],
+                "normalized_preview": normalized[:200],
                 "expected": expected,
             }
         )
@@ -199,6 +217,24 @@ class SemanticMap:
 
     def has_seen_vendor(self, filepath: Path) -> bool:
         return str(filepath) in self.vendor_history
+
+    def _file_checksum(self, filepath: Path) -> str:
+        content = filepath.read_bytes()
+        return hashlib.sha256(content).hexdigest()[:16]
+
+    def is_vendor_unchanged(self, filepath: Path) -> bool:
+        info = self.vendor_history.get(str(filepath))
+        if not info:
+            return False
+        return info.get("checksum") == self._file_checksum(filepath)
+
+    @staticmethod
+    def _normalize_for_learning(raw_block: str) -> str:
+        compact = " ".join(raw_block.split())
+        compact = re.sub(r"\b0x[0-9a-fA-F]+\b", "0xN", compact)
+        compact = re.sub(r"\b\d+\b", "N", compact)
+        compact = re.sub(r'"[^"]*"', '"STR"', compact)
+        return compact
 
     def resolve_type(self, pattern: str) -> Optional[str]:
         return self.types.get(pattern)
@@ -235,8 +271,8 @@ class CBlockParser:
                 continue
 
             if line.startswith("#"):
-                blocks.append({"type": "preprocessor", "content": line, "raw": line})
-                i += 1
+                preproc_block, i = self._extract_preprocessor(lines, i)
+                blocks.append(preproc_block)
                 continue
 
             if "struct " in line and "{" in line:
@@ -327,6 +363,18 @@ class CBlockParser:
             "raw": content,
         }, i + 1
 
+    def _extract_preprocessor(self, lines, start_idx):
+        block_lines = []
+        i = start_idx
+        while i < len(lines):
+            line = lines[i]
+            block_lines.append(line)
+            if not line.rstrip().endswith("\\"):
+                break
+            i += 1
+        content = "\n".join(block_lines)
+        return {"type": "preprocessor", "content": content, "raw": content}, i + 1
+
 
 class SymbolTable:
     """
@@ -358,11 +406,32 @@ class SymbolTable:
 
     def resolve(self, parent_ref: str) -> Optional[str]:
         """Resolve a parent reference to a clock name."""
+        parent_ref = self._normalize_parent_ref(parent_ref)
+        if not parent_ref:
+            return None
         # Already a quoted string name
         if parent_ref.startswith('"') and parent_ref.endswith('"'):
             return parent_ref.strip('"')
         # Variable name
         return self.symbols.get(parent_ref)
+
+    @staticmethod
+    def _normalize_parent_ref(parent_ref: str) -> str:
+        ref = parent_ref.strip()
+        if not ref:
+            return ""
+        if ref.startswith("&"):
+            ref = ref[1:]
+        if ref.startswith("*"):
+            ref = ref[1:]
+        if "." in ref:
+            ref = ref.split(".", 1)[0]
+        if "[" in ref:
+            ref = ref.split("[", 1)[0]
+        fn_match = re.match(r"\w+\s*\(\s*&?([\w\[\]\.]+)", ref)
+        if fn_match:
+            ref = fn_match.group(1).split(".", 1)[0].split("[", 1)[0]
+        return ref.strip()
 
     def get_item(self, name: str) -> Optional[Dict]:
         return self.by_name.get(name)
@@ -371,9 +440,12 @@ class SymbolTable:
 class CrossReferenceValidator:
     """Validates that all parent/child references exist."""
 
-    def validate(self, items: List[Dict], symtab: SymbolTable) -> List[str]:
+    def validate(
+        self, items: List[Dict], symtab: SymbolTable, root_sources: Optional[Set[str]] = None
+    ) -> List[str]:
         errors = []
         all_names = {item.get("name", "") for item in items}
+        known_roots = root_sources or {"osc24M", "dcxo", "hosc", "losc", "ext-osc32k"}
 
         for item in items:
             parent = item.get("parent", "")
@@ -388,7 +460,7 @@ class CrossReferenceValidator:
                 continue
 
             # Check if it's a known root source
-            if parent in ("osc24M", "dcxo", "hosc", "losc", "ext-osc32k"):
+            if parent in known_roots:
                 continue
 
             errors.append(
@@ -520,22 +592,33 @@ class BatchProcessor:
         self.engine = engine
 
     def process_directory(
-        self, directory: Path, subsystem: str
+        self, directory: Path, subsystem: str, skip_unchanged: bool = True
     ) -> Dict[str, ExtractionResult]:
-        """Process all .c files in a directory."""
+        """Process all matching source files in a directory."""
         results = {}
-        for source_file in directory.rglob("*.c"):
+        patterns = ["*.h"] if subsystem == "registers" else ["*.c"]
+        if subsystem == "registers":
+            patterns.append("*.c")
+        source_files: List[Path] = []
+        for pattern in patterns:
+            source_files.extend(directory.rglob(pattern))
+        source_files = sorted(set(source_files))
+        for source_file in source_files:
             print(f"Processing {source_file}...")
-            result = self.engine.extract(subsystem, source_file=source_file)
+            result = self.engine.extract(
+                subsystem, source_file=source_file, skip_unchanged=skip_unchanged
+            )
             results[str(source_file)] = result
         return results
 
     def process_file_list(
-        self, files: List[Path], subsystem: str
+        self, files: List[Path], subsystem: str, skip_unchanged: bool = True
     ) -> Dict[str, ExtractionResult]:
         results = {}
         for source_file in files:
-            result = self.engine.extract(subsystem, source_file=source_file)
+            result = self.engine.extract(
+                subsystem, source_file=source_file, skip_unchanged=skip_unchanged
+            )
             results[str(source_file)] = result
         return results
 
@@ -576,8 +659,12 @@ class ExtractorPlugin:
 class Engine:
     """Main extraction engine with full analysis pipeline."""
 
-    def __init__(self):
-        self.semantic_map = SemanticMap()
+    def __init__(
+        self,
+        semantic_map: Optional[SemanticMap] = None,
+        map_path: Optional[Path] = None,
+    ):
+        self.semantic_map = semantic_map or SemanticMap(map_path=map_path)
         self.parser = CBlockParser()
         self.registry = PluginRegistry()
         self.symbol_table = SymbolTable()
@@ -603,6 +690,7 @@ class Engine:
         source_file: Optional[Path] = None,
         blocks: Optional[List[Dict]] = None,
         validate: bool = False,
+        skip_unchanged: bool = False,
     ) -> ExtractionResult:
         plugin = self.registry.get(subsystem)
         if not plugin:
@@ -617,15 +705,37 @@ class Engine:
                     subsystem=subsystem,
                     errors=["Either source_file or blocks must be provided"],
                 )
+            if skip_unchanged and self.semantic_map.is_vendor_unchanged(source_file):
+                stats = (
+                    self.semantic_map.vendor_history.get(str(source_file), {}).get("stats", {})
+                )
+                return ExtractionResult(
+                    subsystem=subsystem,
+                    confidence=float(stats.get("confidence", 1.0)),
+                    metrics={
+                        "skipped_unchanged": True,
+                        "cached_from_history": True,
+                        "previous_items": int(stats.get("items", 0)),
+                    },
+                    warnings=[f"Skipped unchanged file: {source_file}"],
+                    cached=True,
+                )
             blocks = self.parser.parse_file(source_file)
 
         result = ExtractionResult(subsystem=subsystem)
         extracted_count = 0
         failed_count = 0
+        learned_count = 0
 
         for block in blocks:
             if plugin.can_extract(block):
                 item = plugin.extract(block)
+                if not item:
+                    item = self._apply_learned_pattern(
+                        subsystem=subsystem, raw_block=block.get("raw", "")
+                    )
+                    if item:
+                        learned_count += 1
                 if item:
                     result.items.append(item)
                     extracted_count += 1
@@ -636,6 +746,14 @@ class Engine:
         total = extracted_count + failed_count
         if total > 0:
             result.confidence = extracted_count / total
+        result.metrics.update(
+            {
+                "total_candidate_blocks": total,
+                "extracted_blocks": extracted_count,
+                "failed_blocks": failed_count,
+                "learned_pattern_hits": learned_count,
+            }
+        )
 
         # Post-extraction analysis
         self.symbol_table.index(result.items)
@@ -654,7 +772,9 @@ class Engine:
             result.errors.extend(plugin.validate(result.items))
             result.errors.extend(self._semantic_validate(subsystem, result.items))
             result.errors.extend(
-                self.xref_validator.validate(result.items, self.symbol_table)
+                self.xref_validator.validate(
+                    result.items, self.symbol_table, self.semantic_map.root_sources
+                )
             )
 
             conflicts = self.conflict_detector.detect(result.items)
@@ -676,6 +796,34 @@ class Engine:
 
         return result
 
+    def _apply_learned_pattern(self, subsystem: str, raw_block: str) -> Optional[Dict]:
+        if not raw_block:
+            return None
+        block_hash = hashlib.sha256(raw_block.encode()).hexdigest()[:16]
+        normalized = self.semantic_map._normalize_for_learning(raw_block)
+        normalized_hash = hashlib.sha256(normalized.encode()).hexdigest()[:16]
+        best: Optional[Dict[str, Any]] = None
+        best_score = 0.0
+
+        for pattern in self.semantic_map.learned_patterns:
+            if pattern.get("context") and pattern.get("context") != subsystem:
+                continue
+            if pattern.get("hash") == block_hash:
+                return dict(pattern.get("expected", {}))
+            if pattern.get("normalized_hash") == normalized_hash:
+                return dict(pattern.get("expected", {}))
+            preview = pattern.get("normalized_preview", "")
+            if not preview:
+                continue
+            score = SequenceMatcher(None, normalized[:200], preview).ratio()
+            if score > best_score:
+                best_score = score
+                best = pattern
+
+        if best and best_score >= 0.92:
+            return dict(best.get("expected", {}))
+        return None
+
     def resolve_parents(self, items: List[Dict]) -> List[Dict]:
         """Resolve variable-name parents to actual clock names."""
         for item in items:
@@ -692,7 +840,9 @@ class Engine:
 
     def validate_crossrefs(self, items: List[Dict]) -> List[str]:
         """Validate all cross-references."""
-        return self.xref_validator.validate(items, self.symbol_table)
+        return self.xref_validator.validate(
+            items, self.symbol_table, self.semantic_map.root_sources
+        )
 
     def detect_conflicts(self, items: List[Dict]) -> List[str]:
         """Detect register/bit conflicts."""
@@ -747,6 +897,13 @@ class Engine:
             )
         if result.raw_blocks:
             lines.append(f"Unparsed blocks: {len(result.raw_blocks)}")
+        if result.cached:
+            lines.append("Used cached history for unchanged file.")
+        if result.metrics:
+            lines.append(
+                "Metrics: "
+                + ", ".join(f"{k}={v}" for k, v in sorted(result.metrics.items()))
+            )
         return "\n".join(lines)
 
     def save_semantic_map(self, path: Path):

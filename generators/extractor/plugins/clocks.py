@@ -177,7 +177,6 @@ class ClockExtractor(ExtractorPlugin):
             ast.USub,
             ast.UAdd,
             ast.Constant,
-            ast.Num,
         )
         return all(isinstance(n, allowed) for n in ast.walk(node))
 

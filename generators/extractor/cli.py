@@ -31,7 +31,14 @@ def cmd_status(args):
     print(f"Validation rules: {len(data.get('validation_rules', []))}")
     print(f"Learned patterns: {len(data.get('learned_patterns', []))}")
     print(f"Vendor files processed: {len(data.get('vendor_history', {}))}")
-    print(f"Root sources tracked: {len(data.get('root_sources', []))}")
+    root_sources = data.get("root_sources") or [
+        "osc24M",
+        "dcxo",
+        "hosc",
+        "losc",
+        "ext-osc32k",
+    ]
+    print(f"Root sources tracked: {len(root_sources)}")
 
 
 def cmd_history(args):

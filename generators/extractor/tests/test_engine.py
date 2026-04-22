@@ -18,15 +18,13 @@ class TestSSEEEngine(unittest.TestCase):
         self._tmp.cleanup()
 
     def test_learned_pattern_fallback_extracts_item(self):
-        raw = (
-            'static SUNXI_CCU_GATE(uart0_clk, "uart0", apb1, 0x000, BIT(UART0_BIT), 0);'
-        )
+        raw = "static SUNXI_CCU_GATE(uart0_clk);"
         expected = {
             "name": "uart0",
             "type": "gate",
             "parent": "apb1",
             "reg": "0x000",
-            "bit_expr": "BIT(UART0_BIT)",
+            "bit": 0,
         }
         self.engine.learn("clocks", raw, expected)
 

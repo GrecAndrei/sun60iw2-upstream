@@ -36,7 +36,6 @@ Usage:
 import json
 import re
 import csv
-import time
 import hashlib
 from datetime import datetime, timezone
 from difflib import SequenceMatcher
@@ -50,6 +49,8 @@ from collections import defaultdict
 DEFAULT_ROOT_SOURCES = ("osc24M", "dcxo", "hosc", "losc", "ext-osc32k")
 PATTERN_PREVIEW_LENGTH = 200
 LEARNED_PATTERN_MIN_SIMILARITY = 0.92
+NORMALIZED_PREFIX_LENGTH = 24
+PREVIEW_PREFIX_MATCH_LENGTH = 8
 
 
 @dataclass
@@ -196,8 +197,9 @@ class SemanticMap:
         checksum = self._file_checksum(filepath)
         previous = self.vendor_history.get(str(filepath), {})
         run_count = int(previous.get("run_count", 0)) + 1
-        now_iso = datetime.now(timezone.utc).isoformat()
-        now_epoch = time.time()
+        now = datetime.now(timezone.utc)
+        now_iso = now.isoformat()
+        now_epoch = now.timestamp()
         self.vendor_history[str(filepath)] = {
             "checksum": checksum,
             "last_run": now_epoch,
@@ -814,7 +816,7 @@ class Engine:
         normalized_hash = hashlib.sha256(normalized.encode()).hexdigest()[:16]
         best: Optional[Dict[str, Any]] = None
         best_score = 0.0
-        normalized_prefix = normalized[:24]
+        normalized_prefix = normalized[:NORMALIZED_PREFIX_LENGTH]
 
         for pattern in self.semantic_map.learned_patterns:
             if pattern.get("context") and pattern.get("context") != subsystem:
@@ -829,8 +831,10 @@ class Engine:
             if (
                 normalized_prefix
                 and preview
-                and not preview.startswith(normalized_prefix[:8])
-                and normalized_prefix[:8] not in preview
+                and not preview.startswith(
+                    normalized_prefix[:PREVIEW_PREFIX_MATCH_LENGTH]
+                )
+                and normalized_prefix[:PREVIEW_PREFIX_MATCH_LENGTH] not in preview
             ):
                 continue
             score = SequenceMatcher(

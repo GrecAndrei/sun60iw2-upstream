@@ -10,6 +10,35 @@ import re
 from typing import Dict, Optional
 from generators.extractor import ExtractorPlugin
 
+SUNXI_CCU_M_PATTERN = re.compile(
+    r"""
+    .*?SUNXI_CCU_M\s*\(
+      \s*\w+\s*,                     # var name
+      \s*"([^"]+)"\s*,              # clock name
+      \s*("[^"]+"|\w+)\s*,          # parent
+      \s*(0x[0-9a-fA-F]+)\s*,       # reg
+      \s*(\d+)\s*,                  # shift
+      \s*(\d+)\s*,                  # width
+      \s*([\w\|\s]+)\s*             # flags
+    \)
+    """,
+    re.VERBOSE,
+)
+
+SUNXI_CCU_GATE_PATTERN = re.compile(
+    r"""
+    .*?SUNXI_CCU_GATE(?:_HWS)?\s*\(
+      \s*\w+\s*,                    # var name
+      \s*"([^"]+)"\s*,             # clock name
+      \s*("[^"]+"|\w+)\s*,         # parent
+      \s*(0x[0-9a-fA-F]+)\s*,      # reg
+      \s*([^,]+)\s*,               # bit expr
+      \s*([\w\|\s]+)\s*            # flags
+    \)
+    """,
+    re.VERBOSE,
+)
+
 
 class ClockExtractor(ExtractorPlugin):
     """Extract clock definitions from vendor CCU drivers."""
@@ -86,10 +115,7 @@ class ClockExtractor(ExtractorPlugin):
         flat = " ".join(content.split())
 
         # SUNXI_CCU_M - divider
-        match = re.match(
-            r'.*?SUNXI_CCU_M\s*\(\s*\w+\s*,\s*"([^"]+)"\s*,\s*("[^"]+"|\w+)\s*,\s*(0x[0-9a-fA-F]+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*([\w\|\s]+)\s*\)',
-            flat,
-        )
+        match = SUNXI_CCU_M_PATTERN.match(flat)
         if match:
             parent = match.group(2).strip('"')
             return {
@@ -102,10 +128,7 @@ class ClockExtractor(ExtractorPlugin):
             }
 
         # SUNXI_CCU_GATE / SUNXI_CCU_GATE_HWS
-        match = re.match(
-            r'.*?SUNXI_CCU_GATE(?:_HWS)?\s*\(\s*\w+\s*,\s*"([^"]+)"\s*,\s*("[^"]+"|\w+)\s*,\s*(0x[0-9a-fA-F]+)\s*,\s*([^,]+)\s*,\s*([\w\|\s]+)\s*\)',
-            flat,
-        )
+        match = SUNXI_CCU_GATE_PATTERN.match(flat)
         if match:
             parent = match.group(2).strip('"')
             bit_raw = match.group(4).strip()

@@ -32,7 +32,9 @@ def cmd_status(args):
     print(f"Validation rules: {len(data.get('validation_rules', []))}")
     print(f"Learned patterns: {len(data.get('learned_patterns', []))}")
     print(f"Vendor files processed: {len(data.get('vendor_history', {}))}")
-    root_sources = data.get("root_sources") or list(DEFAULT_ROOT_SOURCES)
+    root_sources = data.get("root_sources")
+    if root_sources is None:
+        root_sources = list(DEFAULT_ROOT_SOURCES)
     print(f"Root sources tracked: {len(root_sources)}")
 
 

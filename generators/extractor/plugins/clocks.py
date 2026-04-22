@@ -5,8 +5,8 @@ Understands Allwinner CCU driver patterns and extracts structured
 data about PLLs, dividers, gates, and fixed-factor clocks.
 """
 
-import re
 import ast
+import re
 from typing import Dict, Optional
 from generators.extractor import ExtractorPlugin
 

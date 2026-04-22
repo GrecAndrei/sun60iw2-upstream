@@ -36,6 +36,7 @@ Usage:
 import json
 import re
 import csv
+import time
 import hashlib
 from datetime import datetime, timezone
 from difflib import SequenceMatcher
@@ -196,12 +197,11 @@ class SemanticMap:
         previous = self.vendor_history.get(str(filepath), {})
         run_count = int(previous.get("run_count", 0)) + 1
         now_iso = datetime.now(timezone.utc).isoformat()
-        now_epoch = str(__import__("time").time())
+        now_epoch = str(time.time())
         self.vendor_history[str(filepath)] = {
             "checksum": checksum,
-            "last_run": now_iso,
+            "last_run": now_epoch,
             "last_run_iso": now_iso,
-            "last_run_epoch": now_epoch,
             "run_count": run_count,
             "stats": stats,
         }

@@ -36,7 +36,9 @@ class TestSSEEEngine(unittest.TestCase):
         self.assertEqual(result.metrics.get("learned_pattern_hits"), 1)
 
     def test_preprocessor_multiline_is_single_block(self):
-        content = "#define CLK_NAME(x) \\\n\t((x) + 1)\nstatic SUNXI_CCU_GATE(foo, \"f\", p, 0x0, 1, 0);"
+        content = """#define CLK_NAME(x) \\
+\t((x) + 1)
+static SUNXI_CCU_GATE(foo, "f", p, 0x0, 1, 0);"""
         blocks = CBlockParser().parse(content)
         preproc = [b for b in blocks if b.get("type") == "preprocessor"]
         self.assertEqual(len(preproc), 1)

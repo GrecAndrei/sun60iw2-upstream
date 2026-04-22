@@ -44,6 +44,8 @@ from typing import Dict, List, Optional, Any, Set, Tuple
 from dataclasses import dataclass, field, asdict
 from collections import defaultdict
 
+# Canonical external/root clock sources that are valid parents even when
+# they do not appear as extracted in-file items.
 DEFAULT_ROOT_SOURCES = ("osc24M", "dcxo", "hosc", "losc", "ext-osc32k")
 PATTERN_PREVIEW_LENGTH = 200
 LEARNED_PATTERN_MIN_SIMILARITY = 0.92
@@ -193,9 +195,13 @@ class SemanticMap:
         checksum = self._file_checksum(filepath)
         previous = self.vendor_history.get(str(filepath), {})
         run_count = int(previous.get("run_count", 0)) + 1
+        now_iso = datetime.now(timezone.utc).isoformat()
+        now_epoch = str(__import__("time").time())
         self.vendor_history[str(filepath)] = {
             "checksum": checksum,
-            "last_run": datetime.now(timezone.utc).isoformat(),
+            "last_run": now_iso,
+            "last_run_iso": now_iso,
+            "last_run_epoch": now_epoch,
             "run_count": run_count,
             "stats": stats,
         }
@@ -806,6 +812,7 @@ class Engine:
         normalized_hash = hashlib.sha256(normalized.encode()).hexdigest()[:16]
         best: Optional[Dict[str, Any]] = None
         best_score = 0.0
+        normalized_prefix = normalized[:24]
 
         for pattern in self.semantic_map.learned_patterns:
             if pattern.get("context") and pattern.get("context") != subsystem:
@@ -816,6 +823,13 @@ class Engine:
                 return dict(pattern.get("expected", {}))
             preview = pattern.get("normalized_preview", "")
             if not preview:
+                continue
+            if (
+                normalized_prefix
+                and preview
+                and not preview.startswith(normalized_prefix[:8])
+                and normalized_prefix[:8] not in preview
+            ):
                 continue
             score = SequenceMatcher(
                 None, normalized[:PATTERN_PREVIEW_LENGTH], preview

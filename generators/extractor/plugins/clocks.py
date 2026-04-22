@@ -87,7 +87,7 @@ class ClockExtractor(ExtractorPlugin):
 
         # SUNXI_CCU_M - divider
         match = re.match(
-            r'.*?SUNXI_CCU_M\s*\(\s*\w+\s*,\s*"([^"]+)"\s*,\s*("[^"]+"|\w+)\s*,\s*(0x[0-9a-fA-F]+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*[^)]+\)',
+            r'.*?SUNXI_CCU_M\s*\(\s*\w+\s*,\s*"([^"]+)"\s*,\s*("[^"]+"|\w+)\s*,\s*(0x[0-9a-fA-F]+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*([\w\|\s]+)\s*\)',
             flat,
         )
         if match:
@@ -103,7 +103,7 @@ class ClockExtractor(ExtractorPlugin):
 
         # SUNXI_CCU_GATE / SUNXI_CCU_GATE_HWS
         match = re.match(
-            r'.*?SUNXI_CCU_GATE(?:_HWS)?\s*\(\s*\w+\s*,\s*"([^"]+)"\s*,\s*("[^"]+"|\w+)\s*,\s*(0x[0-9a-fA-F]+)\s*,\s*([^,]+)\s*,\s*[^)]+\)',
+            r'.*?SUNXI_CCU_GATE(?:_HWS)?\s*\(\s*\w+\s*,\s*"([^"]+)"\s*,\s*("[^"]+"|\w+)\s*,\s*(0x[0-9a-fA-F]+)\s*,\s*([^,]+)\s*,\s*([\w\|\s]+)\s*\)',
             flat,
         )
         if match:
@@ -182,7 +182,7 @@ class ClockExtractor(ExtractorPlugin):
 
     def _eval_safe_int_node(self, node: ast.AST) -> int:
         if isinstance(node, ast.Constant):
-            if not isinstance(node.value, (int, float)):
+            if not isinstance(node.value, int):
                 raise ValueError("Unsupported constant type")
             return int(node.value)
         if isinstance(node, ast.UnaryOp):

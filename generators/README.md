@@ -61,6 +61,31 @@ python3 generators/generate_ccu.py --report --no-output
 - JSON clock definitions (reg offsets, bit positions, parent relationships)
 - Generator script logic
 
+### `generate_thermal.py`
+
+Reads `data/thermal-main.json` and patches `sun8i_thermal.c` with new chip
+descriptors, calc_temp functions, calibrate functions, init functions, and
+OF match entries.
+
+```bash
+python3 generators/generate_thermal.py \
+    --input ../linux/drivers/thermal/sun8i_thermal.c \
+    --output generators/output/sun8i_thermal.c
+```
+
+**What it generates:**
+- `MAX_SENSOR_NUM` bump (if needed)
+- Piecewise-linear `calc_temp` functions
+- Custom `calibrate` functions for efuse-based calibration
+- `init` functions using H6-style register macros
+- `ths_thermal_chip` structs
+- OF match table entries
+- Optional IRQ support in probe (for chips without dedicated THS interrupt)
+
+**Hand-written parts:**
+- JSON chip definitions (sensor count, register bases, calibration layout)
+- Generator script logic
+
 ### `report_ccu_pipeline.py`
 
 Compares canonical-only coverage vs merged (canonical + extracted) coverage.

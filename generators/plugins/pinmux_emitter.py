@@ -91,7 +91,7 @@ def emit_pinmux_c(data: dict) -> str:
         if num_pins == 0:
             continue
         if prev_bank_idx != -1 and bidx != prev_bank_idx + 1:
-            lines.append("	/* Hole */")
+            lines.append("\t/* Hole */")
         prev_bank_idx = bidx
 
         lines.append(f"\t/* Bank {bank_name} */")
@@ -106,23 +106,35 @@ def emit_pinmux_c(data: dict) -> str:
             funcs = sorted(funcs, key=lambda f: f["mux"])
 
             bank_letter = bank_name[-1]
-            lines.append(f"\tSUNXI_PIN(SUNXI_PINCTRL_PIN({bank_letter}, {pin_num}),")
-            lines.append('\t\t  SUNXI_FUNCTION(0x0, "gpio_in"),')
-            lines.append('\t\t  SUNXI_FUNCTION(0x1, "gpio_out"),')
+
+            entries = []
+            entries.append('\t\t  SUNXI_FUNCTION(0x0, "gpio_in")')
+            entries.append('\t\t  SUNXI_FUNCTION(0x1, "gpio_out")')
 
             for func in funcs:
                 mux = func["mux"]
                 name = func["name"]
                 signal = func.get("signal", "")
                 comment = f"\t\t/* {signal} */" if signal else ""
-                lines.append(f'\t\t  SUNXI_FUNCTION(0x{mux:x}, "{name}"),{comment}')
+                entries.append(f'\t\t  SUNXI_FUNCTION(0x{mux:x}, "{name}"){comment}')
 
             if irq_mux and irq_bank is not None:
-                lines.append(
-                    f"\t\t  SUNXI_FUNCTION_IRQ_BANK(0x{irq_mux:x}, {irq_bank}, {pin_num})),"
+                entries.append(
+                    f"\t\t  SUNXI_FUNCTION_IRQ_BANK(0x{irq_mux:x}, {irq_bank}, {pin_num}))"
                     f"\t/* {bank_name}_EINT{pin_num} */"
                 )
-            else:
+
+            lines.append(f"\tSUNXI_PIN(SUNXI_PINCTRL_PIN({bank_letter}, {pin_num}),")
+            for i, entry in enumerate(entries):
+                if i < len(entries) - 1:
+                    lines.append(f"{entry},")
+                else:
+                    # IRQ entry closes SUNXI_PIN itself, so add outer-array comma
+                    if irq_mux and irq_bank is not None:
+                        lines.append(f"{entry},")
+                    else:
+                        lines.append(entry)
+            if not (irq_mux and irq_bank is not None):
                 lines.append("\t\t),")
 
     lines.append("};")

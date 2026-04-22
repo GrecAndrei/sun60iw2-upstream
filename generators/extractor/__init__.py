@@ -197,7 +197,7 @@ class SemanticMap:
         previous = self.vendor_history.get(str(filepath), {})
         run_count = int(previous.get("run_count", 0)) + 1
         now_iso = datetime.now(timezone.utc).isoformat()
-        now_epoch = str(time.time())
+        now_epoch = time.time()
         self.vendor_history[str(filepath)] = {
             "checksum": checksum,
             "last_run": now_epoch,
@@ -425,6 +425,11 @@ class SymbolTable:
 
     @staticmethod
     def _normalize_parent_ref(parent_ref: str) -> str:
+        def _strip_member_and_index(expr: str) -> str:
+            expr = expr.split(".", 1)[0]
+            expr = expr.split("[", 1)[0]
+            return expr
+
         ref = parent_ref.strip()
         if not ref:
             return ""
@@ -432,13 +437,10 @@ class SymbolTable:
             ref = ref[1:]
         if ref.startswith("*"):
             ref = ref[1:]
-        if "." in ref:
-            ref = ref.split(".", 1)[0]
-        if "[" in ref:
-            ref = ref.split("[", 1)[0]
+        ref = _strip_member_and_index(ref)
         fn_match = re.match(r"\w+\s*\(\s*&?([\w\[\]\.]+)", ref)
         if fn_match:
-            ref = fn_match.group(1).split(".", 1)[0].split("[", 1)[0]
+            ref = _strip_member_and_index(fn_match.group(1))
         return ref.strip()
 
     def get_item(self, name: str) -> Optional[Dict]:

@@ -22,14 +22,22 @@ By defining the hardware in JSON and generating the C, we:
 Reads `data/pinctrl-main.json` and generates the main pinctrl driver.
 
 ```bash
+# DT-table mode (default) - uses sunxi_pinctrl_dt_table_init()
 python3 generators/generate_pinctrl.py > drivers/pinctrl/sunxi/pinctrl-sun60i-a733.c
+
+# C-array mode - explicit SUNXI_PIN tables with sunxi_pinctrl_init_with_flags()
+python3 generators/generate_pinctrl.py --with-pinmux=c > drivers/pinctrl/sunxi/pinctrl-sun60i-a733.c
+
+# DT-node mode - emits pinmux nodes for device tree
+python3 generators/generate_pinctrl.py --with-pinmux=dt > output/pinmux-dt.txt
 ```
 
 **What it generates:**
-- Pin bank size arrays
-- IRQ bank mapping arrays  
-- Probe function using `sunxi_pinctrl_dt_table_init()`
+- Pin bank size arrays (DT mode) or explicit `SUNXI_PIN()` tables (C-array mode)
+- IRQ bank mapping arrays
+- Probe function using `sunxi_pinctrl_dt_table_init()` (DT) or `sunxi_pinctrl_init_with_flags()` (C-array)
 - Platform driver registration
+- Pinmux validation via `plugins/pinmux_validator.py`
 
 **Hand-written parts:**
 - JSON data file (human-readable hardware description)
@@ -37,12 +45,17 @@ python3 generators/generate_pinctrl.py > drivers/pinctrl/sunxi/pinctrl-sun60i-a7
 
 ### `generate_ccu.py`
 
-Reads `data/ccu-main.json` and `data/ccu-main-extracted.json`, merges
-canonical IDs with extracted topology, then generates the Clock Controller Unit
-driver.
+Unified domain-aware CCU generator. Reads JSON data and generates clock
+controller drivers for any domain via `--domain` flag.
 
 ```bash
-python3 generators/generate_ccu.py > drivers/clk/sunxi-ng/ccu-sun60i-a733.c
+# Generate main CCU
+python3 generators/generate_ccu.py --domain main > drivers/clk/sunxi-ng/ccu-sun60i-a733.c
+
+# Generate R-domain, RTC, CPUPLL CCUs
+python3 generators/generate_ccu.py --domain r > drivers/clk/sunxi-ng/ccu-sun60i-a733-r.c
+python3 generators/generate_ccu.py --domain rtc > drivers/clk/sunxi-ng/ccu-sun60i-a733-rtc.c
+python3 generators/generate_ccu.py --domain cpupll > drivers/clk/sunxi-ng/ccu-sun60i-a733-cpupll.c
 
 # Metrics-only mode (no C output)
 python3 generators/generate_ccu.py --report --no-output
@@ -85,6 +98,20 @@ python3 generators/generate_thermal.py \
 **Hand-written parts:**
 - JSON chip definitions (sensor count, register bases, calibration layout)
 - Generator script logic
+
+### `generate_dma.py`
+
+Reads `data/dma.json` and emits the C struct and OF match entry for
+`sun6i-dma.c` patches.
+
+```bash
+python3 generators/generate_dma.py > generators/output/dma_patch.c
+```
+
+**What it generates:**
+- `sun6i_dma_config` struct with burst lengths, address widths, flags
+- DT snippet for `sun60i-a733.dtsi`
+- UART DMA request line references
 
 ### `report_ccu_pipeline.py`
 
@@ -194,14 +221,38 @@ To add a new clock:
 Same process as clocks, but add to the `resets` array and update
 `include/dt-bindings/reset/sun60i-a733-ccu.h`.
 
-## Future Generators
+## Plugin Architecture
 
-Planned generators:
-- `generate_r_ccu.py` - R-domain CCU
-- `generate_rtc_ccu.py` - RTC CCU  
-- `generate_cpupll.py` - CPU PLL CCU
-- `generate_thermal.py` - Thermal sensor chip descriptor
-- `generate_pinmux_data.py` - Pinmux function tables
+The generator framework uses a plugin system for domain-specific extraction
+and emission:
+
+```
+generators/plugins/
+├── __init__.py              # Domain configs (main/r/rtc/cpupll)
+├── pinmux_extractor.py      # Extract pinmux from vendor C
+├── pinmux_emitter.py        # Emit C/DT pinmux tables
+└── pinmux_validator.py      # Validate pinmux structure
+```
+
+**Adding a new domain:** Edit `plugins/__init__.py` to add the domain config,
+then use `generate_ccu.py --domain <name>`.
+
+## Validation
+
+Always run the validation suite after generator changes:
+
+```bash
+python3 scripts/validate-factory.py
+```
+
+This checks:
+- JSON data validity
+- Generator determinism (regenerating produces identical output)
+- Committed files match fresh output
+- Python syntax validation
+- Pinctrl structural validation (bank sizes, IRQ maps, pin ranges)
+- Mainline pattern matching
+- ID coverage metrics
 
 ## Rules
 

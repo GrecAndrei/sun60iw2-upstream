@@ -218,17 +218,18 @@ Markdown table for documentation and review:
 
 ## Comparison to Mainline `sun55i-a523` Pattern
 
-| Aspect | `sun55i-a523` (current) | Proposed Generator |
-|--------|------------------------|--------------------|
-| Pinmux source | Device Tree only | JSON (single source of truth) |
-| C arrays | None (DT-table init) | Optional `--mode=c` output |
-| Validation | Manual DT review | Automated report + JSON schema validation |
-| Naming | Hand-written in DT | Centralised `name_map` |
-| Upstreaming effort | High (lots of DT hand-work) | Medium (generate + review) |
+| Aspect | `sun55i-a523` (DT mode) | `sun60i-a733` (C-array mode) | `sun60i-a733` (DT mode) |
+|--------|------------------------|------------------------------|------------------------|
+| Pinmux source | Device Tree nodes | JSON → explicit C arrays | JSON → DT nodes |
+| Init function | `sunxi_pinctrl_dt_table_init()` | `sunxi_pinctrl_init_with_flags()` | `sunxi_pinctrl_dt_table_init()` |
+| C arrays | None | Full `SUNXI_PIN()` tables | None |
+| Validation | Manual DT review | Automated JSON + C validation | Automated JSON + DT validation |
+| Naming | Hand-written in DT | Centralised `name_map` | Centralised `name_map` |
 
-The generator **does not replace** the DT-table approach for sun60i-a733;
-rather it **feeds** it.  The JSON becomes the canonical description from which
-both C arrays *and* DT nodes can be derived.
+**Current default for sun60i-a733:** C-array mode (`--with-pinmux=c`).
+This produces upstreamable explicit tables matching the `sun50i-h616` pattern.
+DT mode (`--with-pinmux=dt`) is available for backward compatibility or
+SoCs that prefer runtime DT parsing.
 
 ## Feasibility & Prototype
 
@@ -265,14 +266,14 @@ See the prototype outputs below.
 | Vendor names (`twi`, `sdc`) differ from mainline (`i2c`, `mmc`). | Low | `name_map` layer handles this automatically. |
 | Vendor uses `0xe` for IRQ, mainline explicit drivers use `0x6`. | Low | `irq.bank_mux` array already encodes this; generator uses whatever is in JSON. |
 | Large pin count (~200+ pins) makes manual JSON authoring impractical. | Medium | Must automate extraction from vendor BSP using SSEE. This is a **separate** tool; the generator assumes JSON already exists. |
-| sun60i-a733 mainline driver uses DT-table init, so explicit C arrays are **not required** for this SoC. | Low | The generator is reusable for other SoCs (e.g. if we back-port sun60i-a733 to an older kernel, or support sun55iw6, etc.). |
+| sun60i-a733 mainline driver now uses **C-array mode** as default. | Low | DT mode remains available via `--with-pinmux=dt` flag. Both modes share the same JSON source. |
 
 ## Conclusion
 
-The proposed JSON schema is simple, upstreamable, and decouples the *semantic*
-pinmux description from the *presentation* (C array vs DT nodes).  A minimal
-prototype is feasible immediately; full automation depends on completing the
-SSEE-based vendor→JSON extractor.
+The JSON schema is the single source of truth for pinmux data. Both C-array
+and DT-node emitters derive from it, ensuring consistency. The C-array mode
+(`--with-pinmux=c`) is the default for sun60i-a733 and compiles cleanly in
+mainline Linux 7.0.
 
 ---
 

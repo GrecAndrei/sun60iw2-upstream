@@ -1,5 +1,41 @@
 # Testing on Real Hardware
 
+## Validation Suite (Pre-Hardware)
+
+Before testing on real hardware, run the automated validation suite:
+
+```bash
+cd sun60iw2-upstream
+python3 scripts/validate-factory.py
+```
+
+**Expected output:** `ALL 24 CHECKS PASSED`
+
+This verifies:
+- All JSON data is valid
+- Generators are deterministic
+- Committed drivers match regenerated output
+- Pinctrl structure is valid (bank sizes, IRQ maps, pin ranges)
+- Driver patterns match mainline conventions
+
+### Compile Gates
+
+Every driver must compile in the Linux tree before hardware testing:
+
+```bash
+# CCU drivers (all 4 domains)
+make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- drivers/clk/sunxi-ng/ccu-sun60i-a733.o
+make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- drivers/clk/sunxi-ng/ccu-sun60i-a733-r.o
+make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- drivers/clk/sunxi-ng/ccu-sun60i-a733-rtc.o
+make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- drivers/clk/sunxi-ng/ccu-sun60i-a733-cpupll.o
+
+# Pinctrl
+make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- drivers/pinctrl/sunxi/pinctrl-sun60i-a733.o
+
+# DTB
+make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- dtbs
+```
+
 ## Required Hardware
 
 - Orange Pi 4 Pro (any RAM variant)

@@ -176,16 +176,64 @@
       "parent": "pll-ref"
     },
     {
+      "name": "pll-video0-4x",
+      "type": "divider",
+      "parent": "pll-video0",
+      "reg": "0x0120",
+      "shift": 20,
+      "width": 3
+    },
+    {
+      "name": "pll-video0-3x",
+      "type": "divider",
+      "parent": "pll-video0",
+      "reg": "0x0120",
+      "shift": 16,
+      "width": 3
+    },
+    {
       "name": "pll-video1",
       "type": "nm",
       "reg": "0x0140",
       "parent": "pll-ref"
     },
     {
+      "name": "pll-video1-4x",
+      "type": "divider",
+      "parent": "pll-video1",
+      "reg": "0x0140",
+      "shift": 20,
+      "width": 3
+    },
+    {
+      "name": "pll-video1-3x",
+      "type": "divider",
+      "parent": "pll-video1",
+      "reg": "0x0140",
+      "shift": 16,
+      "width": 3
+    },
+    {
       "name": "pll-video2",
       "type": "nm",
       "reg": "0x0160",
       "parent": "pll-ref"
+    },
+    {
+      "name": "pll-video2-4x",
+      "type": "divider",
+      "parent": "pll-video2",
+      "reg": "0x0160",
+      "shift": 20,
+      "width": 3
+    },
+    {
+      "name": "pll-video2-3x",
+      "type": "divider",
+      "parent": "pll-video2",
+      "reg": "0x0160",
+      "shift": 16,
+      "width": 3
     },
     {
       "name": "pll-ve0",
@@ -212,6 +260,22 @@
       "parent": "pll-ref"
     },
     {
+      "name": "pll-audio1-div2",
+      "type": "divider",
+      "parent": "pll-audio1",
+      "reg": "0x0280",
+      "shift": 20,
+      "width": 3
+    },
+    {
+      "name": "pll-audio1-div5",
+      "type": "divider",
+      "parent": "pll-audio1",
+      "reg": "0x0280",
+      "shift": 16,
+      "width": 3
+    },
+    {
       "name": "pll-npu",
       "type": "nm",
       "reg": "0x02A0",
@@ -224,6 +288,179 @@
       "parent": "pll-ref"
     },
     {
+      "name": "apb0_parents",
+      "type": "parent_array",
+      "parents": [
+        "sys24M",
+        "osc32k",
+        "iosc",
+        "pll-peri0-600m"
+      ]
+    },
+    {
+      "name": "ahb",
+      "type": "mux_divider",
+      "parents_array": "apb0_parents",
+      "reg": "0x0500",
+      "mux_shift": 0,
+      "mux_width": 5,
+      "div_shift": 24,
+      "div_width": 2,
+      "parents": [
+        "sys24M",
+        "osc32k",
+        "iosc",
+        "pll-peri0-600m"
+      ]
+    },
+    {
+      "name": "apb0",
+      "type": "mux_divider",
+      "parents_array": "apb0_parents",
+      "reg": "0x0510",
+      "mux_shift": 0,
+      "mux_width": 5,
+      "div_shift": 24,
+      "div_width": 2,
+      "parents": [
+        "sys24M",
+        "osc32k",
+        "iosc",
+        "pll-peri0-600m"
+      ]
+    },
+    {
+      "name": "apb1",
+      "type": "mux_divider",
+      "parents_array": "apb0_parents",
+      "reg": "0x0518",
+      "mux_shift": 0,
+      "mux_width": 5,
+      "div_shift": 24,
+      "div_width": 2,
+      "parents": [
+        "sys24M",
+        "osc32k",
+        "iosc",
+        "pll-peri0-600m"
+      ]
+    },
+    {
+      "name": "apb_uart_parents",
+      "type": "parent_array",
+      "parents": [
+        "sys24M",
+        "osc32k",
+        "iosc",
+        "pll-peri0-600m",
+        "pll-peri0-480m"
+      ]
+    },
+    {
+      "name": "apb-uart",
+      "type": "mux_divider",
+      "parents_array": "apb_uart_parents",
+      "reg": "0x0538",
+      "mux_shift": 0,
+      "mux_width": 5,
+      "div_shift": 24,
+      "div_width": 3,
+      "parents": [
+        "sys24M",
+        "osc32k",
+        "iosc",
+        "pll-peri0-600m",
+        "pll-peri0-480m"
+      ]
+    },
+    {
+      "name": "trace_parents",
+      "type": "parent_array",
+      "parents": [
+        "sys24M",
+        "osc32k",
+        "iosc",
+        "pll-peri0-300m",
+        "pll-peri0-400m"
+      ]
+    },
+    {
+      "name": "trace",
+      "type": "mux_divider_gate",
+      "parents_array": "trace_parents",
+      "reg": "0x0540",
+      "mux_shift": 0,
+      "mux_width": 5,
+      "div_shift": 24,
+      "div_width": 3,
+      "gate_bit": 31,
+      "parents": [
+        "sys24M",
+        "osc32k",
+        "iosc",
+        "pll-peri0-300m",
+        "pll-peri0-400m"
+      ]
+    },
+    {
+      "name": "gic_parents",
+      "type": "parent_array",
+      "parents": [
+        "sys24M",
+        "osc32k",
+        "pll-peri0-600m",
+        "pll-peri0-480m",
+        "pll-peri0-400m"
+      ]
+    },
+    {
+      "name": "gic",
+      "type": "mux_divider_gate",
+      "parents_array": "gic_parents",
+      "reg": "0x0560",
+      "mux_shift": 0,
+      "mux_width": 5,
+      "div_shift": 24,
+      "div_width": 3,
+      "gate_bit": 31,
+      "parents": [
+        "sys24M",
+        "osc32k",
+        "pll-peri0-600m",
+        "pll-peri0-480m",
+        "pll-peri0-400m"
+      ]
+    },
+    {
+      "name": "cpu_peri_parents",
+      "type": "parent_array",
+      "parents": [
+        "sys24M",
+        "osc32k",
+        "pll-peri0-600m",
+        "pll-peri0-480m",
+        "pll-peri0-400m"
+      ]
+    },
+    {
+      "name": "cpu-peri",
+      "type": "mux_divider_gate",
+      "parents_array": "cpu_peri_parents",
+      "reg": "0x0568",
+      "mux_shift": 0,
+      "mux_width": 5,
+      "div_shift": 24,
+      "div_width": 3,
+      "gate_bit": 31,
+      "parents": [
+        "sys24M",
+        "osc32k",
+        "pll-peri0-600m",
+        "pll-peri0-480m",
+        "pll-peri0-400m"
+      ]
+    },
+    {
       "name": "its-pcie0-aclk",
       "type": "gate",
       "parent": "dcxo",
@@ -231,10 +468,69 @@
       "bit": 1
     },
     {
+      "name": "nsi_parents",
+      "type": "parent_array",
+      "parents": [
+        "sys24M",
+        "pll-ddr",
+        "pll-peri0-800m",
+        "pll-peri0-600m",
+        "pll-peri0-480m",
+        "pll-de-3x"
+      ]
+    },
+    {
       "name": "nsi-cfg",
       "type": "gate",
       "parent": "dcxo",
       "reg": "0x0584",
+      "bit": 0
+    },
+    {
+      "name": "mbus_parents",
+      "type": "parent_array",
+      "parents": [
+        "sys24M",
+        "pll-peri0-600m",
+        "pll-ddr",
+        "pll-peri0-480m",
+        "pll-peri0-400m",
+        "pll-npu"
+      ]
+    },
+    {
+      "name": "iommu0-sys-hclk",
+      "type": "gate",
+      "parent": "dcxo",
+      "reg": "0x058C",
+      "bit": 2
+    },
+    {
+      "name": "iommu0-sys-pclk",
+      "type": "gate",
+      "parent": "dcxo",
+      "reg": "0x058C",
+      "bit": 1
+    },
+    {
+      "name": "iommu0-sys-mclk",
+      "type": "gate",
+      "parent": "dcxo",
+      "reg": "0x058C",
+      "bit": 0
+    },
+    {
+      "name": "msi-lite0",
+      "type": "gate",
+      "parent": "dcxo",
+      "reg": "0x0594",
+      "bit": 0
+    },
+    {
+      "name": "msi-lite1",
+      "type": "gate",
+      "parent": "dcxo",
+      "reg": "0x059C",
       "bit": 0
     },
     {
@@ -245,10 +541,304 @@
       "bit": 0
     },
     {
+      "name": "iommu1-sys-hclk",
+      "type": "gate",
+      "parent": "dcxo",
+      "reg": "0x05B4",
+      "bit": 2
+    },
+    {
+      "name": "iommu1-sys-pclk",
+      "type": "gate",
+      "parent": "dcxo",
+      "reg": "0x05B4",
+      "bit": 1
+    },
+    {
       "name": "iommu1-sys-mclk",
       "type": "gate",
       "parent": "dcxo",
       "reg": "0x05B4",
+      "bit": 0
+    },
+    {
+      "name": "cpus-hclk-gate",
+      "type": "gate_with_key",
+      "parent": "dcxo",
+      "reg": "0x05C0",
+      "key_value": "AHB_MASTER_KEY_VALUE",
+      "bit": 28
+    },
+    {
+      "name": "store-ahb-gate",
+      "type": "gate_with_key",
+      "parent": "dcxo",
+      "reg": "0x05C0",
+      "key_value": "AHB_MASTER_KEY_VALUE",
+      "bit": 24
+    },
+    {
+      "name": "msilite0-ahb-gate",
+      "type": "gate_with_key",
+      "parent": "dcxo",
+      "reg": "0x05C0",
+      "key_value": "AHB_MASTER_KEY_VALUE",
+      "bit": 16
+    },
+    {
+      "name": "usb-sys-ahb-gate",
+      "type": "gate_with_key",
+      "parent": "dcxo",
+      "reg": "0x05C0",
+      "key_value": "AHB_MASTER_KEY_VALUE",
+      "bit": 9
+    },
+    {
+      "name": "serdes-ahb-gate",
+      "type": "gate_with_key",
+      "parent": "dcxo",
+      "reg": "0x05C0",
+      "key_value": "AHB_MASTER_KEY_VALUE",
+      "bit": 8
+    },
+    {
+      "name": "gpu0-ahb-gate",
+      "type": "gate_with_key",
+      "parent": "dcxo",
+      "reg": "0x05C0",
+      "key_value": "AHB_MASTER_KEY_VALUE",
+      "bit": 7
+    },
+    {
+      "name": "npu-ahb-gate",
+      "type": "gate_with_key",
+      "parent": "dcxo",
+      "reg": "0x05C0",
+      "key_value": "AHB_MASTER_KEY_VALUE",
+      "bit": 6
+    },
+    {
+      "name": "de-ahb-gate",
+      "type": "gate_with_key",
+      "parent": "dcxo",
+      "reg": "0x05C0",
+      "key_value": "AHB_MASTER_KEY_VALUE",
+      "bit": 5
+    },
+    {
+      "name": "vid-out1-ahb-gate",
+      "type": "gate_with_key",
+      "parent": "dcxo",
+      "reg": "0x05C0",
+      "key_value": "AHB_MASTER_KEY_VALUE",
+      "bit": 4
+    },
+    {
+      "name": "vid-out0-ahb-gate",
+      "type": "gate_with_key",
+      "parent": "dcxo",
+      "reg": "0x05C0",
+      "key_value": "AHB_MASTER_KEY_VALUE",
+      "bit": 3
+    },
+    {
+      "name": "vid-in-ahb-gate",
+      "type": "gate_with_key",
+      "parent": "dcxo",
+      "reg": "0x05C0",
+      "key_value": "AHB_MASTER_KEY_VALUE",
+      "bit": 2
+    },
+    {
+      "name": "ve-enc-ahb-gate",
+      "type": "gate_with_key",
+      "parent": "dcxo",
+      "reg": "0x05C0",
+      "key_value": "AHB_MASTER_KEY_VALUE",
+      "bit": 1
+    },
+    {
+      "name": "ve-ahb-gate",
+      "type": "gate_with_key",
+      "parent": "dcxo",
+      "reg": "0x05C0",
+      "key_value": "AHB_MASTER_KEY_VALUE",
+      "bit": 0
+    },
+    {
+      "name": "msilite2-mbus-gate",
+      "type": "gate_with_key",
+      "parent": "dcxo",
+      "reg": "0x05E0",
+      "key_value": "MBUS_MASTER_KEY_VALUE",
+      "bit": 31
+    },
+    {
+      "name": "store-mbus-gate",
+      "type": "gate_with_key",
+      "parent": "dcxo",
+      "reg": "0x05E0",
+      "key_value": "MBUS_MASTER_KEY_VALUE",
+      "bit": 30
+    },
+    {
+      "name": "msilite0-mbus-gate",
+      "type": "gate_with_key",
+      "parent": "dcxo",
+      "reg": "0x05E0",
+      "key_value": "MBUS_MASTER_KEY_VALUE",
+      "bit": 29
+    },
+    {
+      "name": "serdes-mbus-gate",
+      "type": "gate_with_key",
+      "parent": "dcxo",
+      "reg": "0x05E0",
+      "key_value": "MBUS_MASTER_KEY_VALUE",
+      "bit": 28
+    },
+    {
+      "name": "vid-in-mbus-gate",
+      "type": "gate_with_key",
+      "parent": "dcxo",
+      "reg": "0x05E0",
+      "key_value": "MBUS_MASTER_KEY_VALUE",
+      "bit": 24
+    },
+    {
+      "name": "npu-mbus-gate",
+      "type": "gate_with_key",
+      "parent": "dcxo",
+      "reg": "0x05E0",
+      "key_value": "MBUS_MASTER_KEY_VALUE",
+      "bit": 18
+    },
+    {
+      "name": "gpu0-mbus-gate",
+      "type": "gate_with_key",
+      "parent": "dcxo",
+      "reg": "0x05E0",
+      "key_value": "MBUS_MASTER_KEY_VALUE",
+      "bit": 16
+    },
+    {
+      "name": "ve-dec-mbus-gate",
+      "type": "gate_with_key",
+      "parent": "dcxo",
+      "reg": "0x05E0",
+      "key_value": "MBUS_MASTER_KEY_VALUE",
+      "bit": 14
+    },
+    {
+      "name": "ve-mbus-gate",
+      "type": "gate_with_key",
+      "parent": "dcxo",
+      "reg": "0x05E0",
+      "key_value": "MBUS_MASTER_KEY_VALUE",
+      "bit": 12
+    },
+    {
+      "name": "desys-mbus-gate",
+      "type": "gate_with_key",
+      "parent": "dcxo",
+      "reg": "0x05E0",
+      "key_value": "MBUS_MASTER_KEY_VALUE",
+      "bit": 11
+    },
+    {
+      "name": "iommu1-mbus-gate",
+      "type": "gate_with_key",
+      "parent": "dcxo",
+      "reg": "0x05E0",
+      "key_value": "MBUS_MASTER_KEY_VALUE",
+      "bit": 1
+    },
+    {
+      "name": "iommu0-mbus-gate",
+      "type": "gate_with_key",
+      "parent": "dcxo",
+      "reg": "0x05E0",
+      "key_value": "MBUS_MASTER_KEY_VALUE",
+      "bit": 0
+    },
+    {
+      "name": "ve-dec-mclk",
+      "type": "gate_with_key",
+      "parent": "dcxo",
+      "reg": "0x05E4",
+      "key_value": "MBUS_GATE_KEY_VALUE",
+      "bit": 18
+    },
+    {
+      "name": "gmac1-mclk",
+      "type": "gate_with_key",
+      "parent": "dcxo",
+      "reg": "0x05E4",
+      "key_value": "MBUS_GATE_KEY_VALUE",
+      "bit": 12
+    },
+    {
+      "name": "gmac0-mclk",
+      "type": "gate_with_key",
+      "parent": "dcxo",
+      "reg": "0x05E4",
+      "key_value": "MBUS_GATE_KEY_VALUE",
+      "bit": 11
+    },
+    {
+      "name": "isp-mclk",
+      "type": "gate_with_key",
+      "parent": "dcxo",
+      "reg": "0x05E4",
+      "key_value": "MBUS_GATE_KEY_VALUE",
+      "bit": 9
+    },
+    {
+      "name": "csi-mclk",
+      "type": "gate_with_key",
+      "parent": "dcxo",
+      "reg": "0x05E4",
+      "key_value": "MBUS_GATE_KEY_VALUE",
+      "bit": 8
+    },
+    {
+      "name": "nand-mclk",
+      "type": "gate_with_key",
+      "parent": "dcxo",
+      "reg": "0x05E4",
+      "key_value": "MBUS_GATE_KEY_VALUE",
+      "bit": 5
+    },
+    {
+      "name": "dma1-mclk",
+      "type": "gate_with_key",
+      "parent": "dcxo",
+      "reg": "0x05E4",
+      "key_value": "MBUS_GATE_KEY_VALUE",
+      "bit": 3
+    },
+    {
+      "name": "ce-mclk",
+      "type": "gate_with_key",
+      "parent": "dcxo",
+      "reg": "0x05E4",
+      "key_value": "MBUS_GATE_KEY_VALUE",
+      "bit": 2
+    },
+    {
+      "name": "ve-mclk",
+      "type": "gate_with_key",
+      "parent": "dcxo",
+      "reg": "0x05E4",
+      "key_value": "MBUS_GATE_KEY_VALUE",
+      "bit": 1
+    },
+    {
+      "name": "dma0-mclk",
+      "type": "gate_with_key",
+      "parent": "dcxo",
+      "reg": "0x05E4",
+      "key_value": "MBUS_GATE_KEY_VALUE",
       "bit": 0
     },
     {
@@ -273,6 +863,27 @@
       "bit": 0
     },
     {
+      "name": "msgbox0",
+      "type": "gate",
+      "parent": "dcxo",
+      "reg": "0x0744",
+      "bit": 0
+    },
+    {
+      "name": "pwm0",
+      "type": "gate",
+      "parent": "dcxo",
+      "reg": "0x0784",
+      "bit": 0
+    },
+    {
+      "name": "pwm1",
+      "type": "gate",
+      "parent": "dcxo",
+      "reg": "0x078C",
+      "bit": 0
+    },
+    {
       "name": "dbgsys",
       "type": "gate",
       "parent": "dcxo",
@@ -287,11 +898,282 @@
       "bit": 0
     },
     {
+      "name": "timer_clk_parents",
+      "type": "parent_array",
+      "parents": [
+        "sys24M",
+        "iosc",
+        "osc32k",
+        "pll-peri0-200m",
+        "dcxo"
+      ]
+    },
+    {
+      "name": "timer0",
+      "type": "mux_divider",
+      "parents_array": "timer_clk_parents",
+      "reg": "0x0800",
+      "mux_shift": 24,
+      "mux_width": 3,
+      "div_shift": 0,
+      "div_width": 3,
+      "parents": [
+        "sys24M",
+        "iosc",
+        "osc32k",
+        "pll-peri0-200m",
+        "dcxo"
+      ]
+    },
+    {
+      "name": "timer1",
+      "type": "mux_divider",
+      "parents_array": "timer_clk_parents",
+      "reg": "0x0804",
+      "mux_shift": 24,
+      "mux_width": 3,
+      "div_shift": 0,
+      "div_width": 3,
+      "parents": [
+        "sys24M",
+        "iosc",
+        "osc32k",
+        "pll-peri0-200m",
+        "dcxo"
+      ]
+    },
+    {
+      "name": "timer2",
+      "type": "mux_divider",
+      "parents_array": "timer_clk_parents",
+      "reg": "0x0808",
+      "mux_shift": 24,
+      "mux_width": 3,
+      "div_shift": 0,
+      "div_width": 3,
+      "parents": [
+        "sys24M",
+        "iosc",
+        "osc32k",
+        "pll-peri0-200m",
+        "dcxo"
+      ]
+    },
+    {
+      "name": "timer3",
+      "type": "mux_divider",
+      "parents_array": "timer_clk_parents",
+      "reg": "0x080C",
+      "mux_shift": 24,
+      "mux_width": 3,
+      "div_shift": 0,
+      "div_width": 3,
+      "parents": [
+        "sys24M",
+        "iosc",
+        "osc32k",
+        "pll-peri0-200m",
+        "dcxo"
+      ]
+    },
+    {
+      "name": "timer4",
+      "type": "mux_divider",
+      "parents_array": "timer_clk_parents",
+      "reg": "0x0810",
+      "mux_shift": 24,
+      "mux_width": 3,
+      "div_shift": 0,
+      "div_width": 3,
+      "parents": [
+        "sys24M",
+        "iosc",
+        "osc32k",
+        "pll-peri0-200m",
+        "dcxo"
+      ]
+    },
+    {
+      "name": "timer5",
+      "type": "mux_divider",
+      "parents_array": "timer_clk_parents",
+      "reg": "0x0814",
+      "mux_shift": 24,
+      "mux_width": 3,
+      "div_shift": 0,
+      "div_width": 3,
+      "parents": [
+        "sys24M",
+        "iosc",
+        "osc32k",
+        "pll-peri0-200m",
+        "dcxo"
+      ]
+    },
+    {
+      "name": "timer6",
+      "type": "mux_divider",
+      "parents_array": "timer_clk_parents",
+      "reg": "0x0818",
+      "mux_shift": 24,
+      "mux_width": 3,
+      "div_shift": 0,
+      "div_width": 3,
+      "parents": [
+        "sys24M",
+        "iosc",
+        "osc32k",
+        "pll-peri0-200m",
+        "dcxo"
+      ]
+    },
+    {
+      "name": "timer7",
+      "type": "mux_divider",
+      "parents_array": "timer_clk_parents",
+      "reg": "0x081C",
+      "mux_shift": 24,
+      "mux_width": 3,
+      "div_shift": 0,
+      "div_width": 3,
+      "parents": [
+        "sys24M",
+        "iosc",
+        "osc32k",
+        "pll-peri0-200m",
+        "dcxo"
+      ]
+    },
+    {
+      "name": "timer8",
+      "type": "mux_divider",
+      "parents_array": "timer_clk_parents",
+      "reg": "0x0820",
+      "mux_shift": 24,
+      "mux_width": 3,
+      "div_shift": 0,
+      "div_width": 3,
+      "parents": [
+        "sys24M",
+        "iosc",
+        "osc32k",
+        "pll-peri0-200m",
+        "dcxo"
+      ]
+    },
+    {
+      "name": "timer9",
+      "type": "mux_divider",
+      "parents_array": "timer_clk_parents",
+      "reg": "0x0824",
+      "mux_shift": 24,
+      "mux_width": 3,
+      "div_shift": 0,
+      "div_width": 3,
+      "parents": [
+        "sys24M",
+        "iosc",
+        "osc32k",
+        "pll-peri0-200m",
+        "dcxo"
+      ]
+    },
+    {
       "name": "timer-bus",
       "type": "gate",
       "parent": "dcxo",
       "reg": "0x0850",
       "bit": 0
+    },
+    {
+      "name": "avs_parents",
+      "type": "parent_array",
+      "parents": [
+        "sys24M",
+        "dcxo"
+      ]
+    },
+    {
+      "name": "avs",
+      "type": "mux_gate",
+      "parents_array": "avs_parents",
+      "reg": "0x0880",
+      "mux_shift": 24,
+      "mux_width": 3,
+      "gate_bit": 31,
+      "parents": [
+        "sys24M",
+        "dcxo"
+      ]
+    },
+    {
+      "name": "de0_parents",
+      "type": "parent_array",
+      "parents": [
+        "pll-de-3x",
+        "pll-de-4x",
+        "pll-peri0-480m",
+        "pll-peri0-400m",
+        "pll-peri0-300m",
+        "pll-video0-4x",
+        "pll-video2-4x"
+      ]
+    },
+    {
+      "name": "de0",
+      "type": "mux_divider_gate",
+      "parents_array": "de0_parents",
+      "reg": "0x0A00",
+      "mux_shift": 0,
+      "mux_width": 5,
+      "div_shift": 24,
+      "div_width": 3,
+      "gate_bit": 31,
+      "parents": [
+        "pll-de-3x",
+        "pll-de-4x",
+        "pll-peri0-480m",
+        "pll-peri0-400m",
+        "pll-peri0-300m",
+        "pll-video0-4x",
+        "pll-video2-4x"
+      ]
+    },
+    {
+      "name": "de0-gate",
+      "type": "gate",
+      "parent": "dcxo",
+      "reg": "0x0A04",
+      "bit": 0
+    },
+    {
+      "name": "di_parents",
+      "type": "parent_array",
+      "parents": [
+        "pll-peri0-600m",
+        "pll-peri0-480m",
+        "pll-peri0-400m",
+        "pll-video0-4x",
+        "pll-video2-4x"
+      ]
+    },
+    {
+      "name": "di",
+      "type": "mux_divider_gate",
+      "parents_array": "di_parents",
+      "reg": "0x0A20",
+      "mux_shift": 0,
+      "mux_width": 5,
+      "div_shift": 24,
+      "div_width": 3,
+      "gate_bit": 31,
+      "parents": [
+        "pll-peri0-600m",
+        "pll-peri0-480m",
+        "pll-peri0-400m",
+        "pll-video0-4x",
+        "pll-video2-4x"
+      ]
     },
     {
       "name": "di-gate",
@@ -301,6 +1183,33 @@
       "bit": 0
     },
     {
+      "name": "g2d_parents",
+      "type": "parent_array",
+      "parents": [
+        "pll-peri0-300m",
+        "pll-peri0-400m",
+        "pll-video0-4x",
+        "pll-video2-4x"
+      ]
+    },
+    {
+      "name": "g2d",
+      "type": "mux_divider_gate",
+      "parents_array": "g2d_parents",
+      "reg": "0x0A40",
+      "mux_shift": 0,
+      "mux_width": 5,
+      "div_shift": 24,
+      "div_width": 3,
+      "gate_bit": 31,
+      "parents": [
+        "pll-peri0-300m",
+        "pll-peri0-400m",
+        "pll-video0-4x",
+        "pll-video2-4x"
+      ]
+    },
+    {
       "name": "g2d-gate",
       "type": "gate",
       "parent": "dcxo",
@@ -308,11 +1217,129 @@
       "bit": 0
     },
     {
+      "name": "eink_parents",
+      "type": "parent_array",
+      "parents": [
+        "pll-peri0-480m",
+        "pll-peri0-400m"
+      ]
+    },
+    {
+      "name": "eink",
+      "type": "mux_divider_gate",
+      "parents_array": "eink_parents",
+      "reg": "0x0A60",
+      "mux_shift": 0,
+      "mux_width": 5,
+      "div_shift": 24,
+      "div_width": 3,
+      "gate_bit": 31,
+      "parents": [
+        "pll-peri0-480m",
+        "pll-peri0-400m"
+      ]
+    },
+    {
+      "name": "eink_panel_parents",
+      "type": "parent_array",
+      "parents": [
+        "pll-video0-4x",
+        "pll-video0-3x",
+        "pll-video1-4x",
+        "pll-video1-3x",
+        "pll-peri0-300m"
+      ]
+    },
+    {
+      "name": "eink-panel",
+      "type": "mux_divider_gate",
+      "parents_array": "eink_panel_parents",
+      "reg": "0x0A64",
+      "mux_shift": 0,
+      "mux_width": 5,
+      "div_shift": 24,
+      "div_width": 3,
+      "gate_bit": 31,
+      "parents": [
+        "pll-video0-4x",
+        "pll-video0-3x",
+        "pll-video1-4x",
+        "pll-video1-3x",
+        "pll-peri0-300m"
+      ]
+    },
+    {
       "name": "eink-gate",
       "type": "gate",
       "parent": "dcxo",
       "reg": "0x0A6C",
       "bit": 0
+    },
+    {
+      "name": "ve_enc0_parents",
+      "type": "parent_array",
+      "parents": [
+        "pll-ve0",
+        "pll-ve1",
+        "pll-peri0-800m",
+        "pll-peri0-600m",
+        "pll-peri0-480m",
+        "pll-de-3x",
+        "pll-npu"
+      ]
+    },
+    {
+      "name": "ve-enc0",
+      "type": "mux_divider_gate",
+      "parents_array": "ve_enc0_parents",
+      "reg": "0x0A80",
+      "mux_shift": 0,
+      "mux_width": 5,
+      "div_shift": 24,
+      "div_width": 3,
+      "gate_bit": 31,
+      "parents": [
+        "pll-ve0",
+        "pll-ve1",
+        "pll-peri0-800m",
+        "pll-peri0-600m",
+        "pll-peri0-480m",
+        "pll-de-3x",
+        "pll-npu"
+      ]
+    },
+    {
+      "name": "ve_dec_parents",
+      "type": "parent_array",
+      "parents": [
+        "pll-ve1",
+        "pll-ve0",
+        "pll-peri0-800m",
+        "pll-peri0-600m",
+        "pll-peri0-480m",
+        "pll-de-3x",
+        "pll-npu"
+      ]
+    },
+    {
+      "name": "ve-dec",
+      "type": "mux_divider_gate",
+      "parents_array": "ve_dec_parents",
+      "reg": "0x0A88",
+      "mux_shift": 0,
+      "mux_width": 5,
+      "div_shift": 24,
+      "div_width": 3,
+      "gate_bit": 31,
+      "parents": [
+        "pll-ve1",
+        "pll-ve0",
+        "pll-peri0-800m",
+        "pll-peri0-600m",
+        "pll-peri0-480m",
+        "pll-de-3x",
+        "pll-npu"
+      ]
     },
     {
       "name": "ve-dec-gate",
@@ -329,11 +1356,114 @@
       "bit": 0
     },
     {
+      "name": "ce_parents",
+      "type": "parent_array",
+      "parents": [
+        "sys24M",
+        "pll-peri0-400m",
+        "pll-peri0-600m"
+      ]
+    },
+    {
+      "name": "ce",
+      "type": "mux_divider_gate",
+      "parents_array": "ce_parents",
+      "reg": "0x0AC0",
+      "mux_shift": 0,
+      "mux_width": 5,
+      "div_shift": 24,
+      "div_width": 3,
+      "gate_bit": 31,
+      "parents": [
+        "sys24M",
+        "pll-peri0-400m",
+        "pll-peri0-600m"
+      ]
+    },
+    {
+      "name": "ce-sys",
+      "type": "gate",
+      "parent": "dcxo",
+      "reg": "0x0AC4",
+      "bit": 1
+    },
+    {
+      "name": "ce-bus",
+      "type": "gate",
+      "parent": "dcxo",
+      "reg": "0x0AC4",
+      "bit": 0
+    },
+    {
+      "name": "npu_parents",
+      "type": "parent_array",
+      "parents": [
+        "pll-npu",
+        "pll-peri0-800m",
+        "pll-peri0-600m",
+        "pll-peri0-480m",
+        "pll-ve0",
+        "pll-ve1",
+        "pll-de-3x"
+      ]
+    },
+    {
+      "name": "npu",
+      "type": "mux_divider_gate",
+      "parents_array": "npu_parents",
+      "reg": "0x0B00",
+      "mux_shift": 0,
+      "mux_width": 5,
+      "div_shift": 24,
+      "div_width": 3,
+      "gate_bit": 31,
+      "parents": [
+        "pll-npu",
+        "pll-peri0-800m",
+        "pll-peri0-600m",
+        "pll-peri0-480m",
+        "pll-ve0",
+        "pll-ve1",
+        "pll-de-3x"
+      ]
+    },
+    {
       "name": "npu-gate",
       "type": "gate",
       "parent": "dcxo",
       "reg": "0x0B04",
       "bit": 0
+    },
+    {
+      "name": "gpu0_parents",
+      "type": "parent_array",
+      "parents": [
+        "pll-gpu",
+        "pll-peri0-800m",
+        "pll-peri0-600m",
+        "pll-peri0-400m",
+        "pll-peri0-300m",
+        "pll-peri0-200m"
+      ]
+    },
+    {
+      "name": "gpu0",
+      "type": "mux_divider",
+      "parents_array": "gpu0_parents",
+      "reg": "0x0B20",
+      "mux_shift": 24,
+      "mux_width": 3,
+      "div_shift": 0,
+      "div_width": 4,
+      "key_value": "UPD_KEY_VALUE",
+      "parents": [
+        "pll-gpu",
+        "pll-peri0-800m",
+        "pll-peri0-600m",
+        "pll-peri0-400m",
+        "pll-peri0-300m",
+        "pll-peri0-200m"
+      ]
     },
     {
       "name": "gpu0-gate",
@@ -343,11 +1473,107 @@
       "bit": 0
     },
     {
+      "name": "dram0_parents",
+      "type": "parent_array",
+      "parents": [
+        "pll-ddr",
+        "pll-peri1-800m",
+        "pll-peri1-600m",
+        "pll-de-3x",
+        "pll-npu"
+      ]
+    },
+    {
+      "name": "dram0-gate",
+      "type": "gate",
+      "parent": "dcxo",
+      "reg": "0x0C0C",
+      "bit": 0
+    },
+    {
+      "name": "nand0_clk_parents",
+      "type": "parent_array",
+      "parents": [
+        "sys24M",
+        "pll-peri0-400m",
+        "pll-peri0-300m",
+        "pll-peri1-400m",
+        "pll-peri1-300m"
+      ]
+    },
+    {
+      "name": "nand0-clk0",
+      "type": "mux_divider_gate",
+      "parents_array": "nand0_clk_parents",
+      "reg": "0x0C80",
+      "mux_shift": 0,
+      "mux_width": 5,
+      "div_shift": 24,
+      "div_width": 3,
+      "gate_bit": 31,
+      "parents": [
+        "sys24M",
+        "pll-peri0-400m",
+        "pll-peri0-300m",
+        "pll-peri1-400m",
+        "pll-peri1-300m"
+      ]
+    },
+    {
+      "name": "nand0-clk1",
+      "type": "mux_divider_gate",
+      "parents_array": "nand0_clk_parents",
+      "reg": "0x0C84",
+      "mux_shift": 0,
+      "mux_width": 5,
+      "div_shift": 24,
+      "div_width": 3,
+      "gate_bit": 31,
+      "parents": [
+        "sys24M",
+        "pll-peri0-400m",
+        "pll-peri0-300m",
+        "pll-peri1-400m",
+        "pll-peri1-300m"
+      ]
+    },
+    {
       "name": "nand0-bus",
       "type": "gate",
       "parent": "dcxo",
       "reg": "0x0C8C",
       "bit": 0
+    },
+    {
+      "name": "smhc_parents",
+      "type": "parent_array",
+      "parents": [
+        "sys24M",
+        "pll-peri0-400m",
+        "pll-peri0-300m",
+        "pll-peri1-400m",
+        "pll-peri1-300m"
+      ]
+    },
+    {
+      "name": "smhc0",
+      "type": "mp_mux_gate_no_index",
+      "parents_array": "smhc_parents",
+      "reg": "0x0D00",
+      "m_shift": 0,
+      "m_width": 5,
+      "n_shift": 8,
+      "n_width": 5,
+      "mux_shift": 24,
+      "mux_width": 3,
+      "gate_bit": 31,
+      "parents": [
+        "sys24M",
+        "pll-peri0-400m",
+        "pll-peri0-300m",
+        "pll-peri1-400m",
+        "pll-peri1-300m"
+      ]
     },
     {
       "name": "smhc0-gate",
@@ -357,11 +1583,62 @@
       "bit": 0
     },
     {
+      "name": "smhc1",
+      "type": "mp_mux_gate_no_index",
+      "parents_array": "smhc_parents",
+      "reg": "0x0D10",
+      "m_shift": 0,
+      "m_width": 5,
+      "n_shift": 8,
+      "n_width": 5,
+      "mux_shift": 24,
+      "mux_width": 3,
+      "gate_bit": 31,
+      "parents": [
+        "sys24M",
+        "pll-peri0-400m",
+        "pll-peri0-300m",
+        "pll-peri1-400m",
+        "pll-peri1-300m"
+      ]
+    },
+    {
       "name": "smhc1-gate",
       "type": "gate",
       "parent": "dcxo",
       "reg": "0x0D1C",
       "bit": 0
+    },
+    {
+      "name": "smhc2_parents",
+      "type": "parent_array",
+      "parents": [
+        "sys24M",
+        "pll-peri0-800m",
+        "pll-peri0-600m",
+        "pll-peri1-800m",
+        "pll-peri1-600m"
+      ]
+    },
+    {
+      "name": "smhc2",
+      "type": "mp_mux_gate_no_index",
+      "parents_array": "smhc2_parents",
+      "reg": "0x0D20",
+      "m_shift": 0,
+      "m_width": 5,
+      "n_shift": 8,
+      "n_width": 5,
+      "mux_shift": 24,
+      "mux_width": 3,
+      "gate_bit": 31,
+      "parents": [
+        "sys24M",
+        "pll-peri0-800m",
+        "pll-peri0-600m",
+        "pll-peri1-800m",
+        "pll-peri1-600m"
+      ]
     },
     {
       "name": "smhc2-gate",
@@ -371,6 +1648,26 @@
       "bit": 0
     },
     {
+      "name": "smhc3",
+      "type": "mp_mux_gate_no_index",
+      "parents_array": "smhc2_parents",
+      "reg": "0x0D30",
+      "m_shift": 0,
+      "m_width": 5,
+      "n_shift": 8,
+      "n_width": 5,
+      "mux_shift": 24,
+      "mux_width": 3,
+      "gate_bit": 31,
+      "parents": [
+        "sys24M",
+        "pll-peri0-800m",
+        "pll-peri0-600m",
+        "pll-peri1-800m",
+        "pll-peri1-600m"
+      ]
+    },
+    {
       "name": "smhc3-bus",
       "type": "gate",
       "parent": "dcxo",
@@ -378,10 +1675,63 @@
       "bit": 0
     },
     {
+      "name": "ufs_axi_parents",
+      "type": "parent_array",
+      "parents": [
+        "pll-peri0-300m",
+        "pll-peri0-200m"
+      ]
+    },
+    {
+      "name": "ufs-axi",
+      "type": "mux_divider_gate",
+      "parents_array": "ufs_axi_parents",
+      "reg": "0x0D80",
+      "mux_shift": 0,
+      "mux_width": 5,
+      "div_shift": 24,
+      "div_width": 3,
+      "gate_bit": 31,
+      "parents": [
+        "pll-peri0-300m",
+        "pll-peri0-200m"
+      ]
+    },
+    {
+      "name": "ufs_cfg_parents",
+      "type": "parent_array",
+      "parents": [
+        "pll-peri0-480m",
+        "dcxo"
+      ]
+    },
+    {
+      "name": "ufs-cfg",
+      "type": "mux_divider_gate",
+      "parents_array": "ufs_cfg_parents",
+      "reg": "0x0D84",
+      "mux_shift": 0,
+      "mux_width": 5,
+      "div_shift": 24,
+      "div_width": 3,
+      "gate_bit": 31,
+      "parents": [
+        "pll-peri0-480m",
+        "dcxo"
+      ]
+    },
+    {
       "name": "ufs",
       "type": "gate",
       "parent": "dcxo",
       "reg": "0x0D8C",
+      "bit": 0
+    },
+    {
+      "name": "uart0",
+      "type": "gate",
+      "parent": "apb-uart",
+      "reg": "0x0E00",
       "bit": 0
     },
     {
@@ -518,11 +1868,71 @@
       "bit": 0
     },
     {
+      "name": "spi_parents",
+      "type": "parent_array",
+      "parents": [
+        "sys24M",
+        "pll-peri0-300m",
+        "pll-peri0-200m",
+        "pll-peri1-300m",
+        "pll-peri1-200m",
+        "pll-peri0-480m",
+        "pll-peri1-480m",
+        "dcxo"
+      ]
+    },
+    {
+      "name": "spi0",
+      "type": "mp_mux_gate_no_index",
+      "parents_array": "spi_parents",
+      "reg": "0x0F00",
+      "m_shift": 0,
+      "m_width": 5,
+      "n_shift": 8,
+      "n_width": 5,
+      "mux_shift": 24,
+      "mux_width": 3,
+      "gate_bit": 31,
+      "parents": [
+        "sys24M",
+        "pll-peri0-300m",
+        "pll-peri0-200m",
+        "pll-peri1-300m",
+        "pll-peri1-200m",
+        "pll-peri0-480m",
+        "pll-peri1-480m",
+        "dcxo"
+      ]
+    },
+    {
       "name": "spi0-bus",
       "type": "gate",
       "parent": "dcxo",
       "reg": "0x0F04",
       "bit": 0
+    },
+    {
+      "name": "spi1",
+      "type": "mp_mux_gate_no_index",
+      "parents_array": "spi_parents",
+      "reg": "0x0F08",
+      "m_shift": 0,
+      "m_width": 5,
+      "n_shift": 8,
+      "n_width": 5,
+      "mux_shift": 24,
+      "mux_width": 3,
+      "gate_bit": 31,
+      "parents": [
+        "sys24M",
+        "pll-peri0-300m",
+        "pll-peri0-200m",
+        "pll-peri1-300m",
+        "pll-peri1-200m",
+        "pll-peri0-480m",
+        "pll-peri1-480m",
+        "dcxo"
+      ]
     },
     {
       "name": "spi1-bus",
@@ -532,11 +1942,71 @@
       "bit": 0
     },
     {
+      "name": "spi2",
+      "type": "mp_mux_gate_no_index",
+      "parents_array": "spi_parents",
+      "reg": "0x0F10",
+      "m_shift": 0,
+      "m_width": 5,
+      "n_shift": 8,
+      "n_width": 5,
+      "mux_shift": 24,
+      "mux_width": 3,
+      "gate_bit": 31,
+      "parents": [
+        "sys24M",
+        "pll-peri0-300m",
+        "pll-peri0-200m",
+        "pll-peri1-300m",
+        "pll-peri1-200m",
+        "pll-peri0-480m",
+        "pll-peri1-480m",
+        "dcxo"
+      ]
+    },
+    {
       "name": "spi2-bus",
       "type": "gate",
       "parent": "dcxo",
       "reg": "0x0F14",
       "bit": 0
+    },
+    {
+      "name": "spif_parents",
+      "type": "parent_array",
+      "parents": [
+        "sys24M",
+        "pll-peri0-400m",
+        "pll-peri0-300m",
+        "pll-peri1-400m",
+        "pll-peri1-300m",
+        "pll-peri0-160m",
+        "pll-peri1-160m",
+        "dcxo"
+      ]
+    },
+    {
+      "name": "spif",
+      "type": "mp_mux_gate_no_index",
+      "parents_array": "spif_parents",
+      "reg": "0x0F18",
+      "m_shift": 0,
+      "m_width": 5,
+      "n_shift": 8,
+      "n_width": 5,
+      "mux_shift": 24,
+      "mux_width": 3,
+      "gate_bit": 31,
+      "parents": [
+        "sys24M",
+        "pll-peri0-400m",
+        "pll-peri0-300m",
+        "pll-peri1-400m",
+        "pll-peri1-300m",
+        "pll-peri0-160m",
+        "pll-peri1-160m",
+        "dcxo"
+      ]
     },
     {
       "name": "spif-bus",
@@ -546,6 +2016,29 @@
       "bit": 0
     },
     {
+      "name": "spi3",
+      "type": "mp_mux_gate_no_index",
+      "parents_array": "spi_parents",
+      "reg": "0x0F20",
+      "m_shift": 0,
+      "m_width": 5,
+      "n_shift": 8,
+      "n_width": 5,
+      "mux_shift": 24,
+      "mux_width": 3,
+      "gate_bit": 31,
+      "parents": [
+        "sys24M",
+        "pll-peri0-300m",
+        "pll-peri0-200m",
+        "pll-peri1-300m",
+        "pll-peri1-200m",
+        "pll-peri0-480m",
+        "pll-peri1-480m",
+        "dcxo"
+      ]
+    },
+    {
       "name": "spi3-bus",
       "type": "gate",
       "parent": "dcxo",
@@ -553,11 +2046,57 @@
       "bit": 0
     },
     {
+      "name": "spi4",
+      "type": "mp_mux_gate_no_index",
+      "parents_array": "spi_parents",
+      "reg": "0x0F28",
+      "m_shift": 0,
+      "m_width": 5,
+      "n_shift": 8,
+      "n_width": 5,
+      "mux_shift": 24,
+      "mux_width": 3,
+      "gate_bit": 31,
+      "parents": [
+        "sys24M",
+        "pll-peri0-300m",
+        "pll-peri0-200m",
+        "pll-peri1-300m",
+        "pll-peri1-200m",
+        "pll-peri0-480m",
+        "pll-peri1-480m",
+        "dcxo"
+      ]
+    },
+    {
       "name": "spi4-bus",
       "type": "gate",
       "parent": "dcxo",
       "reg": "0x0F2C",
       "bit": 0
+    },
+    {
+      "name": "gpadc0_24m_parents",
+      "type": "parent_array",
+      "parents": [
+        "sys24M",
+        "dcxo"
+      ]
+    },
+    {
+      "name": "gpadc0-24m",
+      "type": "mux_divider_gate",
+      "parents_array": "gpadc0_24m_parents",
+      "reg": "0x0FC0",
+      "mux_shift": 0,
+      "mux_width": 5,
+      "div_shift": 24,
+      "div_width": 3,
+      "gate_bit": 31,
+      "parents": [
+        "sys24M",
+        "dcxo"
+      ]
     },
     {
       "name": "gpadc0",
@@ -574,11 +2113,61 @@
       "bit": 0
     },
     {
+      "name": "irrx_parents",
+      "type": "parent_array",
+      "parents": [
+        "osc32k",
+        "sys24M",
+        "dcxo"
+      ]
+    },
+    {
+      "name": "irrx",
+      "type": "mux_divider_gate",
+      "parents_array": "irrx_parents",
+      "reg": "0x1000",
+      "mux_shift": 0,
+      "mux_width": 5,
+      "div_shift": 24,
+      "div_width": 3,
+      "gate_bit": 31,
+      "parents": [
+        "osc32k",
+        "sys24M",
+        "dcxo"
+      ]
+    },
+    {
       "name": "irrx-gate",
       "type": "gate",
       "parent": "dcxo",
       "reg": "0x1004",
       "bit": 0
+    },
+    {
+      "name": "irtx_parents",
+      "type": "parent_array",
+      "parents": [
+        "sys24M",
+        "pll-peri1-600m",
+        "dcxo"
+      ]
+    },
+    {
+      "name": "irtx",
+      "type": "mux_divider_gate",
+      "parents_array": "irtx_parents",
+      "reg": "0x1008",
+      "mux_shift": 0,
+      "mux_width": 5,
+      "div_shift": 24,
+      "div_width": 3,
+      "gate_bit": 31,
+      "parents": [
+        "sys24M",
+        "pll-peri1-600m",
+        "dcxo"
+      ]
     },
     {
       "name": "irtx-gate",
@@ -595,11 +2184,61 @@
       "bit": 0
     },
     {
+      "name": "sgpio_parents",
+      "type": "parent_array",
+      "parents": [
+        "sys24M",
+        "osc32k"
+      ]
+    },
+    {
+      "name": "sgpio",
+      "type": "mux_divider_gate",
+      "parents_array": "sgpio_parents",
+      "reg": "0x1060",
+      "mux_shift": 0,
+      "mux_width": 5,
+      "div_shift": 24,
+      "div_width": 3,
+      "gate_bit": 31,
+      "parents": [
+        "sys24M",
+        "osc32k"
+      ]
+    },
+    {
       "name": "sgpio-bus",
       "type": "gate",
       "parent": "dcxo",
       "reg": "0x1064",
       "bit": 0
+    },
+    {
+      "name": "lpc_parents",
+      "type": "parent_array",
+      "parents": [
+        "pll-video0-3x",
+        "pll-video1-3x",
+        "pll-video2-3x",
+        "pll-peri0-300m"
+      ]
+    },
+    {
+      "name": "lpc",
+      "type": "mux_divider_gate",
+      "parents_array": "lpc_parents",
+      "reg": "0x1080",
+      "mux_shift": 0,
+      "mux_width": 5,
+      "div_shift": 24,
+      "div_width": 3,
+      "gate_bit": 31,
+      "parents": [
+        "pll-video0-3x",
+        "pll-video1-3x",
+        "pll-video2-3x",
+        "pll-peri0-300m"
+      ]
     },
     {
       "name": "lpc-gate",
@@ -609,11 +2248,55 @@
       "bit": 0
     },
     {
+      "name": "i2spcm_parents",
+      "type": "parent_array",
+      "parents": [
+        "pll-audio0-4x",
+        "pll-audio1-div2",
+        "pll-audio1-div5",
+        "pll-peri0-200m"
+      ]
+    },
+    {
+      "name": "i2spcm0",
+      "type": "mux_divider_gate",
+      "parents_array": "i2spcm_parents",
+      "reg": "0x1200",
+      "mux_shift": 0,
+      "mux_width": 5,
+      "div_shift": 24,
+      "div_width": 3,
+      "gate_bit": 31,
+      "parents": [
+        "pll-audio0-4x",
+        "pll-audio1-div2",
+        "pll-audio1-div5",
+        "pll-peri0-200m"
+      ]
+    },
+    {
       "name": "i2spcm0-bus",
       "type": "gate",
       "parent": "dcxo",
       "reg": "0x120C",
       "bit": 0
+    },
+    {
+      "name": "i2spcm1",
+      "type": "mux_divider_gate",
+      "parents_array": "i2spcm_parents",
+      "reg": "0x1210",
+      "mux_shift": 0,
+      "mux_width": 5,
+      "div_shift": 24,
+      "div_width": 3,
+      "gate_bit": 31,
+      "parents": [
+        "pll-audio0-4x",
+        "pll-audio1-div2",
+        "pll-audio1-div5",
+        "pll-peri0-200m"
+      ]
     },
     {
       "name": "i2spcm1-bus",
@@ -623,11 +2306,84 @@
       "bit": 0
     },
     {
+      "name": "i2spcm2",
+      "type": "mux_divider_gate",
+      "parents_array": "i2spcm_parents",
+      "reg": "0x1220",
+      "mux_shift": 0,
+      "mux_width": 5,
+      "div_shift": 24,
+      "div_width": 3,
+      "gate_bit": 31,
+      "parents": [
+        "pll-audio0-4x",
+        "pll-audio1-div2",
+        "pll-audio1-div5",
+        "pll-peri0-200m"
+      ]
+    },
+    {
+      "name": "i2spcm2_asrc_parents",
+      "type": "parent_array",
+      "parents": [
+        "pll-audio0-4x",
+        "pll-audio1-div2",
+        "pll-audio1-div5",
+        "pll-peri0-300m",
+        "pll-peri1-300m"
+      ]
+    },
+    {
+      "name": "i2spcm2-asrc",
+      "type": "mux_divider_gate",
+      "parents_array": "i2spcm2_asrc_parents",
+      "reg": "0x1224",
+      "mux_shift": 0,
+      "mux_width": 5,
+      "div_shift": 24,
+      "div_width": 3,
+      "gate_bit": 31,
+      "parents": [
+        "pll-audio0-4x",
+        "pll-audio1-div2",
+        "pll-audio1-div5",
+        "pll-peri0-300m",
+        "pll-peri1-300m"
+      ]
+    },
+    {
       "name": "i2spcm2-bus",
       "type": "gate",
       "parent": "dcxo",
       "reg": "0x122C",
       "bit": 0
+    },
+    {
+      "name": "i2spcm3_parents",
+      "type": "parent_array",
+      "parents": [
+        "pll-audio0-4x",
+        "pll-audio1-div2",
+        "pll-audio1-div5",
+        "pll-peri0-200m"
+      ]
+    },
+    {
+      "name": "i2spcm3",
+      "type": "mux_divider_gate",
+      "parents_array": "i2spcm3_parents",
+      "reg": "0x1230",
+      "mux_shift": 0,
+      "mux_width": 5,
+      "div_shift": 24,
+      "div_width": 3,
+      "gate_bit": 31,
+      "parents": [
+        "pll-audio0-4x",
+        "pll-audio1-div2",
+        "pll-audio1-div5",
+        "pll-peri0-200m"
+      ]
     },
     {
       "name": "i2spcm3-bus",
@@ -637,6 +2393,23 @@
       "bit": 0
     },
     {
+      "name": "i2spcm4",
+      "type": "mux_divider_gate",
+      "parents_array": "i2spcm3_parents",
+      "reg": "0x1240",
+      "mux_shift": 0,
+      "mux_width": 5,
+      "div_shift": 24,
+      "div_width": 3,
+      "gate_bit": 31,
+      "parents": [
+        "pll-audio0-4x",
+        "pll-audio1-div2",
+        "pll-audio1-div5",
+        "pll-peri0-200m"
+      ]
+    },
+    {
       "name": "i2spcm4-bus",
       "type": "gate",
       "parent": "dcxo",
@@ -644,11 +2417,86 @@
       "bit": 0
     },
     {
+      "name": "owa_tx_parents",
+      "type": "parent_array",
+      "parents": [
+        "pll-audio0-4x",
+        "pll-audio1-div2",
+        "pll-audio1-div5"
+      ]
+    },
+    {
+      "name": "owa-tx",
+      "type": "mux_divider_gate",
+      "parents_array": "owa_tx_parents",
+      "reg": "0x1280",
+      "mux_shift": 0,
+      "mux_width": 5,
+      "div_shift": 24,
+      "div_width": 3,
+      "gate_bit": 31,
+      "parents": [
+        "pll-audio0-4x",
+        "pll-audio1-div2",
+        "pll-audio1-div5"
+      ]
+    },
+    {
+      "name": "owa_rx_parents",
+      "type": "parent_array",
+      "parents": [
+        "pll-peri0-200m",
+        "pll-peri0-300m",
+        "pll-peri0-400m"
+      ]
+    },
+    {
+      "name": "owa-rx",
+      "type": "mux_divider_gate",
+      "parents_array": "owa_rx_parents",
+      "reg": "0x1284",
+      "mux_shift": 0,
+      "mux_width": 5,
+      "div_shift": 24,
+      "div_width": 3,
+      "gate_bit": 31,
+      "parents": [
+        "pll-peri0-200m",
+        "pll-peri0-300m",
+        "pll-peri0-400m"
+      ]
+    },
+    {
       "name": "owa-bus",
       "type": "gate",
       "parent": "dcxo",
       "reg": "0x128C",
       "bit": 0
+    },
+    {
+      "name": "dmic_parents",
+      "type": "parent_array",
+      "parents": [
+        "pll-audio0-4x",
+        "pll-audio1-div2",
+        "pll-audio1-div5"
+      ]
+    },
+    {
+      "name": "dmic",
+      "type": "mux_divider_gate",
+      "parents_array": "dmic_parents",
+      "reg": "0x12C0",
+      "mux_shift": 0,
+      "mux_width": 5,
+      "div_shift": 24,
+      "div_width": 3,
+      "gate_bit": 31,
+      "parents": [
+        "pll-audio0-4x",
+        "pll-audio1-div2",
+        "pll-audio1-div5"
+      ]
     },
     {
       "name": "dmic-bus",
@@ -707,6 +2555,234 @@
       "bit": 0
     },
     {
+      "name": "usb_ref_parents",
+      "type": "parent_array",
+      "parents": [
+        "sys24M",
+        "dcxo"
+      ]
+    },
+    {
+      "name": "usb-ref",
+      "type": "mux_gate",
+      "parents_array": "usb_ref_parents",
+      "reg": "0x1340",
+      "mux_shift": 24,
+      "mux_width": 3,
+      "gate_bit": 31,
+      "parents": [
+        "sys24M",
+        "dcxo"
+      ]
+    },
+    {
+      "name": "usb2-u2-ref",
+      "type": "mux_gate",
+      "parents_array": "usb_ref_parents",
+      "reg": "0x1348",
+      "mux_shift": 24,
+      "mux_width": 3,
+      "gate_bit": 31,
+      "parents": [
+        "sys24M",
+        "dcxo"
+      ]
+    },
+    {
+      "name": "usb2_suspend_parents",
+      "type": "parent_array",
+      "parents": [
+        "osc32k",
+        "sys24M"
+      ]
+    },
+    {
+      "name": "usb2-suspend",
+      "type": "mux_divider_gate",
+      "parents_array": "usb2_suspend_parents",
+      "reg": "0x1350",
+      "mux_shift": 0,
+      "mux_width": 5,
+      "div_shift": 24,
+      "div_width": 1,
+      "gate_bit": 31,
+      "parents": [
+        "osc32k",
+        "sys24M"
+      ]
+    },
+    {
+      "name": "usb2_mf_parents",
+      "type": "parent_array",
+      "parents": [
+        "sys24M",
+        "pll-peri0-300m",
+        "dcxo"
+      ]
+    },
+    {
+      "name": "usb2-mf",
+      "type": "mux_divider_gate",
+      "parents_array": "usb2_mf_parents",
+      "reg": "0x1354",
+      "mux_shift": 0,
+      "mux_width": 5,
+      "div_shift": 24,
+      "div_width": 3,
+      "gate_bit": 31,
+      "parents": [
+        "sys24M",
+        "pll-peri0-300m",
+        "dcxo"
+      ]
+    },
+    {
+      "name": "usb2_u3_utmi_parents",
+      "type": "parent_array",
+      "parents": [
+        "sys24M",
+        "pll-peri0-300m",
+        "dcxo"
+      ]
+    },
+    {
+      "name": "usb2-u3-utmi",
+      "type": "mux_divider_gate",
+      "parents_array": "usb2_u3_utmi_parents",
+      "reg": "0x1360",
+      "mux_shift": 0,
+      "mux_width": 5,
+      "div_shift": 24,
+      "div_width": 3,
+      "gate_bit": 31,
+      "parents": [
+        "sys24M",
+        "pll-peri0-300m",
+        "dcxo"
+      ]
+    },
+    {
+      "name": "usb2_u2_pipe_parents",
+      "type": "parent_array",
+      "parents": [
+        "sys24M",
+        "pll-peri0-480m",
+        "dcxo"
+      ]
+    },
+    {
+      "name": "usb2-u2-pipe",
+      "type": "mux_divider_gate",
+      "parents_array": "usb2_u2_pipe_parents",
+      "reg": "0x1364",
+      "mux_shift": 0,
+      "mux_width": 5,
+      "div_shift": 24,
+      "div_width": 3,
+      "gate_bit": 31,
+      "parents": [
+        "sys24M",
+        "pll-peri0-480m",
+        "dcxo"
+      ]
+    },
+    {
+      "name": "pcie0_aux_parents",
+      "type": "parent_array",
+      "parents": [
+        "sys24M",
+        "osc32k"
+      ]
+    },
+    {
+      "name": "pcie0-aux",
+      "type": "mux_divider_gate",
+      "parents_array": "pcie0_aux_parents",
+      "reg": "0x1380",
+      "mux_shift": 0,
+      "mux_width": 5,
+      "div_shift": 24,
+      "div_width": 1,
+      "gate_bit": 31,
+      "parents": [
+        "sys24M",
+        "osc32k"
+      ]
+    },
+    {
+      "name": "pcie0_axi_slv_parents",
+      "type": "parent_array",
+      "parents": [
+        "pll-peri0-600m",
+        "pll-peri0-600m",
+        "pll-peri0-400m"
+      ]
+    },
+    {
+      "name": "pcie0-axi-slv",
+      "type": "mux_divider_gate",
+      "parents_array": "pcie0_axi_slv_parents",
+      "reg": "0x1384",
+      "mux_shift": 0,
+      "mux_width": 5,
+      "div_shift": 24,
+      "div_width": 3,
+      "gate_bit": 31,
+      "parents": [
+        "pll-peri0-600m",
+        "pll-peri0-600m",
+        "pll-peri0-400m"
+      ]
+    },
+    {
+      "name": "serdes_phy_cfg_parents",
+      "type": "parent_array",
+      "parents": [
+        "sys24M",
+        "pll-peri0-600m"
+      ]
+    },
+    {
+      "name": "serdes-phy-cfg",
+      "type": "mux_divider_gate",
+      "parents_array": "serdes_phy_cfg_parents",
+      "reg": "0x13C0",
+      "mux_shift": 0,
+      "mux_width": 5,
+      "div_shift": 24,
+      "div_width": 3,
+      "gate_bit": 31,
+      "parents": [
+        "sys24M",
+        "pll-peri0-600m"
+      ]
+    },
+    {
+      "name": "gmac_ptp_parents",
+      "type": "parent_array",
+      "parents": [
+        "sys24M",
+        "pll-peri0-200m",
+        "dcxo"
+      ]
+    },
+    {
+      "name": "gmac-ptp",
+      "type": "mux_divider_gate",
+      "parents_array": "gmac_ptp_parents",
+      "reg": "0x1400",
+      "mux_shift": 0,
+      "mux_width": 5,
+      "div_shift": 24,
+      "div_width": 3,
+      "gate_bit": 31,
+      "parents": [
+        "sys24M",
+        "pll-peri0-200m",
+        "dcxo"
+      ]
+    },
+    {
       "name": "gmac0",
       "type": "gate",
       "parent": "dcxo",
@@ -721,6 +2797,290 @@
       "bit": 0
     },
     {
+      "name": "vo0_tconlcd_parents",
+      "type": "parent_array",
+      "parents": [
+        "pll-video0-4x",
+        "pll-video1-4x",
+        "pll-video2-4x",
+        "pll-peri0-2x"
+      ]
+    },
+    {
+      "name": "vo0-tconlcd0",
+      "type": "mux_divider_gate",
+      "parents_array": "vo0_tconlcd_parents",
+      "reg": "0x1500",
+      "mux_shift": 0,
+      "mux_width": 5,
+      "div_shift": 24,
+      "div_width": 3,
+      "gate_bit": 31,
+      "parents": [
+        "pll-video0-4x",
+        "pll-video1-4x",
+        "pll-video2-4x",
+        "pll-peri0-2x"
+      ]
+    },
+    {
+      "name": "vo0-tconlcd0-bus",
+      "type": "gate",
+      "parent": "dcxo",
+      "reg": "0x1504",
+      "bit": 0
+    },
+    {
+      "name": "vo0-tconlcd1",
+      "type": "mux_divider_gate",
+      "parents_array": "vo0_tconlcd_parents",
+      "reg": "0x1508",
+      "mux_shift": 0,
+      "mux_width": 5,
+      "div_shift": 24,
+      "div_width": 3,
+      "gate_bit": 31,
+      "parents": [
+        "pll-video0-4x",
+        "pll-video1-4x",
+        "pll-video2-4x",
+        "pll-peri0-2x"
+      ]
+    },
+    {
+      "name": "vo0-tconlcd1-bus",
+      "type": "gate",
+      "parent": "dcxo",
+      "reg": "0x150C",
+      "bit": 0
+    },
+    {
+      "name": "vo0-tconlcd2",
+      "type": "mux_divider_gate",
+      "parents_array": "vo0_tconlcd_parents",
+      "reg": "0x1510",
+      "mux_shift": 0,
+      "mux_width": 5,
+      "div_shift": 24,
+      "div_width": 3,
+      "gate_bit": 31,
+      "parents": [
+        "pll-video0-4x",
+        "pll-video1-4x",
+        "pll-video2-4x",
+        "pll-peri0-2x"
+      ]
+    },
+    {
+      "name": "vo0-tconlcd2-bus",
+      "type": "gate",
+      "parent": "dcxo",
+      "reg": "0x1514",
+      "bit": 0
+    },
+    {
+      "name": "dsi_parents",
+      "type": "parent_array",
+      "parents": [
+        "sys24M",
+        "pll-peri0-200m",
+        "pll-peri0-150m"
+      ]
+    },
+    {
+      "name": "dsi0",
+      "type": "mux_divider_gate",
+      "parents_array": "dsi_parents",
+      "reg": "0x1580",
+      "mux_shift": 0,
+      "mux_width": 5,
+      "div_shift": 24,
+      "div_width": 3,
+      "gate_bit": 31,
+      "parents": [
+        "sys24M",
+        "pll-peri0-200m",
+        "pll-peri0-150m"
+      ]
+    },
+    {
+      "name": "dsi0-bus",
+      "type": "gate",
+      "parent": "dcxo",
+      "reg": "0x1584",
+      "bit": 0
+    },
+    {
+      "name": "dsi1",
+      "type": "mux_divider_gate",
+      "parents_array": "dsi_parents",
+      "reg": "0x1588",
+      "mux_shift": 0,
+      "mux_width": 5,
+      "div_shift": 24,
+      "div_width": 3,
+      "gate_bit": 31,
+      "parents": [
+        "sys24M",
+        "pll-peri0-200m",
+        "pll-peri0-150m"
+      ]
+    },
+    {
+      "name": "dsi1-bus",
+      "type": "gate",
+      "parent": "dcxo",
+      "reg": "0x158C",
+      "bit": 0
+    },
+    {
+      "name": "combphy_parents",
+      "type": "parent_array",
+      "parents": [
+        "pll-video0-4x",
+        "pll-video1-4x",
+        "pll-video2-4x",
+        "pll-peri0-2x",
+        "pll-video0-3x"
+      ]
+    },
+    {
+      "name": "combphy0",
+      "type": "mux_divider_gate",
+      "parents_array": "combphy_parents",
+      "reg": "0x15C0",
+      "mux_shift": 0,
+      "mux_width": 5,
+      "div_shift": 24,
+      "div_width": 3,
+      "gate_bit": 31,
+      "parents": [
+        "pll-video0-4x",
+        "pll-video1-4x",
+        "pll-video2-4x",
+        "pll-peri0-2x",
+        "pll-video0-3x"
+      ]
+    },
+    {
+      "name": "combphy1",
+      "type": "mux_divider_gate",
+      "parents_array": "combphy_parents",
+      "reg": "0x15C4",
+      "mux_shift": 0,
+      "mux_width": 5,
+      "div_shift": 24,
+      "div_width": 3,
+      "gate_bit": 31,
+      "parents": [
+        "pll-video0-4x",
+        "pll-video1-4x",
+        "pll-video2-4x",
+        "pll-peri0-2x",
+        "pll-video0-3x"
+      ]
+    },
+    {
+      "name": "tcontv0",
+      "type": "gate",
+      "parent": "dcxo",
+      "reg": "0x1604",
+      "bit": 0
+    },
+    {
+      "name": "tcontv1",
+      "type": "gate",
+      "parent": "dcxo",
+      "reg": "0x160C",
+      "bit": 0
+    },
+    {
+      "name": "edp_tv_parents",
+      "type": "parent_array",
+      "parents": [
+        "pll-video0-4x",
+        "pll-video1-4x",
+        "pll-video2-4x",
+        "pll-peri0-2x"
+      ]
+    },
+    {
+      "name": "edp-tv",
+      "type": "mp_mux_gate_no_index",
+      "parents_array": "edp_tv_parents",
+      "reg": "0x1640",
+      "m_shift": 0,
+      "m_width": 5,
+      "n_shift": 8,
+      "n_width": 5,
+      "mux_shift": 24,
+      "mux_width": 3,
+      "gate_bit": 31,
+      "parents": [
+        "pll-video0-4x",
+        "pll-video1-4x",
+        "pll-video2-4x",
+        "pll-peri0-2x"
+      ]
+    },
+    {
+      "name": "edp",
+      "type": "gate",
+      "parent": "dcxo",
+      "reg": "0x164C",
+      "bit": 0
+    },
+    {
+      "name": "hdmi_ref_parents",
+      "type": "parent_array",
+      "parents": [
+        "osc32k",
+        "hdmi-cec-clk32k"
+      ]
+    },
+    {
+      "name": "hdmi-ref",
+      "type": "mux_gate",
+      "parents_array": "hdmi_ref_parents",
+      "reg": "0x1680",
+      "mux_shift": 24,
+      "mux_width": 3,
+      "gate_bit": 31,
+      "parents": [
+        "osc32k",
+        "hdmi-cec-clk32k"
+      ]
+    },
+    {
+      "name": "hdmi_tv_parents",
+      "type": "parent_array",
+      "parents": [
+        "pll-video0-4x",
+        "pll-video1-4x",
+        "pll-video2-4x",
+        "pll-peri0-2x"
+      ]
+    },
+    {
+      "name": "hdmi-tv",
+      "type": "mp_mux_gate_no_index",
+      "parents_array": "hdmi_tv_parents",
+      "reg": "0x1684",
+      "m_shift": 0,
+      "m_width": 5,
+      "n_shift": 8,
+      "n_width": 5,
+      "mux_shift": 24,
+      "mux_width": 3,
+      "gate_bit": 31,
+      "parents": [
+        "pll-video0-4x",
+        "pll-video1-4x",
+        "pll-video2-4x",
+        "pll-peri0-2x"
+      ]
+    },
+    {
       "name": "hdmi",
       "type": "gate",
       "parent": "dcxo",
@@ -728,11 +3088,71 @@
       "bit": 0
     },
     {
+      "name": "hdmi_sfr_parents",
+      "type": "parent_array",
+      "parents": [
+        "sys24M",
+        "dcxo"
+      ]
+    },
+    {
+      "name": "hdmi-sfr",
+      "type": "mux_gate",
+      "parents_array": "hdmi_sfr_parents",
+      "reg": "0x1690",
+      "mux_shift": 24,
+      "mux_width": 3,
+      "gate_bit": 31,
+      "parents": [
+        "sys24M",
+        "dcxo"
+      ]
+    },
+    {
       "name": "hdcp-esm",
       "type": "gate",
       "parent": "pll-peri0-300m",
       "reg": "0x1694",
       "bit": 31
+    },
+    {
+      "name": "dpss-top0",
+      "type": "gate",
+      "parent": "dcxo",
+      "reg": "0x16C4",
+      "bit": 0
+    },
+    {
+      "name": "dpss-top1",
+      "type": "gate",
+      "parent": "dcxo",
+      "reg": "0x16CC",
+      "bit": 0
+    },
+    {
+      "name": "ledc_parents",
+      "type": "parent_array",
+      "parents": [
+        "sys24M",
+        "pll-peri0-600m",
+        "dcxo"
+      ]
+    },
+    {
+      "name": "ledc",
+      "type": "mux_divider_gate",
+      "parents_array": "ledc_parents",
+      "reg": "0x1700",
+      "mux_shift": 0,
+      "mux_width": 5,
+      "div_shift": 24,
+      "div_width": 3,
+      "gate_bit": 31,
+      "parents": [
+        "sys24M",
+        "pll-peri0-600m",
+        "dcxo"
+      ]
     },
     {
       "name": "ledc-bus",
@@ -749,6 +3169,118 @@
       "bit": 0
     },
     {
+      "name": "csi_master_parents",
+      "type": "parent_array",
+      "parents": [
+        "sys24M",
+        "pll-video0-4x",
+        "pll-video0-3x",
+        "pll-video1-4x",
+        "pll-video1-3x",
+        "pll-video2-4x",
+        "pll-video2-3x"
+      ]
+    },
+    {
+      "name": "csi-master0",
+      "type": "mp_mux_gate_no_index",
+      "parents_array": "csi_master_parents",
+      "reg": "0x1800",
+      "m_shift": 0,
+      "m_width": 5,
+      "n_shift": 8,
+      "n_width": 5,
+      "mux_shift": 24,
+      "mux_width": 3,
+      "gate_bit": 31,
+      "parents": [
+        "sys24M",
+        "pll-video0-4x",
+        "pll-video0-3x",
+        "pll-video1-4x",
+        "pll-video1-3x",
+        "pll-video2-4x",
+        "pll-video2-3x"
+      ]
+    },
+    {
+      "name": "csi-master1",
+      "type": "mp_mux_gate_no_index",
+      "parents_array": "csi_master_parents",
+      "reg": "0x1804",
+      "m_shift": 0,
+      "m_width": 5,
+      "n_shift": 8,
+      "n_width": 5,
+      "mux_shift": 24,
+      "mux_width": 3,
+      "gate_bit": 31,
+      "parents": [
+        "sys24M",
+        "pll-video0-4x",
+        "pll-video0-3x",
+        "pll-video1-4x",
+        "pll-video1-3x",
+        "pll-video2-4x",
+        "pll-video2-3x"
+      ]
+    },
+    {
+      "name": "csi-master2",
+      "type": "mp_mux_gate_no_index",
+      "parents_array": "csi_master_parents",
+      "reg": "0x1808",
+      "m_shift": 0,
+      "m_width": 5,
+      "n_shift": 8,
+      "n_width": 5,
+      "mux_shift": 24,
+      "mux_width": 3,
+      "gate_bit": 31,
+      "parents": [
+        "sys24M",
+        "pll-video0-4x",
+        "pll-video0-3x",
+        "pll-video1-4x",
+        "pll-video1-3x",
+        "pll-video2-4x",
+        "pll-video2-3x"
+      ]
+    },
+    {
+      "name": "csi_parents",
+      "type": "parent_array",
+      "parents": [
+        "pll-video2-4x",
+        "pll-de-4x",
+        "pll-peri0-480m",
+        "pll-peri0-400m",
+        "pll-peri0-600m",
+        "pll-video0-4x",
+        "pll-video1-4x"
+      ]
+    },
+    {
+      "name": "csi",
+      "type": "mux_divider_gate",
+      "parents_array": "csi_parents",
+      "reg": "0x1840",
+      "mux_shift": 0,
+      "mux_width": 5,
+      "div_shift": 24,
+      "div_width": 3,
+      "gate_bit": 31,
+      "parents": [
+        "pll-video2-4x",
+        "pll-de-4x",
+        "pll-peri0-480m",
+        "pll-peri0-400m",
+        "pll-peri0-600m",
+        "pll-video0-4x",
+        "pll-video1-4x"
+      ]
+    },
+    {
       "name": "csi-bus",
       "type": "gate",
       "parent": "dcxo",
@@ -756,11 +3288,75 @@
       "bit": 0
     },
     {
+      "name": "isp_parents",
+      "type": "parent_array",
+      "parents": [
+        "pll-video2-4x",
+        "pll-peri0-480m",
+        "pll-peri0-400m",
+        "pll-peri0-600m",
+        "pll-video0-4x",
+        "pll-video1-4x"
+      ]
+    },
+    {
+      "name": "isp",
+      "type": "mux_divider_gate",
+      "parents_array": "isp_parents",
+      "reg": "0x1860",
+      "mux_shift": 0,
+      "mux_width": 5,
+      "div_shift": 24,
+      "div_width": 3,
+      "gate_bit": 31,
+      "parents": [
+        "pll-video2-4x",
+        "pll-peri0-480m",
+        "pll-peri0-400m",
+        "pll-peri0-600m",
+        "pll-video0-4x",
+        "pll-video1-4x"
+      ]
+    },
+    {
       "name": "res-dcap-24m",
       "type": "gate",
       "parent": "dcxo",
       "reg": "0x1A00",
       "bit": 3
+    },
+    {
+      "name": "apb2jtag_parents",
+      "type": "parent_array",
+      "parents": [
+        "sys24M",
+        "osc32k",
+        "iosc",
+        "pll-peri0-480m",
+        "pll-peri1-480m",
+        "pll-peri0-200m",
+        "pll-peri1-200m"
+      ]
+    },
+    {
+      "name": "apb2jtag",
+      "type": "mux_divider_gate",
+      "parents_array": "apb2jtag_parents",
+      "reg": "0x1C00",
+      "mux_shift": 0,
+      "mux_width": 5,
+      "div_shift": 24,
+      "div_width": 3,
+      "gate_bit": 31,
+      "parents": [
+        "sys24M",
+        "osc32k",
+        "iosc",
+        "pll-peri0-480m",
+        "pll-peri1-480m",
+        "pll-peri0-200m",
+        "pll-peri1-200m"
+      ]
     },
     {
       "name": "fanout-25m",
@@ -791,6 +3387,56 @@
       "bit": 0
     },
     {
+      "name": "clk27m_fanout_parents",
+      "type": "parent_array",
+      "parents": [
+        "pll-video0-4x",
+        "pll-video1-4x",
+        "pll-video2-4x"
+      ]
+    },
+    {
+      "name": "clk27m_fanout",
+      "type": "mp_mux_gate_no_index",
+      "parents_array": "clk27m_fanout_parents",
+      "reg": "0x1F34",
+      "m_shift": 0,
+      "m_width": 5,
+      "n_shift": 8,
+      "n_width": 5,
+      "mux_shift": 24,
+      "mux_width": 2,
+      "gate_bit": 31,
+      "parents": [
+        "pll-video0-4x",
+        "pll-video1-4x",
+        "pll-video2-4x"
+      ]
+    },
+    {
+      "name": "clk_fanout_parents",
+      "type": "parent_array",
+      "parents": [
+        "apb0"
+      ]
+    },
+    {
+      "name": "clk-fanout",
+      "type": "mp_mux_gate_no_index",
+      "parents_array": "clk_fanout_parents",
+      "reg": "0x1F38",
+      "m_shift": 0,
+      "m_width": 5,
+      "n_shift": 5,
+      "n_width": 5,
+      "mux_shift": 24,
+      "mux_width": 2,
+      "gate_bit": 31,
+      "parents": [
+        "apb0"
+      ]
+    },
+    {
       "name": "sys12M",
       "type": "fixed_factor",
       "parent": "sys24M",
@@ -810,6 +3456,126 @@
       "parent": "pll-peri0-150m",
       "mult": 6,
       "div": 1
+    },
+    {
+      "name": "fanout_clk_parents",
+      "type": "parent_array",
+      "parents": [
+        "rtc32k",
+        "sys12M",
+        "pll-peri0-16m",
+        "sys24M",
+        "pll-peri0-25m",
+        "clk27m-fanout",
+        "clk-fanout"
+      ]
+    },
+    {
+      "name": "fanout3",
+      "type": "mux_gate",
+      "parents_array": "fanout_clk_parents",
+      "reg": "0x1F3C",
+      "mux_shift": 9,
+      "mux_width": 3,
+      "gate_bit": 24,
+      "parents": [
+        "rtc32k",
+        "sys12M",
+        "pll-peri0-16m",
+        "sys24M",
+        "pll-peri0-25m",
+        "clk27m-fanout",
+        "clk-fanout"
+      ]
+    },
+    {
+      "name": "fanout2",
+      "type": "mux_gate",
+      "parents_array": "fanout_clk_parents",
+      "reg": "0x1F3C",
+      "mux_shift": 6,
+      "mux_width": 3,
+      "gate_bit": 23,
+      "parents": [
+        "rtc32k",
+        "sys12M",
+        "pll-peri0-16m",
+        "sys24M",
+        "pll-peri0-25m",
+        "clk27m-fanout",
+        "clk-fanout"
+      ]
+    },
+    {
+      "name": "fanout1",
+      "type": "mux_gate",
+      "parents_array": "fanout_clk_parents",
+      "reg": "0x1F3C",
+      "mux_shift": 3,
+      "mux_width": 3,
+      "gate_bit": 22,
+      "parents": [
+        "rtc32k",
+        "sys12M",
+        "pll-peri0-16m",
+        "sys24M",
+        "pll-peri0-25m",
+        "clk27m-fanout",
+        "clk-fanout"
+      ]
+    },
+    {
+      "name": "fanout0",
+      "type": "mux_gate",
+      "parents_array": "fanout_clk_parents",
+      "reg": "0x1F3C",
+      "mux_shift": 0,
+      "mux_width": 3,
+      "gate_bit": 21,
+      "parents": [
+        "rtc32k",
+        "sys12M",
+        "pll-peri0-16m",
+        "sys24M",
+        "pll-peri0-25m",
+        "clk27m-fanout",
+        "clk-fanout"
+      ]
+    },
+    {
+      "name": "bus_debug_parents",
+      "type": "parent_array",
+      "parents": [
+        "ahb",
+        "apb0",
+        "apb1",
+        "apb-uart",
+        "mbus",
+        "nsi",
+        "ddr0",
+        "pll-ddr",
+        "dram0"
+      ]
+    },
+    {
+      "name": "bus_debug",
+      "type": "mux",
+      "parents_array": "bus_debug_parents",
+      "reg": "0x1F50",
+      "mux_shift": 0,
+      "mux_width": 2,
+      "flags": "0",
+      "parents": [
+        "ahb",
+        "apb0",
+        "apb1",
+        "apb-uart",
+        "mbus",
+        "nsi",
+        "ddr0",
+        "pll-ddr",
+        "dram0"
+      ]
     },
     {
       "name": "pll-ddr-auto",

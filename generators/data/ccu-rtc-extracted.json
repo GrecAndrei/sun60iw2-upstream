@@ -1,0 +1,168 @@
+{
+  "clocks": [
+    {
+      "name": "iosc",
+      "type": "gate",
+      "parent": "rc-16m",
+      "reg": "0x160",
+      "bit": 0
+    },
+    {
+      "name": "ext32k-gate",
+      "type": "gate_with_key",
+      "parent": "ext-32k",
+      "reg": "0x0",
+      "key_value": "KEY_FIELD_MAGIC_NUM_RTC",
+      "bit": 4
+    },
+    {
+      "name": "iosc-div32k",
+      "type": "fixed_factor",
+      "parent": "iosc",
+      "mult": 500,
+      "div": 1
+    },
+    {
+      "name": "osc32k_parents",
+      "type": "parent_array",
+      "parents": [
+        "iosc-div32k",
+        "ext32k-gate"
+      ]
+    },
+    {
+      "name": "osc32k",
+      "type": "mux_gate_key",
+      "parents_array": "osc32k_parents",
+      "reg": "0x0",
+      "mux_shift": 0,
+      "mux_width": 1,
+      "key_value": "KEY_FIELD_MAGIC_NUM_RTC",
+      "gate_bit": 0,
+      "parents": [
+        "iosc-div32k",
+        "ext32k-gate"
+      ]
+    },
+    {
+      "name": "dcxo24M-div32k",
+      "type": "gate_with_fixed_rate",
+      "parent": "dcxo",
+      "reg": "0x60",
+      "rate": 32768,
+      "bit": 16
+    },
+    {
+      "name": "rtc32k_clk_parents",
+      "type": "parent_array",
+      "parents": [
+        "osc32k",
+        "dcxo24M-div32k"
+      ]
+    },
+    {
+      "name": "rtc32k",
+      "type": "mux_gate_key",
+      "parents_array": "rtc32k_clk_parents",
+      "reg": "0x0",
+      "mux_shift": 1,
+      "mux_width": 1,
+      "key_value": "KEY_FIELD_MAGIC_NUM_RTC",
+      "gate_bit": 0,
+      "parents": [
+        "osc32k",
+        "dcxo24M-div32k"
+      ]
+    },
+    {
+      "name": "rtc-1k",
+      "type": "fixed_factor",
+      "parent": "rtc32k",
+      "mult": 32,
+      "div": 1
+    },
+    {
+      "name": "rtc_32k_fanout_clk_parents",
+      "type": "parent_array",
+      "parents": [
+        "rtc32k",
+        "osc32k",
+        "dcxo24M-div32k"
+      ]
+    },
+    {
+      "name": "rtc-32k-fanout",
+      "type": "mux_gate",
+      "parents_array": "rtc_32k_fanout_clk_parents",
+      "reg": "0x60",
+      "mux_shift": 1,
+      "mux_width": 2,
+      "gate_bit": 0,
+      "parents": [
+        "rtc32k",
+        "osc32k",
+        "dcxo24M-div32k"
+      ]
+    },
+    {
+      "name": "dcxo_parents",
+      "type": "parent_array",
+      "parents": [
+        "dcxo24M",
+        "dcxo19_2M",
+        "dcxo26M",
+        "dcxo24M"
+      ]
+    },
+    {
+      "name": "dcxo",
+      "type": "mux",
+      "parents_array": "dcxo_parents",
+      "reg": "0x160",
+      "mux_shift": 14,
+      "mux_width": 2,
+      "flags": "CLK_SET_RATE_NO_REPARENT",
+      "parents": [
+        "dcxo24M",
+        "dcxo19_2M",
+        "dcxo26M",
+        "dcxo24M"
+      ]
+    },
+    {
+      "name": "dcxo-wakeup",
+      "type": "gate",
+      "parent": "dcxo",
+      "reg": "0x0160",
+      "bit": 31,
+      "key_value": "DCXO_WAKEUP_KEY_FIELD",
+      "key_reg": "0x015c",
+      "features": [
+        "CCU_FEATURE_KEY_FIELD_MOD",
+        "CCU_FEATURE_GATE_IS_REVERSE"
+      ]
+    },
+    {
+      "name": "dcxo-serdes1",
+      "type": "gate",
+      "parent": "r-ahb",
+      "reg": "0x16c",
+      "bit": 5
+    },
+    {
+      "name": "dcxo-serdes0",
+      "type": "gate",
+      "parent": "r-ahb",
+      "reg": "0x16c",
+      "bit": 4
+    },
+    {
+      "name": "rtc-spi",
+      "type": "gate",
+      "parent": "r-ahb",
+      "reg": "0x310",
+      "bit": 31
+    }
+  ],
+  "errors": []
+}

@@ -1,0 +1,116 @@
+{
+  "clocks": [
+    {
+      "name": "pll-cpu-back",
+      "type": "nm",
+      "reg": "0x0000",
+      "parent": "dcxo"
+    },
+    {
+      "name": "pll-cpu-l",
+      "type": "nkmp",
+      "reg": "0x1000",
+      "parent": "dcxo"
+    },
+    {
+      "name": "pll-cpu-b",
+      "type": "nkmp",
+      "reg": "0x2000",
+      "parent": "dcxo"
+    },
+    {
+      "name": "pll-cpu-dsu",
+      "type": "nkmp",
+      "reg": "0x3000",
+      "parent": "dcxo"
+    },
+    {
+      "name": "cpu_l_parents",
+      "type": "parent_array",
+      "parents": [
+        "dcxo",
+        "dcxo",
+        "dcxo",
+        "pll-cpu-l",
+        "pll-peri0-2x",
+        "pll-cpu-back"
+      ]
+    },
+    {
+      "name": "cpu_l",
+      "type": "mux",
+      "parents_array": "cpu_l_parents",
+      "reg": "0x101c",
+      "mux_shift": 24,
+      "mux_width": 3,
+      "flags": "CLK_SET_RATE_PARENT | CLK_IS_CRITICAL",
+      "parents": [
+        "dcxo",
+        "dcxo",
+        "dcxo",
+        "pll-cpu-l",
+        "pll-peri0-2x",
+        "pll-cpu-back"
+      ]
+    },
+    {
+      "name": "cpu_b_parents",
+      "type": "parent_array",
+      "parents": [
+        "dcxo",
+        "dcxo",
+        "dcxo",
+        "pll-cpu-b",
+        "pll-peri0-2x",
+        "pll-cpu-back"
+      ]
+    },
+    {
+      "name": "cpu_b",
+      "type": "mux",
+      "parents_array": "cpu_b_parents",
+      "reg": "0x201c",
+      "mux_shift": 24,
+      "mux_width": 3,
+      "flags": "CLK_SET_RATE_PARENT | CLK_IS_CRITICAL",
+      "parents": [
+        "dcxo",
+        "dcxo",
+        "dcxo",
+        "pll-cpu-b",
+        "pll-peri0-2x",
+        "pll-cpu-back"
+      ]
+    },
+    {
+      "name": "cpu_dsu_parents",
+      "type": "parent_array",
+      "parents": [
+        "dcxo",
+        "dcxo",
+        "dcxo",
+        "pll-cpu-dsu",
+        "pll-peri0-2x",
+        "pll-cpu-back"
+      ]
+    },
+    {
+      "name": "cpu_dsu",
+      "type": "mux",
+      "parents_array": "cpu_dsu_parents",
+      "reg": "0x301c",
+      "mux_shift": 24,
+      "mux_width": 3,
+      "flags": "CLK_SET_RATE_PARENT | CLK_IS_CRITICAL",
+      "parents": [
+        "dcxo",
+        "dcxo",
+        "dcxo",
+        "pll-cpu-dsu",
+        "pll-peri0-2x",
+        "pll-cpu-back"
+      ]
+    }
+  ],
+  "errors": []
+}

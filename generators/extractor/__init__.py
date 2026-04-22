@@ -244,7 +244,21 @@ class CBlockParser:
                 blocks.append(struct_block)
                 continue
 
-            if line.startswith("static "):
+            # Capture parent arrays used by mux clocks.
+            if line.startswith("static const char") and "_parents" in line:
+                parent_block, i = self._extract_parent_array(lines, i)
+                if parent_block:
+                    blocks.append(parent_block)
+                continue
+
+            # Skip other static const declarations (tables, helpers, etc.).
+            if line.startswith("static const "):
+                while i < len(lines) and ";" not in lines[i]:
+                    i += 1
+                i += 1
+                continue
+
+            if line.startswith("static ") or self._is_macro_invocation(line):
                 macro_block, i = self._extract_macro_invocation(lines, i)
                 if macro_block:
                     blocks.append(macro_block)
@@ -318,6 +332,9 @@ class CBlockParser:
         macro_match = re.search(r"static\s+\w+\s*\(\s*(\w+)", content)
         if not macro_match:
             macro_match = re.search(r"static\s+(\w+)\s*\(", content)
+        if not macro_match:
+            # Direct macro invocation without static
+            macro_match = re.search(r"^(\w+)\s*\(", content)
         macro_name = macro_match.group(1) if macro_match else "unknown"
 
         return {
@@ -326,6 +343,60 @@ class CBlockParser:
             "content": content,
             "raw": content,
         }, i + 1
+
+    def _extract_parent_array(self, lines, start_idx):
+        """Extract a static parent-name array."""
+        block_lines = []
+        i = start_idx
+
+        while i < len(lines):
+            line = lines[i]
+            block_lines.append(line)
+            if ";" in line:
+                break
+            i += 1
+
+        content = "\n".join(block_lines)
+        name_match = re.search(
+            r"static\s+const\s+char\s+\*\s+const\s+(\w+)\s*\[\]\s*=\s*\{",
+            content,
+        )
+        if not name_match:
+            return None, i + 1
+
+        parents = re.findall(r'"([^"]+)"', content)
+        return {
+            "type": "parent_array",
+            "name": name_match.group(1),
+            "parents": parents,
+            "content": content,
+            "raw": content,
+        }, i + 1
+
+    def _is_macro_invocation(self, line: str) -> bool:
+        """Check if a line starts with a known macro name (not a variable decl)."""
+        # Skip variable/array declarations
+        if "const char" in line or "[] = {" in line or "* const" in line:
+            return False
+        known_macros = [
+            "SUNXI_CCU_M_WITH_MUX_GATE_KEY",
+            "SUNXI_CCU_M_WITH_MUX_GATE",
+            "SUNXI_CCU_M_WITH_MUX",
+            "SUNXI_CCU_M_WITH_GATE",
+            "SUNXI_CCU_MUX_WITH_GATE_KEY",
+            "SUNXI_CCU_MUX_WITH_GATE",
+            "SUNXI_CCU_MP_WITH_MUX_GATE_NO_INDEX",
+            "SUNXI_CCU_GATE_WITH_KEY",
+            "SUNXI_CCU_GATE_WITH_FIXED_RATE",
+            "SUNXI_CCU_MUX",
+            "SUNXI_CCU_M",
+            "SUNXI_CCU_GATE",
+            "CLK_FIXED_FACTOR",
+        ]
+        for macro in known_macros:
+            if line.startswith(macro):
+                return True
+        return False
 
 
 class SymbolTable:
@@ -342,12 +413,16 @@ class SymbolTable:
     def __init__(self):
         self.symbols: Dict[str, str] = {}  # var_name -> clock_name
         self.by_name: Dict[str, Dict] = {}  # clock_name -> item
+        self.parent_arrays: Dict[str, List[str]] = {}
 
     def index(self, items: List[Dict]):
         """Build index from extracted items."""
         for item in items:
             name = item.get("name", "")
             if not name:
+                continue
+            if item.get("type") == "parent_array":
+                self.parent_arrays[name] = item.get("parents", [])
                 continue
             self.by_name[name] = item
             # Also index by normalized variable name
@@ -361,8 +436,16 @@ class SymbolTable:
         # Already a quoted string name
         if parent_ref.startswith('"') and parent_ref.endswith('"'):
             return parent_ref.strip('"')
+        if parent_ref in self.parent_arrays:
+            return parent_ref
         # Variable name
         return self.symbols.get(parent_ref)
+
+    def resolve_parent_array(self, array_name: str) -> List[str]:
+        return [
+            self.resolve(parent) or parent
+            for parent in self.parent_arrays.get(array_name, [])
+        ]
 
     def get_item(self, name: str) -> Optional[Dict]:
         return self.by_name.get(name)
@@ -624,6 +707,16 @@ class Engine:
         failed_count = 0
 
         for block in blocks:
+            if block.get("type") == "parent_array":
+                result.items.append(
+                    {
+                        "name": block.get("name", ""),
+                        "type": "parent_array",
+                        "parents": block.get("parents", []),
+                    }
+                )
+                continue
+
             if plugin.can_extract(block):
                 item = plugin.extract(block)
                 if item:
@@ -684,6 +777,10 @@ class Engine:
                 resolved = self.symbol_table.resolve(parent)
                 if resolved:
                     item["parent"] = resolved
+
+            parents_array = item.get("parents_array")
+            if parents_array:
+                item["parents"] = self.symbol_table.resolve_parent_array(parents_array)
         return items
 
     def build_clock_tree(self, items: List[Dict]) -> Dict[str, List[str]]:

@@ -37,24 +37,68 @@ python3 generators/generate_pinctrl.py > drivers/pinctrl/sunxi/pinctrl-sun60i-a7
 
 ### `generate_ccu.py`
 
-Reads `data/ccu-main.json` and generates the Clock Controller Unit driver.
+Reads `data/ccu-main.json` and `data/ccu-main-extracted.json`, merges
+canonical IDs with extracted topology, then generates the Clock Controller Unit
+driver.
 
 ```bash
 python3 generators/generate_ccu.py > drivers/clk/sunxi-ng/ccu-sun60i-a733.c
+
+# Metrics-only mode (no C output)
+python3 generators/generate_ccu.py --report --no-output
 ```
 
 **What it generates:**
 - PLL definitions (NKMP, NM types)
-- Divider clocks (SUNXI_CCU_M_HWS)
-- Gate clocks (SUNXI_CCU_GATE_HWS)
-- Parent clock hw arrays
+- Divider clocks (SUNXI_CCU_M / SUNXI_CCU_M_DATA_WITH_MUX*)
+- Gate clocks (SUNXI_CCU_GATE, with explicit key-gate fallback markers)
+- Parent clock data arrays (`struct clk_parent_data`)
 - clk_hw_onecell_data table
 - Reset definitions
-- Probe function
+- `sunxi_ccu_desc` + probe function (`devm_sunxi_ccu_probe`)
 
 **Hand-written parts:**
 - JSON clock definitions (reg offsets, bit positions, parent relationships)
-- Generator script (~200 lines of Python)
+- Generator script logic
+
+### `report_ccu_pipeline.py`
+
+Compares canonical-only coverage vs merged (canonical + extracted) coverage.
+This is the ROI gauge for the CCU automation pipeline.
+
+```bash
+python3 generators/report_ccu_pipeline.py
+```
+
+**Report output includes:**
+- Extractable clocks and supported clocks
+- ID coverage (canonical + inferred)
+- Emitted common/hw coverage
+- Key-gate native emission count and unresolved fallback count
+- Canonical-vs-merged deltas
+
+## Compile-Gated Workflow (Required)
+
+Metrics alone are not sufficient. Every major generator change must pass a real
+kernel compile gate.
+
+1. Regenerate driver:
+   ```bash
+   python3 generators/generate_ccu.py > drivers/clk/sunxi-ng/ccu-sun60i-a733.c
+   ```
+2. Run metrics:
+   ```bash
+   python3 generators/generate_ccu.py --report --no-output
+   python3 generators/report_ccu_pipeline.py
+   ```
+3. Validate in Linux tree (object + directory build):
+   ```bash
+   make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- drivers/clk/sunxi-ng/ccu-sun60i-a733.o
+   make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- drivers/clk/sunxi-ng/ W=1
+   ```
+
+If compile fails, treat it as a pipeline bug and fix generator/data ordering
+before any further feature work.
 
 ## Data Files
 

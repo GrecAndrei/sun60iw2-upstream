@@ -1,0 +1,436 @@
+{
+  "clocks": [
+    {
+      "name": "r_ahb_parents",
+      "type": "parent_array",
+      "parents": [
+        "dcxo",
+        "rtc32k",
+        "iosc",
+        "pll-peri0-200m",
+        "pll-peri0-300m"
+      ]
+    },
+    {
+      "name": "r-ahb",
+      "type": "mux_divider",
+      "parents_array": "r_ahb_parents",
+      "reg": "0x0000",
+      "mux_shift": 0,
+      "mux_width": 5,
+      "div_shift": 24,
+      "div_width": 3,
+      "parents": [
+        "dcxo",
+        "rtc32k",
+        "iosc",
+        "pll-peri0-200m",
+        "pll-peri0-300m"
+      ]
+    },
+    {
+      "name": "r_apbs_parents",
+      "type": "parent_array",
+      "parents": [
+        "dcxo",
+        "rtc32k",
+        "iosc",
+        "pll-peri0-200m",
+        "pll-ref"
+      ]
+    },
+    {
+      "name": "r-apbs0",
+      "type": "mux_divider",
+      "parents_array": "r_apbs_parents",
+      "reg": "0x000c",
+      "mux_shift": 0,
+      "mux_width": 5,
+      "div_shift": 24,
+      "div_width": 3,
+      "parents": [
+        "dcxo",
+        "rtc32k",
+        "iosc",
+        "pll-peri0-200m",
+        "pll-ref"
+      ]
+    },
+    {
+      "name": "r-apbs1",
+      "type": "mux_divider",
+      "parents_array": "r_apbs_parents",
+      "reg": "0x0010",
+      "mux_shift": 0,
+      "mux_width": 5,
+      "div_shift": 24,
+      "div_width": 3,
+      "parents": [
+        "dcxo",
+        "rtc32k",
+        "iosc",
+        "pll-peri0-200m",
+        "pll-ref"
+      ]
+    },
+    {
+      "name": "r_timer_parents",
+      "type": "parent_array",
+      "parents": [
+        "dcxo",
+        "rtc32k",
+        "iosc",
+        "pll-peri0-200m",
+        "pll-ref"
+      ]
+    },
+    {
+      "name": "r-timer0",
+      "type": "mux_divider",
+      "parents_array": "r_timer_parents",
+      "reg": "0x0100",
+      "mux_shift": 4,
+      "mux_width": 3,
+      "div_shift": 1,
+      "div_width": 3,
+      "parents": [
+        "dcxo",
+        "rtc32k",
+        "iosc",
+        "pll-peri0-200m",
+        "pll-ref"
+      ]
+    },
+    {
+      "name": "r-timer1",
+      "type": "mux_divider",
+      "parents_array": "r_timer_parents",
+      "reg": "0x0104",
+      "mux_shift": 4,
+      "mux_width": 3,
+      "div_shift": 1,
+      "div_width": 3,
+      "parents": [
+        "dcxo",
+        "rtc32k",
+        "iosc",
+        "pll-peri0-200m",
+        "pll-ref"
+      ]
+    },
+    {
+      "name": "r-timer2",
+      "type": "mux_divider",
+      "parents_array": "r_timer_parents",
+      "reg": "0x0108",
+      "mux_shift": 4,
+      "mux_width": 3,
+      "div_shift": 1,
+      "div_width": 3,
+      "parents": [
+        "dcxo",
+        "rtc32k",
+        "iosc",
+        "pll-peri0-200m",
+        "pll-ref"
+      ]
+    },
+    {
+      "name": "r-timer3",
+      "type": "mux_divider",
+      "parents_array": "r_timer_parents",
+      "reg": "0x010C",
+      "mux_shift": 4,
+      "mux_width": 3,
+      "div_shift": 1,
+      "div_width": 3,
+      "parents": [
+        "dcxo",
+        "rtc32k",
+        "iosc",
+        "pll-peri0-200m",
+        "pll-ref"
+      ]
+    },
+    {
+      "name": "r-timer",
+      "type": "gate",
+      "parent": "dcxo",
+      "reg": "0x011C",
+      "bit": 0
+    },
+    {
+      "name": "r-twd",
+      "type": "gate",
+      "parent": "dcxo",
+      "reg": "0x012C",
+      "bit": 0
+    },
+    {
+      "name": "r_pwm_parents",
+      "type": "parent_array",
+      "parents": [
+        "dcxo",
+        "rtc32k",
+        "iosc",
+        "pll-ref"
+      ]
+    },
+    {
+      "name": "r-pwm",
+      "type": "mux_gate",
+      "parents_array": "r_pwm_parents",
+      "reg": "0x0130",
+      "mux_shift": 24,
+      "mux_width": 2,
+      "gate_bit": 31,
+      "parents": [
+        "dcxo",
+        "rtc32k",
+        "iosc",
+        "pll-ref"
+      ]
+    },
+    {
+      "name": "r-bus-pwm",
+      "type": "gate",
+      "parent": "dcxo",
+      "reg": "0x013C",
+      "bit": 0
+    },
+    {
+      "name": "r_spi_parents",
+      "type": "parent_array",
+      "parents": [
+        "dcxo",
+        "pll-peri0-200m",
+        "pll-peri0-300m",
+        "pll-peri1-300m",
+        "pll-ref"
+      ]
+    },
+    {
+      "name": "r-spi",
+      "type": "mp_mux_gate_no_index",
+      "parents_array": "r_spi_parents",
+      "reg": "0x0150",
+      "m_shift": 0,
+      "m_width": 5,
+      "n_shift": 8,
+      "n_width": 5,
+      "mux_shift": 24,
+      "mux_width": 3,
+      "gate_bit": 31,
+      "parents": [
+        "dcxo",
+        "pll-peri0-200m",
+        "pll-peri0-300m",
+        "pll-peri1-300m",
+        "pll-ref"
+      ]
+    },
+    {
+      "name": "r-spi-bus",
+      "type": "gate",
+      "parent": "dcxo",
+      "reg": "0x015C",
+      "bit": 0
+    },
+    {
+      "name": "r-mbox",
+      "type": "gate",
+      "parent": "dcxo",
+      "reg": "0x017C",
+      "bit": 0
+    },
+    {
+      "name": "r-uart1",
+      "type": "gate",
+      "parent": "r-apbs1",
+      "reg": "0x018C",
+      "bit": 1
+    },
+    {
+      "name": "r-uart0",
+      "type": "gate",
+      "parent": "r-apbs1",
+      "reg": "0x018C",
+      "bit": 0
+    },
+    {
+      "name": "r-twi2",
+      "type": "gate",
+      "parent": "r-apbs1",
+      "reg": "0x019C",
+      "bit": 2
+    },
+    {
+      "name": "r-twi1",
+      "type": "gate",
+      "parent": "r-apbs1",
+      "reg": "0x019C",
+      "bit": 1
+    },
+    {
+      "name": "r-twi0",
+      "type": "gate",
+      "parent": "r-apbs1",
+      "reg": "0x019C",
+      "bit": 0
+    },
+    {
+      "name": "r-ppu",
+      "type": "gate",
+      "parent": "dcxo",
+      "reg": "0x01AC",
+      "bit": 0
+    },
+    {
+      "name": "r-tzma",
+      "type": "gate",
+      "parent": "dcxo",
+      "reg": "0x01B0",
+      "bit": 0
+    },
+    {
+      "name": "r-cpus-bist",
+      "type": "gate",
+      "parent": "dcxo",
+      "reg": "0x01BC",
+      "bit": 0
+    },
+    {
+      "name": "r_irrx_parents",
+      "type": "parent_array",
+      "parents": [
+        "rtc32k",
+        "dcxo",
+        "pll-ref"
+      ]
+    },
+    {
+      "name": "r-irrx",
+      "type": "mux_divider_gate",
+      "parents_array": "r_irrx_parents",
+      "reg": "0x01C0",
+      "mux_shift": 0,
+      "mux_width": 5,
+      "div_shift": 24,
+      "div_width": 2,
+      "gate_bit": 31,
+      "parents": [
+        "rtc32k",
+        "dcxo",
+        "pll-ref"
+      ]
+    },
+    {
+      "name": "r-irrx-bus",
+      "type": "gate",
+      "parent": "dcxo",
+      "reg": "0x01CC",
+      "bit": 0
+    },
+    {
+      "name": "rtc",
+      "type": "gate",
+      "parent": "dcxo",
+      "reg": "0x020C",
+      "bit": 0
+    },
+    {
+      "name": "riscv_24m_parents",
+      "type": "parent_array",
+      "parents": [
+        "dcxo",
+        "osc32k",
+        "iosc"
+      ]
+    },
+    {
+      "name": "riscv-24m",
+      "type": "mux_gate",
+      "parents_array": "riscv_24m_parents",
+      "reg": "0x0210",
+      "mux_shift": 24,
+      "mux_width": 2,
+      "gate_bit": 31,
+      "parents": [
+        "dcxo",
+        "osc32k",
+        "iosc"
+      ]
+    },
+    {
+      "name": "riscv-cfg",
+      "type": "gate",
+      "parent": "dcxo",
+      "reg": "0x021C",
+      "bit": 1
+    },
+    {
+      "name": "riscv",
+      "type": "gate",
+      "parent": "dcxo",
+      "reg": "0x021C",
+      "bit": 0
+    },
+    {
+      "name": "r-cpucfg",
+      "type": "gate",
+      "parent": "dcxo",
+      "reg": "0x022C",
+      "bit": 0
+    },
+    {
+      "name": "vdd-usb2cpus",
+      "type": "gate",
+      "parent": "dcxo",
+      "reg": "0x0250",
+      "bit": 8
+    },
+    {
+      "name": "vdd-sys2usb",
+      "type": "gate",
+      "parent": "dcxo",
+      "reg": "0x0250",
+      "bit": 3
+    },
+    {
+      "name": "vdd-sys2cpus",
+      "type": "gate",
+      "parent": "dcxo",
+      "reg": "0x0250",
+      "bit": 2
+    },
+    {
+      "name": "vdd-ddr",
+      "type": "gate",
+      "parent": "dcxo",
+      "reg": "0x0250",
+      "bit": 0
+    },
+    {
+      "name": "tt-auto",
+      "type": "gate",
+      "parent": "dcxo",
+      "reg": "0x0338",
+      "bit": 9
+    },
+    {
+      "name": "cpu-icache-auto",
+      "type": "gate",
+      "parent": "dcxo",
+      "reg": "0x0338",
+      "bit": 8
+    },
+    {
+      "name": "ahbs-auto-clk",
+      "type": "gate",
+      "parent": "dcxo",
+      "reg": "0x033C",
+      "bit": 24
+    }
+  ],
+  "errors": []
+}

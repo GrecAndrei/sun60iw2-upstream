@@ -1,0 +1,104 @@
+{
+  "_comment": "Example pinmux data for sun60i-a733 (PB0-PB2, PC0-PC2)",
+  "soc": "sun60i-a733",
+  "banks": {
+    "PA": 0,
+    "PB": 11,
+    "PC": 17,
+    "PD": 22,
+    "PE": 11,
+    "PF": 6,
+    "PG": 6,
+    "PH": 0,
+    "PI": 0,
+    "PJ": 28,
+    "PK": 26
+  },
+  "irq": {
+    "bank_mux": [0, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14],
+    "bank_map": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+  },
+  "name_map": {
+    "twi": "i2c",
+    "sdc": "mmc",
+    "spif": "spi",
+    "ndfc": "nand",
+    "dpss": "lcd0"
+  },
+  "pins": [
+    {
+      "bank": "PB",
+      "pin": 0,
+      "functions": [
+        {"mux": 2, "name": "uart2",    "signal": "TX"},
+        {"mux": 3, "name": "uart0",    "signal": "TX"},
+        {"mux": 4, "name": "spi2",     "signal": "CLK"},
+        {"mux": 5, "name": "dsi",      "signal": "D0"},
+        {"mux": 6, "name": "lcd0",     "signal": "D0"},
+        {"mux": 7, "name": "jtag",     "signal": "TMS"}
+      ]
+    },
+    {
+      "bank": "PB",
+      "pin": 1,
+      "functions": [
+        {"mux": 2, "name": "uart2",    "signal": "RX"},
+        {"mux": 3, "name": "uart0",    "signal": "RX"},
+        {"mux": 4, "name": "spi2",     "signal": "MOSI"},
+        {"mux": 6, "name": "lcd0",     "signal": "D1"},
+        {"mux": 7, "name": "jtag",     "signal": "TDI"}
+      ]
+    },
+    {
+      "bank": "PB",
+      "pin": 2,
+      "functions": [
+        {"mux": 2, "name": "uart2",    "signal": "RTS"},
+        {"mux": 4, "name": "spi2",     "signal": "MISO"},
+        {"mux": 5, "name": "hdmi",     "signal": "CEC"},
+        {"mux": 6, "name": "lcd0",     "signal": "D2"},
+        {"mux": 7, "name": "jtag",     "signal": "TDO"},
+        {"mux": 8, "name": "i2c0",     "signal": "SCK"}
+      ]
+    },
+    {
+      "bank": "PB",
+      "pin": 3,
+      "functions": [
+        {"mux": 2, "name": "uart2",    "signal": "CTS"},
+        {"mux": 4, "name": "spi2",     "signal": "CS0"},
+        {"mux": 5, "name": "hdmi",     "signal": "SCL"},
+        {"mux": 6, "name": "lcd0",     "signal": "D3"},
+        {"mux": 7, "name": "jtag",     "signal": "TCK"},
+        {"mux": 8, "name": "i2c0",     "signal": "SDA"}
+      ]
+    },
+    {
+      "bank": "PC",
+      "pin": 0,
+      "functions": [
+        {"mux": 2, "name": "nand",     "signal": "WE"},
+        {"mux": 3, "name": "mmc2",     "signal": "DS"},
+        {"mux": 4, "name": "mmc3",     "signal": "DS"}
+      ]
+    },
+    {
+      "bank": "PC",
+      "pin": 1,
+      "functions": [
+        {"mux": 2, "name": "nand",     "signal": "ALE"},
+        {"mux": 3, "name": "mmc2",     "signal": "RST"},
+        {"mux": 4, "name": "mmc3",     "signal": "RST"}
+      ]
+    },
+    {
+      "bank": "PC",
+      "pin": 2,
+      "functions": [
+        {"mux": 2, "name": "nand",     "signal": "CLE"},
+        {"mux": 5, "name": "spi0",     "signal": "CLK"},
+        {"mux": 6, "name": "spi",      "signal": "CLK"}
+      ]
+    }
+  ]
+}

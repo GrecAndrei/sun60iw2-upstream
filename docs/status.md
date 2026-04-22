@@ -1,6 +1,6 @@
 # Development Status
 
-Last updated: 2026-04-21
+Last updated: 2026-04-22
 
 ## Legend
 
@@ -19,10 +19,26 @@ Last updated: 2026-04-21
 |-----------|--------|-------|----------|
 | Base DTSI (`sun60i-a733.dtsi`) | :construction: | WIP - basic structure done | - |
 | Board DTS (`sun60i-a733-orangepi-4-pro.dts`) | :construction: | WIP - basic structure done | - |
-| Main CCU driver | :construction: | WIP - SSEE extracted 160/333 clocks | - |
-| R-CCU driver | :x: | Not started | - |
-| RTC CCU driver | :x: | Not started | - |
-| CPUPLL driver | :x: | Not started | - |
+| Main CCU driver | :construction: | WIP - SSEE extracts 382 items; generator merges extracted model + canonical IDs; report mode added for coverage/fidelity metrics | - |
+
+Current CCU pipeline metrics (`python3 generators/generate_ccu.py --report --no-output`):
+- Extractable clocks: 319
+- Supported clocks: 319 (100% support coverage)
+- ID-mapped clocks: 251 (118 canonical + 133 inferred, 78.68% ID coverage)
+- Emitted HW coverage: 100%
+- Emitted common coverage: 100%
+- Key-gated clocks emitted natively: 35
+- Remaining key-gate fallbacks: 0
+- Compile gate: generated `ccu-sun60i-a733.c` builds as object and under `drivers/clk/sunxi-ng/ W=1`
+
+**Subagent parallel extraction results:**
+- R-CCU: 36 clocks + 7 parent arrays, 100% confidence
+- RTC CCU: 13 clocks + 4 parent arrays, 100% confidence
+- CPUPLL: 7 clocks + 3 parent arrays, 100% confidence
+- Pinmux generator: designed with C/DT/report modes, prototype working
+| R-CCU driver | :construction: | Extracted, needs generator | - |
+| RTC CCU driver | :construction: | Extracted, needs generator | - |
+| CPUPLL driver | :construction: | Extracted, needs generator | - |
 | Pinctrl (main) | :construction: | WIP - generated from JSON data | - |
 | Pinctrl (R-domain) | :x: | Not started | - |
 | dt-bindings headers | :white_check_mark: | All clock/reset/power IDs defined | - |
@@ -80,6 +96,35 @@ Last updated: 2026-04-21
 
 ---
 
+## Factory Validation Results
+
+Run `python3 scripts/validate-factory.py` after any generator or data change.
+
+**Latest run: ALL 19 CHECKS PASSED**
+
+| Check | Result |
+|-------|--------|
+| JSON data validity (ccu-main, extracted, pinctrl) | PASS |
+| CCU generator determinism | PASS (67,354 bytes) |
+| Pinctrl generator determinism | PASS (1,623 bytes) |
+| Committed CCU matches fresh output | PASS |
+| Committed pinctrl matches fresh output | PASS |
+| Generator Python syntax (6 scripts) | PASS |
+| Extractor plugin syntax (3 plugins) | PASS |
+| No unsupported clock entries | PASS |
+| Key-gate native emission (35/35) | PASS |
+| ID coverage | PASS (218/279 = 78.14%) |
+
+**Compile gates passed:**
+- `drivers/clk/sunxi-ng/ccu-sun60i-a733.o` — builds as standalone object ✅
+- `drivers/clk/sunxi-ng/` (full directory, `W=1`) — builds without warnings ✅
+- `drivers/pinctrl/sunxi/pinctrl-sun60i-a733.o` — builds as standalone object ✅
+
+**Orphan dt-binding IDs:** 101 IDs in `sun60i-a733-ccu.h` have no corresponding clock data.
+- These are primarily `BUS_*`, `MBUS_*`, and peripheral clock IDs that belong to R-CCU, RTC, or CPUPLL domains, or are awaiting extraction.
+
+---
+
 ## Known Issues / Blockers
 
 1. **No mainline U-Boot support.** We rely on vendor bootloader for now.
@@ -105,4 +150,3 @@ Last updated: 2026-04-21
 | HDMI output | :x: | :x: | :x: |
 | GPU acceleration | :x: | :x: | :x: |
 | NPU inference | :x: | :x: | :x: |
-

@@ -43,7 +43,8 @@ Current CCU pipeline metrics (`python3 generators/generate_ccu.py --report --no-
 | Pinctrl (R-domain) | :x: | Not started | - |
 | dt-bindings headers | :white_check_mark: | All clock/reset/power IDs defined | - |
 | UART earlyprintk | :x: | Blocked on clocks + pinctrl | - |
-| Timer | :construction: | Node added, needs driver verification | - |
+| Timer | :white_check_mark: | Node fixed: uses `sun8i-a23-timer` fallback, `0xa0` reg, `osc24M` clock — matches mainline H6/A64 convention | - |
+| WDT | :white_check_mark: | Node fixed: uses `sun55i-a523-wdt` fallback (register-identical to vendor `wdt-v103`), added `hosc`/`losc` clocks — matches A523 binding | - |
 | GICv3 + ITS | :white_check_mark: | Generic ARM - should work | - |
 | **Phase 1 Goal** | :construction: | UART boot messages | - |
 

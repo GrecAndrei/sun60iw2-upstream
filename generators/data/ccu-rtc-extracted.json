@@ -2,6 +2,7 @@
   "clocks": [
     {
       "name": "iosc",
+      "id": "IOSC",
       "type": "gate",
       "parent": "rc-16m",
       "reg": "0x160",
@@ -9,6 +10,7 @@
     },
     {
       "name": "ext32k-gate",
+      "id": "EXT32K_GATE",
       "type": "gate_with_key",
       "parent": "ext-32k",
       "reg": "0x0",
@@ -17,10 +19,11 @@
     },
     {
       "name": "iosc-div32k",
+      "id": "IOSC_DIV32K",
       "type": "fixed_factor",
       "parent": "iosc",
-      "mult": 500,
-      "div": 1
+      "mult": 1,
+      "div": 500
     },
     {
       "name": "osc32k_parents",
@@ -32,6 +35,7 @@
     },
     {
       "name": "osc32k",
+      "id": "OSC32K",
       "type": "mux_gate_key",
       "parents_array": "osc32k_parents",
       "reg": "0x0",
@@ -46,6 +50,7 @@
     },
     {
       "name": "dcxo24M-div32k",
+      "id": "DCXO24M_DIV32K",
       "type": "gate_with_fixed_rate",
       "parent": "dcxo",
       "reg": "0x60",
@@ -62,6 +67,7 @@
     },
     {
       "name": "rtc32k",
+      "id": "RTC32K",
       "type": "mux_gate_key",
       "parents_array": "rtc32k_clk_parents",
       "reg": "0x0",
@@ -76,10 +82,11 @@
     },
     {
       "name": "rtc-1k",
+      "id": "RTC_1K",
       "type": "fixed_factor",
       "parent": "rtc32k",
-      "mult": 32,
-      "div": 1
+      "mult": 1,
+      "div": 32
     },
     {
       "name": "rtc_32k_fanout_clk_parents",
@@ -92,6 +99,7 @@
     },
     {
       "name": "rtc-32k-fanout",
+      "id": "RTC_32K_FANOUT",
       "type": "mux_gate",
       "parents_array": "rtc_32k_fanout_clk_parents",
       "reg": "0x60",
@@ -116,6 +124,7 @@
     },
     {
       "name": "dcxo",
+      "id": "DCXO",
       "type": "mux",
       "parents_array": "dcxo_parents",
       "reg": "0x160",
@@ -131,6 +140,7 @@
     },
     {
       "name": "dcxo-wakeup",
+      "id": "RTC_DCXO_WAKEUP",
       "type": "gate",
       "parent": "dcxo",
       "reg": "0x0160",
@@ -144,6 +154,7 @@
     },
     {
       "name": "dcxo-serdes1",
+      "id": "RTC_DCXO_SERDES1",
       "type": "gate",
       "parent": "r-ahb",
       "reg": "0x16c",
@@ -151,6 +162,7 @@
     },
     {
       "name": "dcxo-serdes0",
+      "id": "RTC_DCXO_SERDES0",
       "type": "gate",
       "parent": "r-ahb",
       "reg": "0x16c",
@@ -158,6 +170,7 @@
     },
     {
       "name": "rtc-spi",
+      "id": "RTC_SPI",
       "type": "gate",
       "parent": "r-ahb",
       "reg": "0x310",

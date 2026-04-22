@@ -88,6 +88,7 @@ def main() -> int:
 
     # 6. Metrics sanity
     from generators.generate_ccu import Generator, merge_data, parse_binding_ids
+    from generators.plugins import DOMAINS
 
     primary = json.loads((ROOT / "generators/data/ccu-main.json").read_text())
     extracted = json.loads(
@@ -97,7 +98,7 @@ def main() -> int:
         ROOT / "include/dt-bindings/clock/sun60i-a733-ccu.h"
     )
     merged = merge_data(primary, extracted, binding_ids)
-    gen = Generator(merged)
+    gen = Generator(merged, DOMAINS["main"])
     gen.render()
     check(
         checks,

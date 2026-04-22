@@ -23,7 +23,7 @@ SSEE extracts structured data from vendor BSP C code and headers, then persists
 learned semantic knowledge in `extractor/data/semantic_map.json`.
 
 **Key capabilities:**
-- Plugin-based extraction (`clocks`, `resets`, `registers`)
+- Plugin-based extraction (`clocks`, `resets`, `registers`, `dts`)
 - DT-binding constants extraction plugin (`bindings`) for `CLK_*`/`RST_*`/`PD_*`
 - Persistent learned-pattern fallback for failed blocks
 - Persistent observed-pattern memory from successful extractions (self-learning cache)
@@ -49,6 +49,12 @@ python3 -m generators.extractor.cli extract \
 python3 -m generators.extractor.cli extract \
   --subsystem bindings \
   --input include/dt-bindings/clock/sun60i-a733-ccu.h \
+  --validate
+
+# Extract DTS nodes from SoC description
+python3 -m generators.extractor.cli extract \
+  --subsystem dts \
+  --input arch/arm64/boot/dts/allwinner/sun60i-a733.dtsi \
   --validate
 
 # Extract a directory, skip unchanged files, export merged json

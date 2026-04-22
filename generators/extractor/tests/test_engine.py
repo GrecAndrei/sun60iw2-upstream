@@ -110,6 +110,15 @@ static SUNXI_CCU_GATE(foo, "f", p, 0x0, 1, 0);"""
         self.assertEqual(len(result.items), 1)
         self.assertEqual(result.items[0]["name"], "example")
 
+    def test_extract_divider_m_hws_macro(self):
+        raw = 'static SUNXI_CCU_M_HWS(peri2x_clk, "pll-peri0-2x", pll_peri0_hws, 0x020, 16, 3, 0);'
+        result = self.engine.extract(
+            "clocks", blocks=[{"type": "macro", "content": raw, "raw": raw}]
+        )
+        self.assertEqual(len(result.items), 1)
+        self.assertEqual(result.items[0]["type"], "divider")
+        self.assertEqual(result.items[0]["name"], "pll-peri0-2x")
+
 
 if __name__ == "__main__":
     unittest.main()

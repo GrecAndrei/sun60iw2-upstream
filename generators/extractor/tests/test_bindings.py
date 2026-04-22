@@ -28,6 +28,7 @@ class TestDtBindingsExtractor(unittest.TestCase):
         self.assertEqual(len(result.items), 1)
         self.assertEqual(result.items[0]["domain"], "clock")
         self.assertEqual(result.items[0]["value"], 154)
+        self.assertEqual(result.errors, [])
 
     def test_validate_duplicate_values(self):
         blocks = [
@@ -49,4 +50,3 @@ class TestDtBindingsExtractor(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-

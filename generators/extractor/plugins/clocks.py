@@ -12,7 +12,7 @@ from generators.extractor import ExtractorPlugin
 
 SUNXI_CCU_M_PATTERN = re.compile(
     r"""
-    .*?SUNXI_CCU_M\s*\(
+    .*?SUNXI_CCU_M(?:_HWS)?\s*\(
       \s*\w+\s*,                     # var name
       \s*"([^"]+)"\s*,              # clock name
       \s*("[^"]+"|\w+)\s*,          # parent
@@ -49,9 +49,11 @@ class ClockExtractor(ExtractorPlugin):
             r"static\s+struct\s+ccu_nm\s+": "pll_nm",
             r"static\s+struct\s+ccu_nkmp\s+": "pll_nkmp",
             r"static\s+SUNXI_CCU_M\s*\(": "divider",
+            r"static\s+SUNXI_CCU_M_HWS\s*\(": "divider",
             r"static\s+SUNXI_CCU_GATE\s*\(": "gate",
             r"static\s+SUNXI_CCU_GATE_HWS\s*\(": "gate",
             r"static\s+CLK_FIXED_FACTOR\s*\(": "fixed_factor",
+            r"static\s+CLK_FIXED_FACTOR_HWS\s*\(": "fixed_factor",
         }
 
     def can_extract(self, block: Dict) -> bool:
@@ -143,14 +145,15 @@ class ClockExtractor(ExtractorPlugin):
 
         # CLK_FIXED_FACTOR
         match = re.match(
-            r'.*?CLK_FIXED_FACTOR\s*\(\s*\w+\s*,\s*"([^"]+)"\s*,\s*"([^"]+)"\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)',
+            r'.*?CLK_FIXED_FACTOR(?:_HWS)?\s*\(\s*\w+\s*,\s*"([^"]+)"\s*,\s*("[^"]+"|\w+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*[^)]+\)',
             flat,
         )
         if match:
+            parent = match.group(2).strip('"')
             return {
                 "name": match.group(1),
                 "type": "fixed_factor",
-                "parent": match.group(2),
+                "parent": parent,
                 "mult": int(match.group(3)),
                 "div": int(match.group(4)),
             }

@@ -37,6 +37,7 @@ import json
 import re
 import csv
 import hashlib
+import tempfile
 from datetime import datetime, timezone
 from difflib import SequenceMatcher
 from pathlib import Path
@@ -170,8 +171,18 @@ class SemanticMap:
         self.root_sources = set(DEFAULT_ROOT_SOURCES)
 
     def load(self, path: Path):
-        with open(path) as f:
-            data = json.load(f)
+        try:
+            with open(path) as f:
+                data = json.load(f)
+        except json.JSONDecodeError:
+            backup = path.with_suffix(".json.corrupt")
+            try:
+                path.rename(backup)
+            except OSError:
+                pass
+            self._init_defaults()
+            self.save(path)
+            return
         self.macros = data.get("macros", {})
         self.types = data.get("types", {})
         self.validation_rules = data.get("validation_rules", [])
@@ -194,8 +205,12 @@ class SemanticMap:
             "root_sources": sorted(self.root_sources),
         }
         save_path.parent.mkdir(parents=True, exist_ok=True)
-        with open(save_path, "w") as f:
-            json.dump(data, f, indent=2)
+        with tempfile.NamedTemporaryFile(
+            "w", dir=save_path.parent, delete=False, encoding="utf-8"
+        ) as tf:
+            json.dump(data, tf, indent=2)
+            temp_path = Path(tf.name)
+        temp_path.replace(save_path)
 
     def record_vendor_run(self, filepath: Path, stats: Dict):
         checksum = self._file_checksum(filepath)
@@ -311,6 +326,15 @@ class CBlockParser:
                 blocks.append(struct_block)
                 continue
 
+            if (
+                line.endswith("{")
+                and ("@" in line or ":" in line or line.startswith("&"))
+                and "struct " not in line
+            ):
+                dts_node, i = self._extract_dts_node(lines, i)
+                blocks.append(dts_node)
+                continue
+
             if line.startswith("static "):
                 macro_block, i = self._extract_macro_invocation(lines, i)
                 if macro_block:
@@ -405,6 +429,26 @@ class CBlockParser:
             i += 1
         content = "\n".join(block_lines)
         return {"type": "preprocessor", "content": content, "raw": content}, i + 1
+
+    def _extract_dts_node(self, lines, start_idx):
+        block_lines = []
+        brace_count = 0
+        i = start_idx
+
+        while i < len(lines):
+            line = lines[i]
+            block_lines.append(line)
+            brace_count += line.count("{") - line.count("}")
+            if brace_count == 0:
+                break
+            i += 1
+
+        content = "\n".join(block_lines)
+        return {
+            "type": "dts_node",
+            "content": content,
+            "raw": content,
+        }, i + 1
 
 
 class SymbolTable:
@@ -651,6 +695,8 @@ class BatchProcessor:
         patterns = ["*.c"]
         if subsystem in ("registers", "bindings"):
             patterns = ["*.h"]
+        if subsystem == "dts":
+            patterns = ["*.dts", "*.dtsi"]
         if subsystem == "registers":
             patterns.append("*.c")
         source_files: List[Path] = []
@@ -734,11 +780,13 @@ class Engine:
         from generators.extractor.plugins.resets import ResetExtractor
         from generators.extractor.plugins.registers import RegisterExtractor
         from generators.extractor.plugins.bindings import DtBindingsExtractor
+        from generators.extractor.plugins.dts import DtsExtractor
 
         self.registry.register("clocks", ClockExtractor(self.semantic_map))
         self.registry.register("resets", ResetExtractor(self.semantic_map))
         self.registry.register("registers", RegisterExtractor(self.semantic_map))
         self.registry.register("bindings", DtBindingsExtractor(self.semantic_map))
+        self.registry.register("dts", DtsExtractor(self.semantic_map))
 
     def extract(
         self,
@@ -928,7 +976,13 @@ class Engine:
 
     def _semantic_validate(self, subsystem: str, items: List[Dict]) -> List[str]:
         errors = []
-        names = [item.get("name", "") for item in items]
+        identity_key = "name"
+        if subsystem == "bindings":
+            identity_key = "symbol"
+        elif subsystem == "dts":
+            identity_key = "node"
+
+        names = [item.get(identity_key, "") for item in items]
         seen = set()
         for name in names:
             if name in seen:

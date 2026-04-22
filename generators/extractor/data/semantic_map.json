@@ -95,6 +95,4417 @@
   ],
   "relationships": {},
   "learned_patterns": [],
+  "observed_patterns": {
+    "clocks": {
+      "e04bb54877a961e1": {
+        "count": 4,
+        "normalized_preview": "static SUNXI_CCU_GATE_HWS(apb1_clk, \"STR\", pll_periph0_2x_hws, 0xN, N, N | CLK_IS_CRITICAL);",
+        "template": {
+          "name": "apb1",
+          "type": "gate",
+          "parent": "pll_periph0_2x_hws",
+          "reg": "0x000",
+          "bit": 0
+        }
+      },
+      "4dedd4af1a2209e3": {
+        "count": 4,
+        "normalized_preview": "static SUNXI_CCU_GATE_HWS(uart0_clk, \"STR\", apb1_hws, 0xN, N, N);",
+        "template": {
+          "name": "uart0",
+          "type": "gate",
+          "parent": "apb1",
+          "reg": "0x000",
+          "bit": 1
+        }
+      },
+      "8b28283755ddd4dc": {
+        "count": 3,
+        "normalized_preview": "static SUNXI_CCU_M_HWS(pll_periph0_2x_clk, \"STR\", pll_periph0_hws, 0xN, N, N, N);",
+        "template": {
+          "name": "pll-periph0-2x",
+          "type": "divider",
+          "parent": "pll_periph0_hws",
+          "reg": "0x020",
+          "shift": 16,
+          "width": 3
+        }
+      }
+    },
+    "resets": {
+      "91c4957e636cac7b": {
+        "count": 4,
+        "normalized_preview": "static struct ccu_reset_map a733_ccu_resets[] = { [RST_BUS_UART0] = { 0xN, N }, }; };",
+        "template": {
+          "id": "RST_BUS_UART0",
+          "reg": "0x000",
+          "bit": 0
+        }
+      }
+    },
+    "bindings": {
+      "4dd8566412f7b837": {
+        "count": 5,
+        "normalized_preview": "#define CLK_PLL_DDR N",
+        "template": {
+          "symbol": "CLK_PLL_DDR",
+          "value": 1,
+          "domain": "clock"
+        }
+      },
+      "e3fed2a556cb6704": {
+        "count": 5,
+        "normalized_preview": "#define CLK_PLL_PERI0 N",
+        "template": {
+          "symbol": "CLK_PLL_PERI0",
+          "value": 2,
+          "domain": "clock"
+        }
+      },
+      "f7c18992512d9b09": {
+        "count": 5,
+        "normalized_preview": "#define CLK_PLL_PERI0_2X N",
+        "template": {
+          "symbol": "CLK_PLL_PERI0_2X",
+          "value": 3,
+          "domain": "clock"
+        }
+      },
+      "013085e4380fe734": {
+        "count": 5,
+        "normalized_preview": "#define CLK_PLL_PERI0_800M N",
+        "template": {
+          "symbol": "CLK_PLL_PERI0_800M",
+          "value": 4,
+          "domain": "clock"
+        }
+      },
+      "628f5f8449c07bf7": {
+        "count": 5,
+        "normalized_preview": "#define CLK_PLL_PERI0_480M N",
+        "template": {
+          "symbol": "CLK_PLL_PERI0_480M",
+          "value": 5,
+          "domain": "clock"
+        }
+      },
+      "e0fb80bd98100931": {
+        "count": 5,
+        "normalized_preview": "#define CLK_PLL_PERI0_600M N",
+        "template": {
+          "symbol": "CLK_PLL_PERI0_600M",
+          "value": 6,
+          "domain": "clock"
+        }
+      },
+      "2671f2cdb6244f4e": {
+        "count": 5,
+        "normalized_preview": "#define CLK_PLL_PERI0_400M N",
+        "template": {
+          "symbol": "CLK_PLL_PERI0_400M",
+          "value": 7,
+          "domain": "clock"
+        }
+      },
+      "626763c9661a7e57": {
+        "count": 5,
+        "normalized_preview": "#define CLK_PLL_PERI0_300M N",
+        "template": {
+          "symbol": "CLK_PLL_PERI0_300M",
+          "value": 8,
+          "domain": "clock"
+        }
+      },
+      "7cc48a9204251eb0": {
+        "count": 5,
+        "normalized_preview": "#define CLK_PLL_PERI0_200M N",
+        "template": {
+          "symbol": "CLK_PLL_PERI0_200M",
+          "value": 9,
+          "domain": "clock"
+        }
+      },
+      "bd68c80d368a0d1b": {
+        "count": 5,
+        "normalized_preview": "#define CLK_PLL_PERI0_160M N",
+        "template": {
+          "symbol": "CLK_PLL_PERI0_160M",
+          "value": 10,
+          "domain": "clock"
+        }
+      },
+      "9077e8427ffa05a9": {
+        "count": 5,
+        "normalized_preview": "#define CLK_PLL_PERI0_150M N",
+        "template": {
+          "symbol": "CLK_PLL_PERI0_150M",
+          "value": 11,
+          "domain": "clock"
+        }
+      },
+      "9352756dc0431874": {
+        "count": 5,
+        "normalized_preview": "#define CLK_PLL_PERI1 N",
+        "template": {
+          "symbol": "CLK_PLL_PERI1",
+          "value": 12,
+          "domain": "clock"
+        }
+      },
+      "b18868233f588f8b": {
+        "count": 5,
+        "normalized_preview": "#define CLK_PLL_PERI1_2X N",
+        "template": {
+          "symbol": "CLK_PLL_PERI1_2X",
+          "value": 13,
+          "domain": "clock"
+        }
+      },
+      "b1da28062777b483": {
+        "count": 5,
+        "normalized_preview": "#define CLK_PLL_PERI1_800M N",
+        "template": {
+          "symbol": "CLK_PLL_PERI1_800M",
+          "value": 14,
+          "domain": "clock"
+        }
+      },
+      "9abc705602189902": {
+        "count": 5,
+        "normalized_preview": "#define CLK_PLL_PERI1_480M N",
+        "template": {
+          "symbol": "CLK_PLL_PERI1_480M",
+          "value": 15,
+          "domain": "clock"
+        }
+      },
+      "6a93b9618a26e3e3": {
+        "count": 5,
+        "normalized_preview": "#define CLK_PLL_PERI1_600M N",
+        "template": {
+          "symbol": "CLK_PLL_PERI1_600M",
+          "value": 16,
+          "domain": "clock"
+        }
+      },
+      "bb60d0cbfc7b542c": {
+        "count": 5,
+        "normalized_preview": "#define CLK_PLL_PERI1_400M N",
+        "template": {
+          "symbol": "CLK_PLL_PERI1_400M",
+          "value": 17,
+          "domain": "clock"
+        }
+      },
+      "03ce36adc68c67d8": {
+        "count": 5,
+        "normalized_preview": "#define CLK_PLL_PERI1_300M N",
+        "template": {
+          "symbol": "CLK_PLL_PERI1_300M",
+          "value": 18,
+          "domain": "clock"
+        }
+      },
+      "05688eda892bcbd1": {
+        "count": 5,
+        "normalized_preview": "#define CLK_PLL_PERI1_200M N",
+        "template": {
+          "symbol": "CLK_PLL_PERI1_200M",
+          "value": 19,
+          "domain": "clock"
+        }
+      },
+      "50ae2a1284e911f9": {
+        "count": 5,
+        "normalized_preview": "#define CLK_PLL_PERI1_160M N",
+        "template": {
+          "symbol": "CLK_PLL_PERI1_160M",
+          "value": 20,
+          "domain": "clock"
+        }
+      },
+      "b37603df39ba8090": {
+        "count": 5,
+        "normalized_preview": "#define CLK_PLL_PERI1_150M N",
+        "template": {
+          "symbol": "CLK_PLL_PERI1_150M",
+          "value": 21,
+          "domain": "clock"
+        }
+      },
+      "a254cb649bcc1f8a": {
+        "count": 5,
+        "normalized_preview": "#define CLK_PLL_GPU0 N",
+        "template": {
+          "symbol": "CLK_PLL_GPU0",
+          "value": 23,
+          "domain": "clock"
+        }
+      },
+      "9bcd1ee30d5481cd": {
+        "count": 5,
+        "normalized_preview": "#define CLK_PLL_VIDEO0 N",
+        "template": {
+          "symbol": "CLK_PLL_VIDEO0",
+          "value": 24,
+          "domain": "clock"
+        }
+      },
+      "67f3facf261a9c79": {
+        "count": 5,
+        "normalized_preview": "#define CLK_PLL_VIDEO0_4X N",
+        "template": {
+          "symbol": "CLK_PLL_VIDEO0_4X",
+          "value": 25,
+          "domain": "clock"
+        }
+      },
+      "fd6070a2f7722b44": {
+        "count": 5,
+        "normalized_preview": "#define CLK_PLL_VIDEO0_3X N",
+        "template": {
+          "symbol": "CLK_PLL_VIDEO0_3X",
+          "value": 26,
+          "domain": "clock"
+        }
+      },
+      "e9960ea0bd98573b": {
+        "count": 5,
+        "normalized_preview": "#define CLK_PLL_VIDEO1 N",
+        "template": {
+          "symbol": "CLK_PLL_VIDEO1",
+          "value": 27,
+          "domain": "clock"
+        }
+      },
+      "853b695c6bb6179e": {
+        "count": 5,
+        "normalized_preview": "#define CLK_PLL_VIDEO1_4X N",
+        "template": {
+          "symbol": "CLK_PLL_VIDEO1_4X",
+          "value": 28,
+          "domain": "clock"
+        }
+      },
+      "22a0e203cefb02c3": {
+        "count": 5,
+        "normalized_preview": "#define CLK_PLL_VIDEO1_3X N",
+        "template": {
+          "symbol": "CLK_PLL_VIDEO1_3X",
+          "value": 29,
+          "domain": "clock"
+        }
+      },
+      "521ef9fce54cbe31": {
+        "count": 5,
+        "normalized_preview": "#define CLK_PLL_VIDEO2 N",
+        "template": {
+          "symbol": "CLK_PLL_VIDEO2",
+          "value": 30,
+          "domain": "clock"
+        }
+      },
+      "dae94133b77b3159": {
+        "count": 5,
+        "normalized_preview": "#define CLK_PLL_VIDEO2_4X N",
+        "template": {
+          "symbol": "CLK_PLL_VIDEO2_4X",
+          "value": 31,
+          "domain": "clock"
+        }
+      },
+      "794d782e88d37fa5": {
+        "count": 5,
+        "normalized_preview": "#define CLK_PLL_VIDEO2_3X N",
+        "template": {
+          "symbol": "CLK_PLL_VIDEO2_3X",
+          "value": 32,
+          "domain": "clock"
+        }
+      },
+      "12cf8508b21de207": {
+        "count": 5,
+        "normalized_preview": "#define CLK_PLL_VE0 N",
+        "template": {
+          "symbol": "CLK_PLL_VE0",
+          "value": 33,
+          "domain": "clock"
+        }
+      },
+      "2ec31fcba37ab51f": {
+        "count": 5,
+        "normalized_preview": "#define CLK_PLL_VE1 N",
+        "template": {
+          "symbol": "CLK_PLL_VE1",
+          "value": 34,
+          "domain": "clock"
+        }
+      },
+      "d9b0d78b7bdd2919": {
+        "count": 5,
+        "normalized_preview": "#define CLK_PLL_AUDIO0_4X N",
+        "template": {
+          "symbol": "CLK_PLL_AUDIO0_4X",
+          "value": 35,
+          "domain": "clock"
+        }
+      },
+      "463827348a3daf25": {
+        "count": 5,
+        "normalized_preview": "#define CLK_PLL_AUDIO1 N",
+        "template": {
+          "symbol": "CLK_PLL_AUDIO1",
+          "value": 36,
+          "domain": "clock"
+        }
+      },
+      "2ddff6e98c6d25e5": {
+        "count": 5,
+        "normalized_preview": "#define CLK_PLL_AUDIO1_DIV2 N",
+        "template": {
+          "symbol": "CLK_PLL_AUDIO1_DIV2",
+          "value": 37,
+          "domain": "clock"
+        }
+      },
+      "d9c05737a068df25": {
+        "count": 5,
+        "normalized_preview": "#define CLK_PLL_AUDIO1_DIV5 N",
+        "template": {
+          "symbol": "CLK_PLL_AUDIO1_DIV5",
+          "value": 38,
+          "domain": "clock"
+        }
+      },
+      "624c0f2b65bb10cd": {
+        "count": 5,
+        "normalized_preview": "#define CLK_PLL_NPU N",
+        "template": {
+          "symbol": "CLK_PLL_NPU",
+          "value": 39,
+          "domain": "clock"
+        }
+      },
+      "ebd2c19249439075": {
+        "count": 5,
+        "normalized_preview": "#define CLK_PLL_DE N",
+        "template": {
+          "symbol": "CLK_PLL_DE",
+          "value": 40,
+          "domain": "clock"
+        }
+      },
+      "248c7dc1abbdfbe4": {
+        "count": 5,
+        "normalized_preview": "#define CLK_PLL_DE_4X N",
+        "template": {
+          "symbol": "CLK_PLL_DE_4X",
+          "value": 41,
+          "domain": "clock"
+        }
+      },
+      "24524e3c624585eb": {
+        "count": 5,
+        "normalized_preview": "#define CLK_PLL_DE_3X N",
+        "template": {
+          "symbol": "CLK_PLL_DE_3X",
+          "value": 42,
+          "domain": "clock"
+        }
+      },
+      "253367c6b1775890": {
+        "count": 5,
+        "normalized_preview": "#define CLK_AHB N",
+        "template": {
+          "symbol": "CLK_AHB",
+          "value": 43,
+          "domain": "clock"
+        }
+      },
+      "e047e994249cbe5e": {
+        "count": 5,
+        "normalized_preview": "#define CLK_APB0 N",
+        "template": {
+          "symbol": "CLK_APB0",
+          "value": 44,
+          "domain": "clock"
+        }
+      },
+      "13407896278277f4": {
+        "count": 5,
+        "normalized_preview": "#define CLK_APB1 N",
+        "template": {
+          "symbol": "CLK_APB1",
+          "value": 45,
+          "domain": "clock"
+        }
+      },
+      "47589fa01dc5ae2e": {
+        "count": 5,
+        "normalized_preview": "#define CLK_TRACE N",
+        "template": {
+          "symbol": "CLK_TRACE",
+          "value": 47,
+          "domain": "clock"
+        }
+      },
+      "080168aaeb3051d7": {
+        "count": 5,
+        "normalized_preview": "#define CLK_GIC N",
+        "template": {
+          "symbol": "CLK_GIC",
+          "value": 48,
+          "domain": "clock"
+        }
+      },
+      "d264c45d16ae0c2f": {
+        "count": 5,
+        "normalized_preview": "#define CLK_CPU_PERI N",
+        "template": {
+          "symbol": "CLK_CPU_PERI",
+          "value": 49,
+          "domain": "clock"
+        }
+      },
+      "f172405fea1c655c": {
+        "count": 5,
+        "normalized_preview": "#define CLK_NSI N",
+        "template": {
+          "symbol": "CLK_NSI",
+          "value": 51,
+          "domain": "clock"
+        }
+      },
+      "090f898135538f79": {
+        "count": 5,
+        "normalized_preview": "#define CLK_NSI_CFG N",
+        "template": {
+          "symbol": "CLK_NSI_CFG",
+          "value": 52,
+          "domain": "clock"
+        }
+      },
+      "17d7c1086b1f5043": {
+        "count": 5,
+        "normalized_preview": "#define CLK_MBUS N",
+        "template": {
+          "symbol": "CLK_MBUS",
+          "value": 53,
+          "domain": "clock"
+        }
+      },
+      "a5c90f0b6b23e0eb": {
+        "count": 5,
+        "normalized_preview": "#define CLK_IOMMU0_SYS_H N",
+        "template": {
+          "symbol": "CLK_IOMMU0_SYS_H",
+          "value": 54,
+          "domain": "clock"
+        }
+      },
+      "7c7da85fdb71eedb": {
+        "count": 5,
+        "normalized_preview": "#define CLK_IOMMU0_SYS_P N",
+        "template": {
+          "symbol": "CLK_IOMMU0_SYS_P",
+          "value": 55,
+          "domain": "clock"
+        }
+      },
+      "33ff8b4748c24e9f": {
+        "count": 5,
+        "normalized_preview": "#define CLK_IOMMU0_SYS_MBUS N",
+        "template": {
+          "symbol": "CLK_IOMMU0_SYS_MBUS",
+          "value": 56,
+          "domain": "clock"
+        }
+      },
+      "76d7f8df05e8d6f5": {
+        "count": 5,
+        "normalized_preview": "#define CLK_MSI_LITE0 N",
+        "template": {
+          "symbol": "CLK_MSI_LITE0",
+          "value": 57,
+          "domain": "clock"
+        }
+      },
+      "5c7bd09e89bfcc6f": {
+        "count": 5,
+        "normalized_preview": "#define CLK_MSI_LITE1 N",
+        "template": {
+          "symbol": "CLK_MSI_LITE1",
+          "value": 58,
+          "domain": "clock"
+        }
+      },
+      "d5febc3c3a1a2e73": {
+        "count": 5,
+        "normalized_preview": "#define CLK_MSI_LITE2 N",
+        "template": {
+          "symbol": "CLK_MSI_LITE2",
+          "value": 59,
+          "domain": "clock"
+        }
+      },
+      "40e1e373cd242991": {
+        "count": 5,
+        "normalized_preview": "#define CLK_IOMMU1_SYS_H N",
+        "template": {
+          "symbol": "CLK_IOMMU1_SYS_H",
+          "value": 60,
+          "domain": "clock"
+        }
+      },
+      "e32de23a81951534": {
+        "count": 5,
+        "normalized_preview": "#define CLK_IOMMU1_SYS_P N",
+        "template": {
+          "symbol": "CLK_IOMMU1_SYS_P",
+          "value": 61,
+          "domain": "clock"
+        }
+      },
+      "2eb07dd00590600d": {
+        "count": 5,
+        "normalized_preview": "#define CLK_IOMMU1_SYS_MBUS N",
+        "template": {
+          "symbol": "CLK_IOMMU1_SYS_MBUS",
+          "value": 62,
+          "domain": "clock"
+        }
+      },
+      "e70046d3a133a04c": {
+        "count": 5,
+        "normalized_preview": "#define CLK_CPUS_HCLK_GATE N",
+        "template": {
+          "symbol": "CLK_CPUS_HCLK_GATE",
+          "value": 63,
+          "domain": "clock"
+        }
+      },
+      "8d5cd90c738e8f2e": {
+        "count": 5,
+        "normalized_preview": "#define CLK_STORE_AHB_GATE N",
+        "template": {
+          "symbol": "CLK_STORE_AHB_GATE",
+          "value": 64,
+          "domain": "clock"
+        }
+      },
+      "0e622e088bcf4d9b": {
+        "count": 5,
+        "normalized_preview": "#define CLK_MSILITE0_AHB_GATE N",
+        "template": {
+          "symbol": "CLK_MSILITE0_AHB_GATE",
+          "value": 65,
+          "domain": "clock"
+        }
+      },
+      "eae1adaa4e8f1d96": {
+        "count": 5,
+        "normalized_preview": "#define CLK_USB_SYS_AHB_GATE N",
+        "template": {
+          "symbol": "CLK_USB_SYS_AHB_GATE",
+          "value": 66,
+          "domain": "clock"
+        }
+      },
+      "eb09c04d49777b78": {
+        "count": 5,
+        "normalized_preview": "#define CLK_SERDES_AHB_GATE N",
+        "template": {
+          "symbol": "CLK_SERDES_AHB_GATE",
+          "value": 67,
+          "domain": "clock"
+        }
+      },
+      "6dc46bfb5aac3414": {
+        "count": 5,
+        "normalized_preview": "#define CLK_GPU0_AHB_GATE N",
+        "template": {
+          "symbol": "CLK_GPU0_AHB_GATE",
+          "value": 68,
+          "domain": "clock"
+        }
+      },
+      "f2f58e4aa74c92cc": {
+        "count": 5,
+        "normalized_preview": "#define CLK_NPU_AHB_GATE N",
+        "template": {
+          "symbol": "CLK_NPU_AHB_GATE",
+          "value": 69,
+          "domain": "clock"
+        }
+      },
+      "fa2f1ab44a93f0c0": {
+        "count": 5,
+        "normalized_preview": "#define CLK_DE_AHB_GATE N",
+        "template": {
+          "symbol": "CLK_DE_AHB_GATE",
+          "value": 70,
+          "domain": "clock"
+        }
+      },
+      "a742fa487fb1f912": {
+        "count": 5,
+        "normalized_preview": "#define CLK_VID_OUT1_AHB_GATE N",
+        "template": {
+          "symbol": "CLK_VID_OUT1_AHB_GATE",
+          "value": 71,
+          "domain": "clock"
+        }
+      },
+      "cdf3b9a0f37b2ecc": {
+        "count": 5,
+        "normalized_preview": "#define CLK_VID_OUT0_AHB_GATE N",
+        "template": {
+          "symbol": "CLK_VID_OUT0_AHB_GATE",
+          "value": 72,
+          "domain": "clock"
+        }
+      },
+      "04a51a5ef65d9a10": {
+        "count": 5,
+        "normalized_preview": "#define CLK_VID_IN_AHB_GATE N",
+        "template": {
+          "symbol": "CLK_VID_IN_AHB_GATE",
+          "value": 73,
+          "domain": "clock"
+        }
+      },
+      "f9be35350cd0ce50": {
+        "count": 5,
+        "normalized_preview": "#define CLK_VE_ENC_AHB_GATE N",
+        "template": {
+          "symbol": "CLK_VE_ENC_AHB_GATE",
+          "value": 74,
+          "domain": "clock"
+        }
+      },
+      "a3e880ce0ddfbe79": {
+        "count": 5,
+        "normalized_preview": "#define CLK_VE_AHB_GATE N",
+        "template": {
+          "symbol": "CLK_VE_AHB_GATE",
+          "value": 75,
+          "domain": "clock"
+        }
+      },
+      "d0af48a0cf9502a0": {
+        "count": 5,
+        "normalized_preview": "#define CLK_MBUS_MSILITE2_GATE N",
+        "template": {
+          "symbol": "CLK_MBUS_MSILITE2_GATE",
+          "value": 76,
+          "domain": "clock"
+        }
+      },
+      "fee21c8fdb8718d7": {
+        "count": 5,
+        "normalized_preview": "#define CLK_MBUS_STORE_GATE N",
+        "template": {
+          "symbol": "CLK_MBUS_STORE_GATE",
+          "value": 77,
+          "domain": "clock"
+        }
+      },
+      "9b691ea9dbe6249a": {
+        "count": 5,
+        "normalized_preview": "#define CLK_MBUS_MSILITE0_GATE N",
+        "template": {
+          "symbol": "CLK_MBUS_MSILITE0_GATE",
+          "value": 78,
+          "domain": "clock"
+        }
+      },
+      "91c13b342de049ea": {
+        "count": 5,
+        "normalized_preview": "#define CLK_MBUS_SERDES_GATE N",
+        "template": {
+          "symbol": "CLK_MBUS_SERDES_GATE",
+          "value": 79,
+          "domain": "clock"
+        }
+      },
+      "da485ea875c5e0cf": {
+        "count": 5,
+        "normalized_preview": "#define CLK_MBUS_VID_IN_GATE N",
+        "template": {
+          "symbol": "CLK_MBUS_VID_IN_GATE",
+          "value": 80,
+          "domain": "clock"
+        }
+      },
+      "f3f4b29dcc9e0126": {
+        "count": 5,
+        "normalized_preview": "#define CLK_MBUS_NPU_GATE N",
+        "template": {
+          "symbol": "CLK_MBUS_NPU_GATE",
+          "value": 81,
+          "domain": "clock"
+        }
+      },
+      "884f015214897361": {
+        "count": 5,
+        "normalized_preview": "#define CLK_MBUS_GPU0_GATE N",
+        "template": {
+          "symbol": "CLK_MBUS_GPU0_GATE",
+          "value": 82,
+          "domain": "clock"
+        }
+      },
+      "bdd03031249f6ffc": {
+        "count": 5,
+        "normalized_preview": "#define CLK_DEC_MBUS_GATE N",
+        "template": {
+          "symbol": "CLK_DEC_MBUS_GATE",
+          "value": 83,
+          "domain": "clock"
+        }
+      },
+      "e18cf3830686a4e9": {
+        "count": 5,
+        "normalized_preview": "#define CLK_MBUS_VE_GATE N",
+        "template": {
+          "symbol": "CLK_MBUS_VE_GATE",
+          "value": 84,
+          "domain": "clock"
+        }
+      },
+      "b25babb5a5bfa4a0": {
+        "count": 5,
+        "normalized_preview": "#define CLK_MBUS_DESYS_GATE N",
+        "template": {
+          "symbol": "CLK_MBUS_DESYS_GATE",
+          "value": 85,
+          "domain": "clock"
+        }
+      },
+      "5b6203fd5ebc1269": {
+        "count": 5,
+        "normalized_preview": "#define CLK_IOMMU1_MBUS_GATE N",
+        "template": {
+          "symbol": "CLK_IOMMU1_MBUS_GATE",
+          "value": 86,
+          "domain": "clock"
+        }
+      },
+      "299a08f732df5e63": {
+        "count": 5,
+        "normalized_preview": "#define CLK_IOMMU0_MBUS_GATE N",
+        "template": {
+          "symbol": "CLK_IOMMU0_MBUS_GATE",
+          "value": 87,
+          "domain": "clock"
+        }
+      },
+      "9e7944569cc96221": {
+        "count": 5,
+        "normalized_preview": "#define CLK_VE_DEC_MBUS N",
+        "template": {
+          "symbol": "CLK_VE_DEC_MBUS",
+          "value": 88,
+          "domain": "clock"
+        }
+      },
+      "7fb686628977ba1b": {
+        "count": 5,
+        "normalized_preview": "#define CLK_GMAC1_MBUS N",
+        "template": {
+          "symbol": "CLK_GMAC1_MBUS",
+          "value": 89,
+          "domain": "clock"
+        }
+      },
+      "8c4a3700a95ce6fd": {
+        "count": 5,
+        "normalized_preview": "#define CLK_GMAC0_MBUS N",
+        "template": {
+          "symbol": "CLK_GMAC0_MBUS",
+          "value": 90,
+          "domain": "clock"
+        }
+      },
+      "2f75a23d62401253": {
+        "count": 5,
+        "normalized_preview": "#define CLK_ISP_MBUS N",
+        "template": {
+          "symbol": "CLK_ISP_MBUS",
+          "value": 91,
+          "domain": "clock"
+        }
+      },
+      "a7e3c901da93c591": {
+        "count": 5,
+        "normalized_preview": "#define CLK_CSI_MBUS N",
+        "template": {
+          "symbol": "CLK_CSI_MBUS",
+          "value": 92,
+          "domain": "clock"
+        }
+      },
+      "c3f89425b3656c3f": {
+        "count": 5,
+        "normalized_preview": "#define CLK_NAND_MBUS N",
+        "template": {
+          "symbol": "CLK_NAND_MBUS",
+          "value": 93,
+          "domain": "clock"
+        }
+      },
+      "98d049525e7a6818": {
+        "count": 5,
+        "normalized_preview": "#define CLK_DMA1_MBUS N",
+        "template": {
+          "symbol": "CLK_DMA1_MBUS",
+          "value": 94,
+          "domain": "clock"
+        }
+      },
+      "ad2647fe1269957b": {
+        "count": 5,
+        "normalized_preview": "#define CLK_MBUS_CE N",
+        "template": {
+          "symbol": "CLK_MBUS_CE",
+          "value": 95,
+          "domain": "clock"
+        }
+      },
+      "789c7d1353fd430e": {
+        "count": 5,
+        "normalized_preview": "#define CLK_MBUS_VE N",
+        "template": {
+          "symbol": "CLK_MBUS_VE",
+          "value": 96,
+          "domain": "clock"
+        }
+      },
+      "ba8fdd2b6f85bcb9": {
+        "count": 5,
+        "normalized_preview": "#define CLK_MBUS_DMA0 N",
+        "template": {
+          "symbol": "CLK_MBUS_DMA0",
+          "value": 97,
+          "domain": "clock"
+        }
+      },
+      "8dd6068ee1defc3a": {
+        "count": 5,
+        "normalized_preview": "#define CLK_DMA0 N",
+        "template": {
+          "symbol": "CLK_DMA0",
+          "value": 98,
+          "domain": "clock"
+        }
+      },
+      "2f816df692605e4d": {
+        "count": 5,
+        "normalized_preview": "#define CLK_DMA1 N",
+        "template": {
+          "symbol": "CLK_DMA1",
+          "value": 99,
+          "domain": "clock"
+        }
+      },
+      "9405d3bed652bd0e": {
+        "count": 5,
+        "normalized_preview": "#define CLK_SPINLOCK N",
+        "template": {
+          "symbol": "CLK_SPINLOCK",
+          "value": 100,
+          "domain": "clock"
+        }
+      },
+      "44b98f5415aa20a0": {
+        "count": 5,
+        "normalized_preview": "#define CLK_MSGBOX0 N",
+        "template": {
+          "symbol": "CLK_MSGBOX0",
+          "value": 101,
+          "domain": "clock"
+        }
+      },
+      "b243a9d0a13fe6a3": {
+        "count": 5,
+        "normalized_preview": "#define CLK_PWM0 N",
+        "template": {
+          "symbol": "CLK_PWM0",
+          "value": 102,
+          "domain": "clock"
+        }
+      },
+      "ccbd1f2b759352a2": {
+        "count": 5,
+        "normalized_preview": "#define CLK_PWM1 N",
+        "template": {
+          "symbol": "CLK_PWM1",
+          "value": 103,
+          "domain": "clock"
+        }
+      },
+      "f6ca34a5513718ff": {
+        "count": 5,
+        "normalized_preview": "#define CLK_DBGSYS N",
+        "template": {
+          "symbol": "CLK_DBGSYS",
+          "value": 104,
+          "domain": "clock"
+        }
+      },
+      "79bf5dab890ff698": {
+        "count": 5,
+        "normalized_preview": "#define CLK_SYSDAP N",
+        "template": {
+          "symbol": "CLK_SYSDAP",
+          "value": 105,
+          "domain": "clock"
+        }
+      },
+      "39e4fba51a8fb95a": {
+        "count": 5,
+        "normalized_preview": "#define CLK_TIMER0 N",
+        "template": {
+          "symbol": "CLK_TIMER0",
+          "value": 106,
+          "domain": "clock"
+        }
+      },
+      "1d1755758328b0d2": {
+        "count": 5,
+        "normalized_preview": "#define CLK_TIMER1 N",
+        "template": {
+          "symbol": "CLK_TIMER1",
+          "value": 107,
+          "domain": "clock"
+        }
+      },
+      "952e494df6d603b9": {
+        "count": 5,
+        "normalized_preview": "#define CLK_TIMER2 N",
+        "template": {
+          "symbol": "CLK_TIMER2",
+          "value": 108,
+          "domain": "clock"
+        }
+      },
+      "60b9ef00e01d0086": {
+        "count": 5,
+        "normalized_preview": "#define CLK_TIMER3 N",
+        "template": {
+          "symbol": "CLK_TIMER3",
+          "value": 109,
+          "domain": "clock"
+        }
+      },
+      "29b6b4f86442ab56": {
+        "count": 5,
+        "normalized_preview": "#define CLK_TIMER4 N",
+        "template": {
+          "symbol": "CLK_TIMER4",
+          "value": 110,
+          "domain": "clock"
+        }
+      },
+      "4c8f393e6abc26ba": {
+        "count": 5,
+        "normalized_preview": "#define CLK_TIMER5 N",
+        "template": {
+          "symbol": "CLK_TIMER5",
+          "value": 111,
+          "domain": "clock"
+        }
+      },
+      "cdd78ad18557bd90": {
+        "count": 5,
+        "normalized_preview": "#define CLK_TIMER6 N",
+        "template": {
+          "symbol": "CLK_TIMER6",
+          "value": 112,
+          "domain": "clock"
+        }
+      },
+      "2ae8d68757bfebc1": {
+        "count": 5,
+        "normalized_preview": "#define CLK_TIMER7 N",
+        "template": {
+          "symbol": "CLK_TIMER7",
+          "value": 113,
+          "domain": "clock"
+        }
+      },
+      "bf969451985f9743": {
+        "count": 5,
+        "normalized_preview": "#define CLK_TIMER8 N",
+        "template": {
+          "symbol": "CLK_TIMER8",
+          "value": 114,
+          "domain": "clock"
+        }
+      },
+      "7491207bf2d285ad": {
+        "count": 5,
+        "normalized_preview": "#define CLK_TIMER9 N",
+        "template": {
+          "symbol": "CLK_TIMER9",
+          "value": 115,
+          "domain": "clock"
+        }
+      },
+      "f36a2794482a06ef": {
+        "count": 5,
+        "normalized_preview": "#define CLK_BUS_TIMER N",
+        "template": {
+          "symbol": "CLK_BUS_TIMER",
+          "value": 116,
+          "domain": "clock"
+        }
+      },
+      "e5c55425411c16b2": {
+        "count": 5,
+        "normalized_preview": "#define CLK_AVS N",
+        "template": {
+          "symbol": "CLK_AVS",
+          "value": 117,
+          "domain": "clock"
+        }
+      },
+      "327588e1ecb3417b": {
+        "count": 5,
+        "normalized_preview": "#define CLK_DE0 N",
+        "template": {
+          "symbol": "CLK_DE0",
+          "value": 118,
+          "domain": "clock"
+        }
+      },
+      "9d72c085f9e56e90": {
+        "count": 5,
+        "normalized_preview": "#define CLK_BUS_DE0 N",
+        "template": {
+          "symbol": "CLK_BUS_DE0",
+          "value": 119,
+          "domain": "clock"
+        }
+      },
+      "bed22973f67313c2": {
+        "count": 5,
+        "normalized_preview": "#define CLK_DI N",
+        "template": {
+          "symbol": "CLK_DI",
+          "value": 120,
+          "domain": "clock"
+        }
+      },
+      "c6f5a2068dc5c15b": {
+        "count": 5,
+        "normalized_preview": "#define CLK_DI_GATE N",
+        "template": {
+          "symbol": "CLK_DI_GATE",
+          "value": 121,
+          "domain": "clock"
+        }
+      },
+      "7f78e24f6ad82bc4": {
+        "count": 5,
+        "normalized_preview": "#define CLK_G2D N",
+        "template": {
+          "symbol": "CLK_G2D",
+          "value": 122,
+          "domain": "clock"
+        }
+      },
+      "b6e687dbbc890271": {
+        "count": 5,
+        "normalized_preview": "#define CLK_G2D_GATE N",
+        "template": {
+          "symbol": "CLK_G2D_GATE",
+          "value": 123,
+          "domain": "clock"
+        }
+      },
+      "7e707efa6083e998": {
+        "count": 5,
+        "normalized_preview": "#define CLK_EINK N",
+        "template": {
+          "symbol": "CLK_EINK",
+          "value": 124,
+          "domain": "clock"
+        }
+      },
+      "bb610e5cce6407a5": {
+        "count": 5,
+        "normalized_preview": "#define CLK_EINK_PANEL N",
+        "template": {
+          "symbol": "CLK_EINK_PANEL",
+          "value": 125,
+          "domain": "clock"
+        }
+      },
+      "82a517075da70804": {
+        "count": 5,
+        "normalized_preview": "#define CLK_EINK_GATE N",
+        "template": {
+          "symbol": "CLK_EINK_GATE",
+          "value": 126,
+          "domain": "clock"
+        }
+      },
+      "98a135fc602988fe": {
+        "count": 5,
+        "normalized_preview": "#define CLK_VE_ENC0 N",
+        "template": {
+          "symbol": "CLK_VE_ENC0",
+          "value": 127,
+          "domain": "clock"
+        }
+      },
+      "bb17bba8b5950fe3": {
+        "count": 5,
+        "normalized_preview": "#define CLK_VE_DEC N",
+        "template": {
+          "symbol": "CLK_VE_DEC",
+          "value": 128,
+          "domain": "clock"
+        }
+      },
+      "f3404611d574dd9e": {
+        "count": 5,
+        "normalized_preview": "#define CLK_BUS_VE_DEC N",
+        "template": {
+          "symbol": "CLK_BUS_VE_DEC",
+          "value": 129,
+          "domain": "clock"
+        }
+      },
+      "991a5fc44c1542c3": {
+        "count": 5,
+        "normalized_preview": "#define CLK_BUS_VE_ENC N",
+        "template": {
+          "symbol": "CLK_BUS_VE_ENC",
+          "value": 130,
+          "domain": "clock"
+        }
+      },
+      "52d5e4a6c4c702a6": {
+        "count": 5,
+        "normalized_preview": "#define CLK_CE N",
+        "template": {
+          "symbol": "CLK_CE",
+          "value": 131,
+          "domain": "clock"
+        }
+      },
+      "36aa13e8df31e0e3": {
+        "count": 5,
+        "normalized_preview": "#define CLK_CE_SYS N",
+        "template": {
+          "symbol": "CLK_CE_SYS",
+          "value": 132,
+          "domain": "clock"
+        }
+      },
+      "fc3122e87a037cac": {
+        "count": 5,
+        "normalized_preview": "#define CLK_BUS_CE N",
+        "template": {
+          "symbol": "CLK_BUS_CE",
+          "value": 133,
+          "domain": "clock"
+        }
+      },
+      "43b855f34e938d1c": {
+        "count": 5,
+        "normalized_preview": "#define CLK_NPU N",
+        "template": {
+          "symbol": "CLK_NPU",
+          "value": 134,
+          "domain": "clock"
+        }
+      },
+      "ae3b7d91aaac328e": {
+        "count": 5,
+        "normalized_preview": "#define CLK_BUS_NPU N",
+        "template": {
+          "symbol": "CLK_BUS_NPU",
+          "value": 135,
+          "domain": "clock"
+        }
+      },
+      "6b362ddee96b599b": {
+        "count": 5,
+        "normalized_preview": "#define CLK_GPU0 N",
+        "template": {
+          "symbol": "CLK_GPU0",
+          "value": 136,
+          "domain": "clock"
+        }
+      },
+      "5b225b80788df875": {
+        "count": 5,
+        "normalized_preview": "#define CLK_BUS_GPU0 N",
+        "template": {
+          "symbol": "CLK_BUS_GPU0",
+          "value": 137,
+          "domain": "clock"
+        }
+      },
+      "a903f71c13a6ed6b": {
+        "count": 5,
+        "normalized_preview": "#define CLK_DRAM0 N",
+        "template": {
+          "symbol": "CLK_DRAM0",
+          "value": 138,
+          "domain": "clock"
+        }
+      },
+      "90fe88de1adb5cc3": {
+        "count": 5,
+        "normalized_preview": "#define CLK_BUS_DRAM0 N",
+        "template": {
+          "symbol": "CLK_BUS_DRAM0",
+          "value": 139,
+          "domain": "clock"
+        }
+      },
+      "c1ceb84baf17e1ac": {
+        "count": 5,
+        "normalized_preview": "#define CLK_NAND0_CLK0 N",
+        "template": {
+          "symbol": "CLK_NAND0_CLK0",
+          "value": 140,
+          "domain": "clock"
+        }
+      },
+      "76bdc3153058271e": {
+        "count": 5,
+        "normalized_preview": "#define CLK_NAND0_CLK1 N",
+        "template": {
+          "symbol": "CLK_NAND0_CLK1",
+          "value": 141,
+          "domain": "clock"
+        }
+      },
+      "fba87f75c568cf03": {
+        "count": 5,
+        "normalized_preview": "#define CLK_BUS_NAND0 N",
+        "template": {
+          "symbol": "CLK_BUS_NAND0",
+          "value": 142,
+          "domain": "clock"
+        }
+      },
+      "e6a6da778d128485": {
+        "count": 5,
+        "normalized_preview": "#define CLK_SMHC0 N",
+        "template": {
+          "symbol": "CLK_SMHC0",
+          "value": 143,
+          "domain": "clock"
+        }
+      },
+      "7e279d93a454f5b1": {
+        "count": 5,
+        "normalized_preview": "#define CLK_BUS_SMHC0 N",
+        "template": {
+          "symbol": "CLK_BUS_SMHC0",
+          "value": 144,
+          "domain": "clock"
+        }
+      },
+      "22cf7d339d0ee1db": {
+        "count": 5,
+        "normalized_preview": "#define CLK_SMHC1 N",
+        "template": {
+          "symbol": "CLK_SMHC1",
+          "value": 145,
+          "domain": "clock"
+        }
+      },
+      "04009f36583420d5": {
+        "count": 5,
+        "normalized_preview": "#define CLK_BUS_SMHC1 N",
+        "template": {
+          "symbol": "CLK_BUS_SMHC1",
+          "value": 146,
+          "domain": "clock"
+        }
+      },
+      "69f1342bf5d9a5cc": {
+        "count": 5,
+        "normalized_preview": "#define CLK_SMHC2 N",
+        "template": {
+          "symbol": "CLK_SMHC2",
+          "value": 147,
+          "domain": "clock"
+        }
+      },
+      "089e220bd03ea086": {
+        "count": 5,
+        "normalized_preview": "#define CLK_BUS_SMHC2 N",
+        "template": {
+          "symbol": "CLK_BUS_SMHC2",
+          "value": 148,
+          "domain": "clock"
+        }
+      },
+      "63928a350032d45d": {
+        "count": 5,
+        "normalized_preview": "#define CLK_SMHC3 N",
+        "template": {
+          "symbol": "CLK_SMHC3",
+          "value": 149,
+          "domain": "clock"
+        }
+      },
+      "3920f53ba19dd3d0": {
+        "count": 5,
+        "normalized_preview": "#define CLK_BUS_SMHC3 N",
+        "template": {
+          "symbol": "CLK_BUS_SMHC3",
+          "value": 150,
+          "domain": "clock"
+        }
+      },
+      "6f602e4f28527f61": {
+        "count": 5,
+        "normalized_preview": "#define CLK_UFS_AXI N",
+        "template": {
+          "symbol": "CLK_UFS_AXI",
+          "value": 151,
+          "domain": "clock"
+        }
+      },
+      "d567ceebe5d2dfd2": {
+        "count": 5,
+        "normalized_preview": "#define CLK_UFS_CFG N",
+        "template": {
+          "symbol": "CLK_UFS_CFG",
+          "value": 152,
+          "domain": "clock"
+        }
+      },
+      "1357757847fc3602": {
+        "count": 5,
+        "normalized_preview": "#define CLK_UFS N",
+        "template": {
+          "symbol": "CLK_UFS",
+          "value": 153,
+          "domain": "clock"
+        }
+      },
+      "d49e36bafcc15ba4": {
+        "count": 5,
+        "normalized_preview": "#define CLK_UART0 N",
+        "template": {
+          "symbol": "CLK_UART0",
+          "value": 154,
+          "domain": "clock"
+        }
+      },
+      "88cb55b6cab40d55": {
+        "count": 5,
+        "normalized_preview": "#define CLK_UART1 N",
+        "template": {
+          "symbol": "CLK_UART1",
+          "value": 155,
+          "domain": "clock"
+        }
+      },
+      "a2e3e9187a81d6b7": {
+        "count": 5,
+        "normalized_preview": "#define CLK_UART2 N",
+        "template": {
+          "symbol": "CLK_UART2",
+          "value": 156,
+          "domain": "clock"
+        }
+      },
+      "d05c4a51aa60381b": {
+        "count": 5,
+        "normalized_preview": "#define CLK_UART3 N",
+        "template": {
+          "symbol": "CLK_UART3",
+          "value": 157,
+          "domain": "clock"
+        }
+      },
+      "f3bf65931853eb43": {
+        "count": 5,
+        "normalized_preview": "#define CLK_UART4 N",
+        "template": {
+          "symbol": "CLK_UART4",
+          "value": 158,
+          "domain": "clock"
+        }
+      },
+      "c15c94b13f0c427c": {
+        "count": 5,
+        "normalized_preview": "#define CLK_UART5 N",
+        "template": {
+          "symbol": "CLK_UART5",
+          "value": 159,
+          "domain": "clock"
+        }
+      },
+      "58d2c1fc659816c6": {
+        "count": 5,
+        "normalized_preview": "#define CLK_UART6 N",
+        "template": {
+          "symbol": "CLK_UART6",
+          "value": 160,
+          "domain": "clock"
+        }
+      },
+      "2d0db8bd964dddfc": {
+        "count": 5,
+        "normalized_preview": "#define CLK_TWI0 N",
+        "template": {
+          "symbol": "CLK_TWI0",
+          "value": 161,
+          "domain": "clock"
+        }
+      },
+      "e5f826027232201b": {
+        "count": 5,
+        "normalized_preview": "#define CLK_TWI1 N",
+        "template": {
+          "symbol": "CLK_TWI1",
+          "value": 162,
+          "domain": "clock"
+        }
+      },
+      "7a149728619b958d": {
+        "count": 5,
+        "normalized_preview": "#define CLK_TWI2 N",
+        "template": {
+          "symbol": "CLK_TWI2",
+          "value": 163,
+          "domain": "clock"
+        }
+      },
+      "ddffb4abebf28aaf": {
+        "count": 5,
+        "normalized_preview": "#define CLK_TWI3 N",
+        "template": {
+          "symbol": "CLK_TWI3",
+          "value": 164,
+          "domain": "clock"
+        }
+      },
+      "e9d5ca7fcefd1f31": {
+        "count": 5,
+        "normalized_preview": "#define CLK_TWI4 N",
+        "template": {
+          "symbol": "CLK_TWI4",
+          "value": 165,
+          "domain": "clock"
+        }
+      },
+      "bb0c2e93d98c97af": {
+        "count": 5,
+        "normalized_preview": "#define CLK_TWI5 N",
+        "template": {
+          "symbol": "CLK_TWI5",
+          "value": 166,
+          "domain": "clock"
+        }
+      },
+      "979397a97663fa13": {
+        "count": 5,
+        "normalized_preview": "#define CLK_TWI6 N",
+        "template": {
+          "symbol": "CLK_TWI6",
+          "value": 167,
+          "domain": "clock"
+        }
+      },
+      "2e4dc163e9897e09": {
+        "count": 5,
+        "normalized_preview": "#define CLK_TWI7 N",
+        "template": {
+          "symbol": "CLK_TWI7",
+          "value": 168,
+          "domain": "clock"
+        }
+      },
+      "f036c194fe664e2f": {
+        "count": 5,
+        "normalized_preview": "#define CLK_TWI8 N",
+        "template": {
+          "symbol": "CLK_TWI8",
+          "value": 169,
+          "domain": "clock"
+        }
+      },
+      "8f26e47b6859df76": {
+        "count": 5,
+        "normalized_preview": "#define CLK_TWI9 N",
+        "template": {
+          "symbol": "CLK_TWI9",
+          "value": 170,
+          "domain": "clock"
+        }
+      },
+      "059783e11e2bc9eb": {
+        "count": 5,
+        "normalized_preview": "#define CLK_TWI10 N",
+        "template": {
+          "symbol": "CLK_TWI10",
+          "value": 171,
+          "domain": "clock"
+        }
+      },
+      "be550ceba30eea8e": {
+        "count": 5,
+        "normalized_preview": "#define CLK_TWI11 N",
+        "template": {
+          "symbol": "CLK_TWI11",
+          "value": 172,
+          "domain": "clock"
+        }
+      },
+      "1a9f2cd3975b0e7e": {
+        "count": 5,
+        "normalized_preview": "#define CLK_TWI12 N",
+        "template": {
+          "symbol": "CLK_TWI12",
+          "value": 173,
+          "domain": "clock"
+        }
+      },
+      "8135596f4061b1d2": {
+        "count": 5,
+        "normalized_preview": "#define CLK_SPI0 N",
+        "template": {
+          "symbol": "CLK_SPI0",
+          "value": 174,
+          "domain": "clock"
+        }
+      },
+      "5eaf6579e6a8a64d": {
+        "count": 5,
+        "normalized_preview": "#define CLK_BUS_SPI0 N",
+        "template": {
+          "symbol": "CLK_BUS_SPI0",
+          "value": 175,
+          "domain": "clock"
+        }
+      },
+      "7f6bb7b15232aad6": {
+        "count": 5,
+        "normalized_preview": "#define CLK_SPI1 N",
+        "template": {
+          "symbol": "CLK_SPI1",
+          "value": 176,
+          "domain": "clock"
+        }
+      },
+      "2a3ac147c8564eee": {
+        "count": 5,
+        "normalized_preview": "#define CLK_BUS_SPI1 N",
+        "template": {
+          "symbol": "CLK_BUS_SPI1",
+          "value": 177,
+          "domain": "clock"
+        }
+      },
+      "3d6bfaa20d8cd107": {
+        "count": 5,
+        "normalized_preview": "#define CLK_SPI2 N",
+        "template": {
+          "symbol": "CLK_SPI2",
+          "value": 178,
+          "domain": "clock"
+        }
+      },
+      "74dbd06509925a9d": {
+        "count": 5,
+        "normalized_preview": "#define CLK_BUS_SPI2 N",
+        "template": {
+          "symbol": "CLK_BUS_SPI2",
+          "value": 179,
+          "domain": "clock"
+        }
+      },
+      "348da6ea72302380": {
+        "count": 5,
+        "normalized_preview": "#define CLK_SPIF N",
+        "template": {
+          "symbol": "CLK_SPIF",
+          "value": 180,
+          "domain": "clock"
+        }
+      },
+      "adab425e8355574a": {
+        "count": 5,
+        "normalized_preview": "#define CLK_BUS_SPIF N",
+        "template": {
+          "symbol": "CLK_BUS_SPIF",
+          "value": 181,
+          "domain": "clock"
+        }
+      },
+      "063d8f7c4b8f7794": {
+        "count": 5,
+        "normalized_preview": "#define CLK_SPI3 N",
+        "template": {
+          "symbol": "CLK_SPI3",
+          "value": 182,
+          "domain": "clock"
+        }
+      },
+      "9f1ed128e9acb820": {
+        "count": 5,
+        "normalized_preview": "#define CLK_BUS_SPI3 N",
+        "template": {
+          "symbol": "CLK_BUS_SPI3",
+          "value": 183,
+          "domain": "clock"
+        }
+      },
+      "1a66cbd28b135be4": {
+        "count": 5,
+        "normalized_preview": "#define CLK_SPI4 N",
+        "template": {
+          "symbol": "CLK_SPI4",
+          "value": 184,
+          "domain": "clock"
+        }
+      },
+      "b2a6eaba20f5df9d": {
+        "count": 5,
+        "normalized_preview": "#define CLK_BUS_SPI4 N",
+        "template": {
+          "symbol": "CLK_BUS_SPI4",
+          "value": 185,
+          "domain": "clock"
+        }
+      },
+      "2828a389e0725654": {
+        "count": 5,
+        "normalized_preview": "#define CLK_GPADC0_24M N",
+        "template": {
+          "symbol": "CLK_GPADC0_24M",
+          "value": 186,
+          "domain": "clock"
+        }
+      },
+      "02838558c1300dca": {
+        "count": 5,
+        "normalized_preview": "#define CLK_GPADC0 N",
+        "template": {
+          "symbol": "CLK_GPADC0",
+          "value": 187,
+          "domain": "clock"
+        }
+      },
+      "5aabf9363326cb07": {
+        "count": 5,
+        "normalized_preview": "#define CLK_THS0 N",
+        "template": {
+          "symbol": "CLK_THS0",
+          "value": 188,
+          "domain": "clock"
+        }
+      },
+      "1bd4cf14266a31fd": {
+        "count": 5,
+        "normalized_preview": "#define CLK_IRRX N",
+        "template": {
+          "symbol": "CLK_IRRX",
+          "value": 189,
+          "domain": "clock"
+        }
+      },
+      "5ff473268f63255c": {
+        "count": 5,
+        "normalized_preview": "#define CLK_IRRX_GATE N",
+        "template": {
+          "symbol": "CLK_IRRX_GATE",
+          "value": 190,
+          "domain": "clock"
+        }
+      },
+      "7f72c16821b015a9": {
+        "count": 5,
+        "normalized_preview": "#define CLK_IRTX N",
+        "template": {
+          "symbol": "CLK_IRTX",
+          "value": 191,
+          "domain": "clock"
+        }
+      },
+      "6c9b21c860b4aa2d": {
+        "count": 5,
+        "normalized_preview": "#define CLK_IRTX_GATE N",
+        "template": {
+          "symbol": "CLK_IRTX_GATE",
+          "value": 192,
+          "domain": "clock"
+        }
+      },
+      "23e7ab2087eb95a7": {
+        "count": 5,
+        "normalized_preview": "#define CLK_LRADC N",
+        "template": {
+          "symbol": "CLK_LRADC",
+          "value": 193,
+          "domain": "clock"
+        }
+      },
+      "fe5d794a93a80eb8": {
+        "count": 5,
+        "normalized_preview": "#define CLK_SGPIO N",
+        "template": {
+          "symbol": "CLK_SGPIO",
+          "value": 194,
+          "domain": "clock"
+        }
+      },
+      "7d20fb56773399d9": {
+        "count": 5,
+        "normalized_preview": "#define CLK_BUS_SGPIO N",
+        "template": {
+          "symbol": "CLK_BUS_SGPIO",
+          "value": 195,
+          "domain": "clock"
+        }
+      },
+      "8b5d516833337efc": {
+        "count": 5,
+        "normalized_preview": "#define CLK_LPC N",
+        "template": {
+          "symbol": "CLK_LPC",
+          "value": 196,
+          "domain": "clock"
+        }
+      },
+      "91a6d64c0d5a3855": {
+        "count": 5,
+        "normalized_preview": "#define CLK_BUS_LPC N",
+        "template": {
+          "symbol": "CLK_BUS_LPC",
+          "value": 197,
+          "domain": "clock"
+        }
+      },
+      "976410c4ddc13dc9": {
+        "count": 5,
+        "normalized_preview": "#define CLK_I2SPCM0 N",
+        "template": {
+          "symbol": "CLK_I2SPCM0",
+          "value": 198,
+          "domain": "clock"
+        }
+      },
+      "636e2e31dffe2580": {
+        "count": 5,
+        "normalized_preview": "#define CLK_BUS_I2SPCM0 N",
+        "template": {
+          "symbol": "CLK_BUS_I2SPCM0",
+          "value": 199,
+          "domain": "clock"
+        }
+      },
+      "8bbd314cacd68aba": {
+        "count": 5,
+        "normalized_preview": "#define CLK_I2SPCM1 N",
+        "template": {
+          "symbol": "CLK_I2SPCM1",
+          "value": 200,
+          "domain": "clock"
+        }
+      },
+      "2a8d5ac68bf252f3": {
+        "count": 5,
+        "normalized_preview": "#define CLK_BUS_I2SPCM1 N",
+        "template": {
+          "symbol": "CLK_BUS_I2SPCM1",
+          "value": 201,
+          "domain": "clock"
+        }
+      },
+      "4d6fdb93ef69d861": {
+        "count": 5,
+        "normalized_preview": "#define CLK_I2SPCM2 N",
+        "template": {
+          "symbol": "CLK_I2SPCM2",
+          "value": 202,
+          "domain": "clock"
+        }
+      },
+      "e642a77481fd9f17": {
+        "count": 5,
+        "normalized_preview": "#define CLK_I2SPCM2_ASRC N",
+        "template": {
+          "symbol": "CLK_I2SPCM2_ASRC",
+          "value": 203,
+          "domain": "clock"
+        }
+      },
+      "d659d849812919d1": {
+        "count": 5,
+        "normalized_preview": "#define CLK_BUS_I2SPCM2 N",
+        "template": {
+          "symbol": "CLK_BUS_I2SPCM2",
+          "value": 204,
+          "domain": "clock"
+        }
+      },
+      "19b2115b533091eb": {
+        "count": 5,
+        "normalized_preview": "#define CLK_I2SPCM3 N",
+        "template": {
+          "symbol": "CLK_I2SPCM3",
+          "value": 205,
+          "domain": "clock"
+        }
+      },
+      "574f423bcef1137b": {
+        "count": 5,
+        "normalized_preview": "#define CLK_BUS_I2SPCM3 N",
+        "template": {
+          "symbol": "CLK_BUS_I2SPCM3",
+          "value": 206,
+          "domain": "clock"
+        }
+      },
+      "c029525b40698ff1": {
+        "count": 5,
+        "normalized_preview": "#define CLK_I2SPCM4 N",
+        "template": {
+          "symbol": "CLK_I2SPCM4",
+          "value": 207,
+          "domain": "clock"
+        }
+      },
+      "51ff852d7fee0e1d": {
+        "count": 5,
+        "normalized_preview": "#define CLK_BUS_I2SPCM4 N",
+        "template": {
+          "symbol": "CLK_BUS_I2SPCM4",
+          "value": 208,
+          "domain": "clock"
+        }
+      },
+      "521b7b9c171e5cf8": {
+        "count": 5,
+        "normalized_preview": "#define CLK_OWA_TX N",
+        "template": {
+          "symbol": "CLK_OWA_TX",
+          "value": 209,
+          "domain": "clock"
+        }
+      },
+      "1ee775e57977969c": {
+        "count": 5,
+        "normalized_preview": "#define CLK_OWA_RX N",
+        "template": {
+          "symbol": "CLK_OWA_RX",
+          "value": 210,
+          "domain": "clock"
+        }
+      },
+      "71f5ca10cc92ab22": {
+        "count": 5,
+        "normalized_preview": "#define CLK_BUS_OWA N",
+        "template": {
+          "symbol": "CLK_BUS_OWA",
+          "value": 211,
+          "domain": "clock"
+        }
+      },
+      "5e8ede926034b011": {
+        "count": 5,
+        "normalized_preview": "#define CLK_DMIC N",
+        "template": {
+          "symbol": "CLK_DMIC",
+          "value": 212,
+          "domain": "clock"
+        }
+      },
+      "62f781a67171cd4a": {
+        "count": 5,
+        "normalized_preview": "#define CLK_BUS_DMIC N",
+        "template": {
+          "symbol": "CLK_BUS_DMIC",
+          "value": 213,
+          "domain": "clock"
+        }
+      },
+      "ba80477430ae2189": {
+        "count": 5,
+        "normalized_preview": "#define CLK_USB N",
+        "template": {
+          "symbol": "CLK_USB",
+          "value": 214,
+          "domain": "clock"
+        }
+      },
+      "4b786379f1653bd5": {
+        "count": 5,
+        "normalized_preview": "#define CLK_USB0_DEVICE N",
+        "template": {
+          "symbol": "CLK_USB0_DEVICE",
+          "value": 215,
+          "domain": "clock"
+        }
+      },
+      "38bcdf2a0437ff3a": {
+        "count": 5,
+        "normalized_preview": "#define CLK_USB0_EHCI N",
+        "template": {
+          "symbol": "CLK_USB0_EHCI",
+          "value": 216,
+          "domain": "clock"
+        }
+      },
+      "29277f9ee5a57aa1": {
+        "count": 5,
+        "normalized_preview": "#define CLK_USB0_OHCI N",
+        "template": {
+          "symbol": "CLK_USB0_OHCI",
+          "value": 217,
+          "domain": "clock"
+        }
+      },
+      "f80b0297fcfdc04b": {
+        "count": 5,
+        "normalized_preview": "#define CLK_USB1 N",
+        "template": {
+          "symbol": "CLK_USB1",
+          "value": 218,
+          "domain": "clock"
+        }
+      },
+      "32f1cc215ea5fab8": {
+        "count": 5,
+        "normalized_preview": "#define CLK_USB1_EHCI N",
+        "template": {
+          "symbol": "CLK_USB1_EHCI",
+          "value": 219,
+          "domain": "clock"
+        }
+      },
+      "9a34e9bcfa2aac0a": {
+        "count": 5,
+        "normalized_preview": "#define CLK_USB1_OHCI N",
+        "template": {
+          "symbol": "CLK_USB1_OHCI",
+          "value": 220,
+          "domain": "clock"
+        }
+      },
+      "3c9d16b2645c5afa": {
+        "count": 5,
+        "normalized_preview": "#define CLK_USB_REF N",
+        "template": {
+          "symbol": "CLK_USB_REF",
+          "value": 221,
+          "domain": "clock"
+        }
+      },
+      "96543596299c0069": {
+        "count": 5,
+        "normalized_preview": "#define CLK_USB2_U2_REF N",
+        "template": {
+          "symbol": "CLK_USB2_U2_REF",
+          "value": 222,
+          "domain": "clock"
+        }
+      },
+      "3457c527a8d4888d": {
+        "count": 5,
+        "normalized_preview": "#define CLK_USB2_SUSPEND N",
+        "template": {
+          "symbol": "CLK_USB2_SUSPEND",
+          "value": 223,
+          "domain": "clock"
+        }
+      },
+      "1559756e90cb837f": {
+        "count": 5,
+        "normalized_preview": "#define CLK_USB2_MF N",
+        "template": {
+          "symbol": "CLK_USB2_MF",
+          "value": 224,
+          "domain": "clock"
+        }
+      },
+      "7bd924b6fe7f4200": {
+        "count": 5,
+        "normalized_preview": "#define CLK_USB2_U3_UTMI N",
+        "template": {
+          "symbol": "CLK_USB2_U3_UTMI",
+          "value": 225,
+          "domain": "clock"
+        }
+      },
+      "b08685a529cb4f3b": {
+        "count": 5,
+        "normalized_preview": "#define CLK_USB2_U2_PIPE N",
+        "template": {
+          "symbol": "CLK_USB2_U2_PIPE",
+          "value": 226,
+          "domain": "clock"
+        }
+      },
+      "b048a031a31d7f95": {
+        "count": 5,
+        "normalized_preview": "#define CLK_PCIE0_AUX N",
+        "template": {
+          "symbol": "CLK_PCIE0_AUX",
+          "value": 227,
+          "domain": "clock"
+        }
+      },
+      "b36105ea64761b15": {
+        "count": 5,
+        "normalized_preview": "#define CLK_PCIE0_AXI_SLV N",
+        "template": {
+          "symbol": "CLK_PCIE0_AXI_SLV",
+          "value": 228,
+          "domain": "clock"
+        }
+      },
+      "956ceb362d40b023": {
+        "count": 5,
+        "normalized_preview": "#define CLK_SERDES_PHY_CFG N",
+        "template": {
+          "symbol": "CLK_SERDES_PHY_CFG",
+          "value": 229,
+          "domain": "clock"
+        }
+      },
+      "9f192d1f1037b9d3": {
+        "count": 5,
+        "normalized_preview": "#define CLK_GMAC_PTP N",
+        "template": {
+          "symbol": "CLK_GMAC_PTP",
+          "value": 230,
+          "domain": "clock"
+        }
+      },
+      "88906026fc649bf2": {
+        "count": 5,
+        "normalized_preview": "#define CLK_GMAC0_PHY N",
+        "template": {
+          "symbol": "CLK_GMAC0_PHY",
+          "value": 231,
+          "domain": "clock"
+        }
+      },
+      "0d539d22a4f4ec07": {
+        "count": 5,
+        "normalized_preview": "#define CLK_GMAC0 N",
+        "template": {
+          "symbol": "CLK_GMAC0",
+          "value": 232,
+          "domain": "clock"
+        }
+      },
+      "e54ce144488a1327": {
+        "count": 5,
+        "normalized_preview": "#define CLK_GMAC1_PHY N",
+        "template": {
+          "symbol": "CLK_GMAC1_PHY",
+          "value": 233,
+          "domain": "clock"
+        }
+      },
+      "6a78c7a9644936f8": {
+        "count": 5,
+        "normalized_preview": "#define CLK_GMAC1 N",
+        "template": {
+          "symbol": "CLK_GMAC1",
+          "value": 234,
+          "domain": "clock"
+        }
+      },
+      "560f13d11cb78e49": {
+        "count": 5,
+        "normalized_preview": "#define CLK_VO0_TCONLCD0 N",
+        "template": {
+          "symbol": "CLK_VO0_TCONLCD0",
+          "value": 235,
+          "domain": "clock"
+        }
+      },
+      "b9b8d7aca05a459e": {
+        "count": 5,
+        "normalized_preview": "#define CLK_BUS_VO0_TCONLCD0 N",
+        "template": {
+          "symbol": "CLK_BUS_VO0_TCONLCD0",
+          "value": 236,
+          "domain": "clock"
+        }
+      },
+      "20fa47ae27693460": {
+        "count": 5,
+        "normalized_preview": "#define CLK_VO0_TCONLCD1 N",
+        "template": {
+          "symbol": "CLK_VO0_TCONLCD1",
+          "value": 237,
+          "domain": "clock"
+        }
+      },
+      "32feaa8686086a78": {
+        "count": 5,
+        "normalized_preview": "#define CLK_BUS_VO0_TCONLCD1 N",
+        "template": {
+          "symbol": "CLK_BUS_VO0_TCONLCD1",
+          "value": 238,
+          "domain": "clock"
+        }
+      },
+      "43a1825aa7633e25": {
+        "count": 5,
+        "normalized_preview": "#define CLK_VO0_TCONLCD2 N",
+        "template": {
+          "symbol": "CLK_VO0_TCONLCD2",
+          "value": 239,
+          "domain": "clock"
+        }
+      },
+      "338a6e2cf2148d15": {
+        "count": 5,
+        "normalized_preview": "#define CLK_BUS_VO0_TCONLCD2 N",
+        "template": {
+          "symbol": "CLK_BUS_VO0_TCONLCD2",
+          "value": 240,
+          "domain": "clock"
+        }
+      },
+      "f5dc800101254020": {
+        "count": 5,
+        "normalized_preview": "#define CLK_DSI0 N",
+        "template": {
+          "symbol": "CLK_DSI0",
+          "value": 241,
+          "domain": "clock"
+        }
+      },
+      "d2227efbb42937ae": {
+        "count": 5,
+        "normalized_preview": "#define CLK_BUS_DSI0 N",
+        "template": {
+          "symbol": "CLK_BUS_DSI0",
+          "value": 242,
+          "domain": "clock"
+        }
+      },
+      "9880a302c3e03e71": {
+        "count": 5,
+        "normalized_preview": "#define CLK_DSI1 N",
+        "template": {
+          "symbol": "CLK_DSI1",
+          "value": 243,
+          "domain": "clock"
+        }
+      },
+      "25d8d157830b7132": {
+        "count": 5,
+        "normalized_preview": "#define CLK_BUS_DSI1 N",
+        "template": {
+          "symbol": "CLK_BUS_DSI1",
+          "value": 244,
+          "domain": "clock"
+        }
+      },
+      "22bad58cf76bd3d0": {
+        "count": 5,
+        "normalized_preview": "#define CLK_COMBPHY0 N",
+        "template": {
+          "symbol": "CLK_COMBPHY0",
+          "value": 245,
+          "domain": "clock"
+        }
+      },
+      "e794804663167427": {
+        "count": 5,
+        "normalized_preview": "#define CLK_COMBPHY1 N",
+        "template": {
+          "symbol": "CLK_COMBPHY1",
+          "value": 246,
+          "domain": "clock"
+        }
+      },
+      "4e550baf434b87ed": {
+        "count": 5,
+        "normalized_preview": "#define CLK_TCONTV0 N",
+        "template": {
+          "symbol": "CLK_TCONTV0",
+          "value": 247,
+          "domain": "clock"
+        }
+      },
+      "bd488bc9735029d8": {
+        "count": 5,
+        "normalized_preview": "#define CLK_TCONTV1 N",
+        "template": {
+          "symbol": "CLK_TCONTV1",
+          "value": 248,
+          "domain": "clock"
+        }
+      },
+      "3783610690919a82": {
+        "count": 5,
+        "normalized_preview": "#define CLK_EDP_TV N",
+        "template": {
+          "symbol": "CLK_EDP_TV",
+          "value": 249,
+          "domain": "clock"
+        }
+      },
+      "0a5c9d9575b9603d": {
+        "count": 5,
+        "normalized_preview": "#define CLK_EDP N",
+        "template": {
+          "symbol": "CLK_EDP",
+          "value": 250,
+          "domain": "clock"
+        }
+      },
+      "4c9fc87f97ff1f09": {
+        "count": 5,
+        "normalized_preview": "#define CLK_HDMI_REF N",
+        "template": {
+          "symbol": "CLK_HDMI_REF",
+          "value": 251,
+          "domain": "clock"
+        }
+      },
+      "a5665ab2f58f1d46": {
+        "count": 5,
+        "normalized_preview": "#define CLK_HDMI_TV N",
+        "template": {
+          "symbol": "CLK_HDMI_TV",
+          "value": 252,
+          "domain": "clock"
+        }
+      },
+      "54341391a0191506": {
+        "count": 5,
+        "normalized_preview": "#define CLK_HDMI N",
+        "template": {
+          "symbol": "CLK_HDMI",
+          "value": 253,
+          "domain": "clock"
+        }
+      },
+      "cd65ac647bc56d5d": {
+        "count": 5,
+        "normalized_preview": "#define CLK_HDMI_SFR N",
+        "template": {
+          "symbol": "CLK_HDMI_SFR",
+          "value": 254,
+          "domain": "clock"
+        }
+      },
+      "94e00a3a834c9c2a": {
+        "count": 5,
+        "normalized_preview": "#define CLK_HDCP_ESM N",
+        "template": {
+          "symbol": "CLK_HDCP_ESM",
+          "value": 255,
+          "domain": "clock"
+        }
+      },
+      "e8fc9cd9c2d4b49b": {
+        "count": 5,
+        "normalized_preview": "#define CLK_DPSS_TOP0 N",
+        "template": {
+          "symbol": "CLK_DPSS_TOP0",
+          "value": 256,
+          "domain": "clock"
+        }
+      },
+      "738ace779bc8987f": {
+        "count": 5,
+        "normalized_preview": "#define CLK_DPSS_TOP1 N",
+        "template": {
+          "symbol": "CLK_DPSS_TOP1",
+          "value": 257,
+          "domain": "clock"
+        }
+      },
+      "540eeb451ca56f4a": {
+        "count": 5,
+        "normalized_preview": "#define CLK_LEDC N",
+        "template": {
+          "symbol": "CLK_LEDC",
+          "value": 258,
+          "domain": "clock"
+        }
+      },
+      "8d047cb7468bad5a": {
+        "count": 5,
+        "normalized_preview": "#define CLK_BUS_LEDC N",
+        "template": {
+          "symbol": "CLK_BUS_LEDC",
+          "value": 259,
+          "domain": "clock"
+        }
+      },
+      "30f34a0025c5349c": {
+        "count": 5,
+        "normalized_preview": "#define CLK_DSC N",
+        "template": {
+          "symbol": "CLK_DSC",
+          "value": 260,
+          "domain": "clock"
+        }
+      },
+      "c2f9a975aa09a846": {
+        "count": 5,
+        "normalized_preview": "#define CLK_CSI_MASTER0 N",
+        "template": {
+          "symbol": "CLK_CSI_MASTER0",
+          "value": 261,
+          "domain": "clock"
+        }
+      },
+      "dac0e5409c94eb54": {
+        "count": 5,
+        "normalized_preview": "#define CLK_CSI_MASTER1 N",
+        "template": {
+          "symbol": "CLK_CSI_MASTER1",
+          "value": 262,
+          "domain": "clock"
+        }
+      },
+      "ccff7e64d4e28c5c": {
+        "count": 5,
+        "normalized_preview": "#define CLK_CSI_MASTER2 N",
+        "template": {
+          "symbol": "CLK_CSI_MASTER2",
+          "value": 263,
+          "domain": "clock"
+        }
+      },
+      "ef0c5919d8843605": {
+        "count": 5,
+        "normalized_preview": "#define CLK_CSI N",
+        "template": {
+          "symbol": "CLK_CSI",
+          "value": 264,
+          "domain": "clock"
+        }
+      },
+      "d6e292972014d102": {
+        "count": 5,
+        "normalized_preview": "#define CLK_BUS_CSI N",
+        "template": {
+          "symbol": "CLK_BUS_CSI",
+          "value": 265,
+          "domain": "clock"
+        }
+      },
+      "201014f11b31bf5f": {
+        "count": 5,
+        "normalized_preview": "#define CLK_ISP N",
+        "template": {
+          "symbol": "CLK_ISP",
+          "value": 266,
+          "domain": "clock"
+        }
+      },
+      "5240eed13f4178ca": {
+        "count": 5,
+        "normalized_preview": "#define CLK_RES_DCAP_24M N",
+        "template": {
+          "symbol": "CLK_RES_DCAP_24M",
+          "value": 267,
+          "domain": "clock"
+        }
+      },
+      "9d31bf78e1b2d855": {
+        "count": 5,
+        "normalized_preview": "#define CLK_APB2JTAG N",
+        "template": {
+          "symbol": "CLK_APB2JTAG",
+          "value": 268,
+          "domain": "clock"
+        }
+      },
+      "0c4173f36bc044aa": {
+        "count": 5,
+        "normalized_preview": "#define CLK_FANOUT_25M N",
+        "template": {
+          "symbol": "CLK_FANOUT_25M",
+          "value": 269,
+          "domain": "clock"
+        }
+      },
+      "f832a451cd9652f1": {
+        "count": 5,
+        "normalized_preview": "#define CLK_FANOUT_16M N",
+        "template": {
+          "symbol": "CLK_FANOUT_16M",
+          "value": 270,
+          "domain": "clock"
+        }
+      },
+      "cf0d728d334a4e20": {
+        "count": 5,
+        "normalized_preview": "#define CLK_FANOUT_12M N",
+        "template": {
+          "symbol": "CLK_FANOUT_12M",
+          "value": 271,
+          "domain": "clock"
+        }
+      },
+      "71d4d23ef390cb7f": {
+        "count": 5,
+        "normalized_preview": "#define CLK_FANOUT_24M N",
+        "template": {
+          "symbol": "CLK_FANOUT_24M",
+          "value": 272,
+          "domain": "clock"
+        }
+      },
+      "255405ac8defe60f": {
+        "count": 5,
+        "normalized_preview": "#define CLK_CLK27M_FANOUT N",
+        "template": {
+          "symbol": "CLK_CLK27M_FANOUT",
+          "value": 273,
+          "domain": "clock"
+        }
+      },
+      "70c5c953b00b941d": {
+        "count": 5,
+        "normalized_preview": "#define CLK_CLK_FANOUT N",
+        "template": {
+          "symbol": "CLK_CLK_FANOUT",
+          "value": 274,
+          "domain": "clock"
+        }
+      },
+      "0f09f6325f1eb0bb": {
+        "count": 5,
+        "normalized_preview": "#define CLK_SYS_12M N",
+        "template": {
+          "symbol": "CLK_SYS_12M",
+          "value": 275,
+          "domain": "clock"
+        }
+      },
+      "68a9f6ff1bc229db": {
+        "count": 5,
+        "normalized_preview": "#define CLK_PLL_PERI0_16M N",
+        "template": {
+          "symbol": "CLK_PLL_PERI0_16M",
+          "value": 276,
+          "domain": "clock"
+        }
+      },
+      "2dea13faeaed034d": {
+        "count": 5,
+        "normalized_preview": "#define CLK_PLL_PERI0_25M N",
+        "template": {
+          "symbol": "CLK_PLL_PERI0_25M",
+          "value": 277,
+          "domain": "clock"
+        }
+      },
+      "b17b865fd95d1e70": {
+        "count": 5,
+        "normalized_preview": "#define CLK_FANOUT3 N",
+        "template": {
+          "symbol": "CLK_FANOUT3",
+          "value": 278,
+          "domain": "clock"
+        }
+      },
+      "4e6096f99b36e9cf": {
+        "count": 5,
+        "normalized_preview": "#define CLK_FANOUT2 N",
+        "template": {
+          "symbol": "CLK_FANOUT2",
+          "value": 279,
+          "domain": "clock"
+        }
+      },
+      "dc199b07efea96a0": {
+        "count": 5,
+        "normalized_preview": "#define CLK_FANOUT1 N",
+        "template": {
+          "symbol": "CLK_FANOUT1",
+          "value": 280,
+          "domain": "clock"
+        }
+      },
+      "b37e50d1a298d4b4": {
+        "count": 5,
+        "normalized_preview": "#define CLK_FANOUT0 N",
+        "template": {
+          "symbol": "CLK_FANOUT0",
+          "value": 281,
+          "domain": "clock"
+        }
+      },
+      "6909f296acf4549c": {
+        "count": 5,
+        "normalized_preview": "#define CLK_BUS_DEBUG N",
+        "template": {
+          "symbol": "CLK_BUS_DEBUG",
+          "value": 282,
+          "domain": "clock"
+        }
+      },
+      "168d0aafaea5f615": {
+        "count": 5,
+        "normalized_preview": "#define CLK_PLL_DDR_AUTO N",
+        "template": {
+          "symbol": "CLK_PLL_DDR_AUTO",
+          "value": 283,
+          "domain": "clock"
+        }
+      },
+      "38687d776ef91db5": {
+        "count": 5,
+        "normalized_preview": "#define CLK_PLL_PERI0_2X_AUTO N",
+        "template": {
+          "symbol": "CLK_PLL_PERI0_2X_AUTO",
+          "value": 284,
+          "domain": "clock"
+        }
+      },
+      "48736791c27f2242": {
+        "count": 5,
+        "normalized_preview": "#define CLK_PLL_PERI0_800M_AUTO N",
+        "template": {
+          "symbol": "CLK_PLL_PERI0_800M_AUTO",
+          "value": 285,
+          "domain": "clock"
+        }
+      },
+      "c1ff1719d4e74ab4": {
+        "count": 5,
+        "normalized_preview": "#define CLK_PLL_PERI0_600M_AUTO N",
+        "template": {
+          "symbol": "CLK_PLL_PERI0_600M_AUTO",
+          "value": 286,
+          "domain": "clock"
+        }
+      },
+      "2095a6634a5735aa": {
+        "count": 5,
+        "normalized_preview": "#define CLK_PLL_PERI0_480M_ALL_AUTO N",
+        "template": {
+          "symbol": "CLK_PLL_PERI0_480M_ALL_AUTO",
+          "value": 287,
+          "domain": "clock"
+        }
+      },
+      "ac0f1e72c2f55cf9": {
+        "count": 5,
+        "normalized_preview": "#define CLK_PLL_PERI0_480M_AUTO N",
+        "template": {
+          "symbol": "CLK_PLL_PERI0_480M_AUTO",
+          "value": 288,
+          "domain": "clock"
+        }
+      },
+      "849cb0072cecac0e": {
+        "count": 5,
+        "normalized_preview": "#define CLK_PLL_PERI0_160M_AUTO N",
+        "template": {
+          "symbol": "CLK_PLL_PERI0_160M_AUTO",
+          "value": 289,
+          "domain": "clock"
+        }
+      },
+      "8a93ff270f6abc0e": {
+        "count": 5,
+        "normalized_preview": "#define CLK_PLL_PERI0_300M_ALL_AUTO N",
+        "template": {
+          "symbol": "CLK_PLL_PERI0_300M_ALL_AUTO",
+          "value": 290,
+          "domain": "clock"
+        }
+      },
+      "cf5db8114e2a2ba8": {
+        "count": 5,
+        "normalized_preview": "#define CLK_PLL_PERI0_300M_AUTO N",
+        "template": {
+          "symbol": "CLK_PLL_PERI0_300M_AUTO",
+          "value": 291,
+          "domain": "clock"
+        }
+      },
+      "4ffdf87eaa00bbee": {
+        "count": 5,
+        "normalized_preview": "#define CLK_PLL_PERI0_150M_AUTO N",
+        "template": {
+          "symbol": "CLK_PLL_PERI0_150M_AUTO",
+          "value": 292,
+          "domain": "clock"
+        }
+      },
+      "f99b1383cbe8d572": {
+        "count": 5,
+        "normalized_preview": "#define CLK_PLL_PERI0_400M_ALL_AUTO N",
+        "template": {
+          "symbol": "CLK_PLL_PERI0_400M_ALL_AUTO",
+          "value": 293,
+          "domain": "clock"
+        }
+      },
+      "46989df3dd01148f": {
+        "count": 5,
+        "normalized_preview": "#define CLK_PLL_PERI0_400M_AUTO N",
+        "template": {
+          "symbol": "CLK_PLL_PERI0_400M_AUTO",
+          "value": 294,
+          "domain": "clock"
+        }
+      },
+      "6fd95c6504ec113f": {
+        "count": 5,
+        "normalized_preview": "#define CLK_PLL_PERI0_200M_AUTO N",
+        "template": {
+          "symbol": "CLK_PLL_PERI0_200M_AUTO",
+          "value": 295,
+          "domain": "clock"
+        }
+      },
+      "30a74ad5ec691c66": {
+        "count": 5,
+        "normalized_preview": "#define CLK_PLL_PERI1_800M_AUTO N",
+        "template": {
+          "symbol": "CLK_PLL_PERI1_800M_AUTO",
+          "value": 296,
+          "domain": "clock"
+        }
+      },
+      "1d9359133d479569": {
+        "count": 5,
+        "normalized_preview": "#define CLK_PLL_PERI1_600M_ALL_AUTO N",
+        "template": {
+          "symbol": "CLK_PLL_PERI1_600M_ALL_AUTO",
+          "value": 297,
+          "domain": "clock"
+        }
+      },
+      "dccdf54ff5f1a415": {
+        "count": 5,
+        "normalized_preview": "#define CLK_PLL_PERI1_600M_AUTO N",
+        "template": {
+          "symbol": "CLK_PLL_PERI1_600M_AUTO",
+          "value": 298,
+          "domain": "clock"
+        }
+      },
+      "4535beefb63b3fb3": {
+        "count": 5,
+        "normalized_preview": "#define CLK_PLL_PERI1_480M_ALL_AUTO N",
+        "template": {
+          "symbol": "CLK_PLL_PERI1_480M_ALL_AUTO",
+          "value": 299,
+          "domain": "clock"
+        }
+      },
+      "ce9ed013dd9b2aa6": {
+        "count": 5,
+        "normalized_preview": "#define CLK_PLL_PERI1_480M_AUTO N",
+        "template": {
+          "symbol": "CLK_PLL_PERI1_480M_AUTO",
+          "value": 300,
+          "domain": "clock"
+        }
+      },
+      "6bd00590a7d8feb8": {
+        "count": 5,
+        "normalized_preview": "#define CLK_PLL_PERI1_160M_AUTO N",
+        "template": {
+          "symbol": "CLK_PLL_PERI1_160M_AUTO",
+          "value": 301,
+          "domain": "clock"
+        }
+      },
+      "f9274a2e0dce78cb": {
+        "count": 5,
+        "normalized_preview": "#define CLK_PLL_PERI1_300M_ALL_AUTO N",
+        "template": {
+          "symbol": "CLK_PLL_PERI1_300M_ALL_AUTO",
+          "value": 302,
+          "domain": "clock"
+        }
+      },
+      "4b9e7469fe79c087": {
+        "count": 5,
+        "normalized_preview": "#define CLK_PLL_PERI1_300M_AUTO N",
+        "template": {
+          "symbol": "CLK_PLL_PERI1_300M_AUTO",
+          "value": 303,
+          "domain": "clock"
+        }
+      },
+      "14c5165641e96601": {
+        "count": 5,
+        "normalized_preview": "#define CLK_PLL_PERI1_150M_AUTO N",
+        "template": {
+          "symbol": "CLK_PLL_PERI1_150M_AUTO",
+          "value": 304,
+          "domain": "clock"
+        }
+      },
+      "0f77f6add442e6c6": {
+        "count": 5,
+        "normalized_preview": "#define CLK_PLL_PERI1_400M_ALL_AUTO N",
+        "template": {
+          "symbol": "CLK_PLL_PERI1_400M_ALL_AUTO",
+          "value": 305,
+          "domain": "clock"
+        }
+      },
+      "042c49533d33c1fb": {
+        "count": 5,
+        "normalized_preview": "#define CLK_PLL_PERI1_400M_AUTO N",
+        "template": {
+          "symbol": "CLK_PLL_PERI1_400M_AUTO",
+          "value": 306,
+          "domain": "clock"
+        }
+      },
+      "83d18512fdf859d6": {
+        "count": 5,
+        "normalized_preview": "#define CLK_PLL_PERI1_200M_AUTO N",
+        "template": {
+          "symbol": "CLK_PLL_PERI1_200M_AUTO",
+          "value": 307,
+          "domain": "clock"
+        }
+      },
+      "607ba62584b48241": {
+        "count": 5,
+        "normalized_preview": "#define CLK_PLL_VIDEO2_3X_AUTO N",
+        "template": {
+          "symbol": "CLK_PLL_VIDEO2_3X_AUTO",
+          "value": 308,
+          "domain": "clock"
+        }
+      },
+      "93987a888c4a5a85": {
+        "count": 5,
+        "normalized_preview": "#define CLK_PLL_VIDEO1_3X_AUTO N",
+        "template": {
+          "symbol": "CLK_PLL_VIDEO1_3X_AUTO",
+          "value": 309,
+          "domain": "clock"
+        }
+      },
+      "e26171d7933ff3a2": {
+        "count": 5,
+        "normalized_preview": "#define CLK_PLL_VIDEO0_3X_AUTO N",
+        "template": {
+          "symbol": "CLK_PLL_VIDEO0_3X_AUTO",
+          "value": 310,
+          "domain": "clock"
+        }
+      },
+      "6d6865206510522a": {
+        "count": 5,
+        "normalized_preview": "#define CLK_PLL_VIDEO2_4X_AUTO N",
+        "template": {
+          "symbol": "CLK_PLL_VIDEO2_4X_AUTO",
+          "value": 311,
+          "domain": "clock"
+        }
+      },
+      "f7437d6f91317004": {
+        "count": 5,
+        "normalized_preview": "#define CLK_PLL_VIDEO1_4X_AUTO N",
+        "template": {
+          "symbol": "CLK_PLL_VIDEO1_4X_AUTO",
+          "value": 312,
+          "domain": "clock"
+        }
+      },
+      "d95245533f090b2c": {
+        "count": 5,
+        "normalized_preview": "#define CLK_PLL_VIDEO0_4X_AUTO N",
+        "template": {
+          "symbol": "CLK_PLL_VIDEO0_4X_AUTO",
+          "value": 313,
+          "domain": "clock"
+        }
+      },
+      "9d32e9bfae7372e9": {
+        "count": 5,
+        "normalized_preview": "#define CLK_PLL_GPU0_AUTO N",
+        "template": {
+          "symbol": "CLK_PLL_GPU0_AUTO",
+          "value": 314,
+          "domain": "clock"
+        }
+      },
+      "951504f2e27debaa": {
+        "count": 5,
+        "normalized_preview": "#define CLK_PLL_VE1_AUTO N",
+        "template": {
+          "symbol": "CLK_PLL_VE1_AUTO",
+          "value": 315,
+          "domain": "clock"
+        }
+      },
+      "a324d018fe83a8aa": {
+        "count": 5,
+        "normalized_preview": "#define CLK_PLL_VE0_AUTO N",
+        "template": {
+          "symbol": "CLK_PLL_VE0_AUTO",
+          "value": 316,
+          "domain": "clock"
+        }
+      },
+      "bbf18623a7c0da63": {
+        "count": 5,
+        "normalized_preview": "#define CLK_PLL_AUDIO1_DIV5_AUTO N",
+        "template": {
+          "symbol": "CLK_PLL_AUDIO1_DIV5_AUTO",
+          "value": 317,
+          "domain": "clock"
+        }
+      },
+      "5e5594d502822b3c": {
+        "count": 5,
+        "normalized_preview": "#define CLK_PLL_AUDIO1_DIV2_AUTO N",
+        "template": {
+          "symbol": "CLK_PLL_AUDIO1_DIV2_AUTO",
+          "value": 318,
+          "domain": "clock"
+        }
+      },
+      "b6c843db7f52d053": {
+        "count": 5,
+        "normalized_preview": "#define CLK_PLL_AUDIO0_4X_AUTO N",
+        "template": {
+          "symbol": "CLK_PLL_AUDIO0_4X_AUTO",
+          "value": 319,
+          "domain": "clock"
+        }
+      },
+      "c7d5e20f7937a992": {
+        "count": 5,
+        "normalized_preview": "#define CLK_PLL_NPU_AUTO N",
+        "template": {
+          "symbol": "CLK_PLL_NPU_AUTO",
+          "value": 320,
+          "domain": "clock"
+        }
+      },
+      "ce0a431a2456d3f4": {
+        "count": 5,
+        "normalized_preview": "#define CLK_PLL_DE_3X_AUTO N",
+        "template": {
+          "symbol": "CLK_PLL_DE_3X_AUTO",
+          "value": 321,
+          "domain": "clock"
+        }
+      },
+      "6c63e2c7899f646d": {
+        "count": 5,
+        "normalized_preview": "#define CLK_PLL_DE_4X_AUTO N",
+        "template": {
+          "symbol": "CLK_PLL_DE_4X_AUTO",
+          "value": 322,
+          "domain": "clock"
+        }
+      },
+      "6d7773b6a7c2087c": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_ITS_PCIE0 N",
+        "template": {
+          "symbol": "RST_BUS_ITS_PCIE0",
+          "value": 0,
+          "domain": "reset"
+        }
+      },
+      "25bd44b391f56328": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_NSI N",
+        "template": {
+          "symbol": "RST_BUS_NSI",
+          "value": 1,
+          "domain": "reset"
+        }
+      },
+      "5458c3e135fb7224": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_NSI_CFG N",
+        "template": {
+          "symbol": "RST_BUS_NSI_CFG",
+          "value": 2,
+          "domain": "reset"
+        }
+      },
+      "af710eea6d1bc9c7": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_IOMMU0_SY N",
+        "template": {
+          "symbol": "RST_BUS_IOMMU0_SY",
+          "value": 3,
+          "domain": "reset"
+        }
+      },
+      "c4176cd0b8e8f603": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_MSI_LITE0_MBU N",
+        "template": {
+          "symbol": "RST_BUS_MSI_LITE0_MBU",
+          "value": 4,
+          "domain": "reset"
+        }
+      },
+      "67f1b7cfccbe7d19": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_MSI_LITE0_AHB N",
+        "template": {
+          "symbol": "RST_BUS_MSI_LITE0_AHB",
+          "value": 5,
+          "domain": "reset"
+        }
+      },
+      "a59d58904c39f97e": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_MSI_LITE1_MBU N",
+        "template": {
+          "symbol": "RST_BUS_MSI_LITE1_MBU",
+          "value": 6,
+          "domain": "reset"
+        }
+      },
+      "4c038993e0b14fe5": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_MSI_LITE1_AHB N",
+        "template": {
+          "symbol": "RST_BUS_MSI_LITE1_AHB",
+          "value": 7,
+          "domain": "reset"
+        }
+      },
+      "02b2cd5b5135837f": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_MSI_LITE2_MBU N",
+        "template": {
+          "symbol": "RST_BUS_MSI_LITE2_MBU",
+          "value": 8,
+          "domain": "reset"
+        }
+      },
+      "60645076a9627851": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_MSI_LITE2_AHB N",
+        "template": {
+          "symbol": "RST_BUS_MSI_LITE2_AHB",
+          "value": 9,
+          "domain": "reset"
+        }
+      },
+      "d510a09ad54283ce": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_IOMMU1_SY N",
+        "template": {
+          "symbol": "RST_BUS_IOMMU1_SY",
+          "value": 10,
+          "domain": "reset"
+        }
+      },
+      "2c9b4cee0496cd39": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_DMA0 N",
+        "template": {
+          "symbol": "RST_BUS_DMA0",
+          "value": 11,
+          "domain": "reset"
+        }
+      },
+      "6c1088fee41140bf": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_DMA1 N",
+        "template": {
+          "symbol": "RST_BUS_DMA1",
+          "value": 12,
+          "domain": "reset"
+        }
+      },
+      "432f7cace1bfaa5a": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_SPINLOCK N",
+        "template": {
+          "symbol": "RST_BUS_SPINLOCK",
+          "value": 13,
+          "domain": "reset"
+        }
+      },
+      "d37a5030c7a9de1a": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_MSGBOX0 N",
+        "template": {
+          "symbol": "RST_BUS_MSGBOX0",
+          "value": 14,
+          "domain": "reset"
+        }
+      },
+      "b1f597953eabbbad": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_PWM0 N",
+        "template": {
+          "symbol": "RST_BUS_PWM0",
+          "value": 15,
+          "domain": "reset"
+        }
+      },
+      "6b3c36ce9bd3d957": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_PWM1 N",
+        "template": {
+          "symbol": "RST_BUS_PWM1",
+          "value": 16,
+          "domain": "reset"
+        }
+      },
+      "27f1f0a78ab7b781": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_DBGSY N",
+        "template": {
+          "symbol": "RST_BUS_DBGSY",
+          "value": 17,
+          "domain": "reset"
+        }
+      },
+      "86c57d9a18c21da1": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_SYSDAP N",
+        "template": {
+          "symbol": "RST_BUS_SYSDAP",
+          "value": 18,
+          "domain": "reset"
+        }
+      },
+      "6ded020f9e071c5a": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_TIMER0 N",
+        "template": {
+          "symbol": "RST_BUS_TIMER0",
+          "value": 19,
+          "domain": "reset"
+        }
+      },
+      "879e59955a26c87d": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_DE0 N",
+        "template": {
+          "symbol": "RST_BUS_DE0",
+          "value": 20,
+          "domain": "reset"
+        }
+      },
+      "a3003d90ea30bbbd": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_DI N",
+        "template": {
+          "symbol": "RST_BUS_DI",
+          "value": 21,
+          "domain": "reset"
+        }
+      },
+      "ad5cb96dfbf2a271": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_G2D N",
+        "template": {
+          "symbol": "RST_BUS_G2D",
+          "value": 22,
+          "domain": "reset"
+        }
+      },
+      "f8ff1b17e704923d": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_EINK N",
+        "template": {
+          "symbol": "RST_BUS_EINK",
+          "value": 23,
+          "domain": "reset"
+        }
+      },
+      "fad59329d8e9973d": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_DE_SY N",
+        "template": {
+          "symbol": "RST_BUS_DE_SY",
+          "value": 24,
+          "domain": "reset"
+        }
+      },
+      "0ca45e2d1ad2cc06": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_VE_DEC N",
+        "template": {
+          "symbol": "RST_BUS_VE_DEC",
+          "value": 25,
+          "domain": "reset"
+        }
+      },
+      "db90b504fe596dd5": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_VE_ENC0 N",
+        "template": {
+          "symbol": "RST_BUS_VE_ENC0",
+          "value": 26,
+          "domain": "reset"
+        }
+      },
+      "e46fa1a4ee84a1e9": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_CE_SY N",
+        "template": {
+          "symbol": "RST_BUS_CE_SY",
+          "value": 27,
+          "domain": "reset"
+        }
+      },
+      "bd04e59e753eb4f6": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_CE N",
+        "template": {
+          "symbol": "RST_BUS_CE",
+          "value": 28,
+          "domain": "reset"
+        }
+      },
+      "53c8e9a9a63f177b": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_NPU_AHB N",
+        "template": {
+          "symbol": "RST_BUS_NPU_AHB",
+          "value": 29,
+          "domain": "reset"
+        }
+      },
+      "3c7e074b9d4e7ccf": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_NPU_AXI N",
+        "template": {
+          "symbol": "RST_BUS_NPU_AXI",
+          "value": 30,
+          "domain": "reset"
+        }
+      },
+      "9f3160b49125d8ee": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_NPU_CORE N",
+        "template": {
+          "symbol": "RST_BUS_NPU_CORE",
+          "value": 31,
+          "domain": "reset"
+        }
+      },
+      "1975ac439ab00397": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_GPU0 N",
+        "template": {
+          "symbol": "RST_BUS_GPU0",
+          "value": 32,
+          "domain": "reset"
+        }
+      },
+      "100d6b047cc0a65f": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_DRAM0 N",
+        "template": {
+          "symbol": "RST_BUS_DRAM0",
+          "value": 33,
+          "domain": "reset"
+        }
+      },
+      "7e42410656f5672a": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_NAND0 N",
+        "template": {
+          "symbol": "RST_BUS_NAND0",
+          "value": 34,
+          "domain": "reset"
+        }
+      },
+      "7269c49085cb9549": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_SMHC0 N",
+        "template": {
+          "symbol": "RST_BUS_SMHC0",
+          "value": 35,
+          "domain": "reset"
+        }
+      },
+      "b2c1bc84b702b283": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_SMHC1 N",
+        "template": {
+          "symbol": "RST_BUS_SMHC1",
+          "value": 36,
+          "domain": "reset"
+        }
+      },
+      "ed44c8d63bc30e1b": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_SMHC2 N",
+        "template": {
+          "symbol": "RST_BUS_SMHC2",
+          "value": 37,
+          "domain": "reset"
+        }
+      },
+      "2cf03d631c01e093": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_SMHC3 N",
+        "template": {
+          "symbol": "RST_BUS_SMHC3",
+          "value": 38,
+          "domain": "reset"
+        }
+      },
+      "388242a124ca512a": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_UFS_AXI N",
+        "template": {
+          "symbol": "RST_BUS_UFS_AXI",
+          "value": 39,
+          "domain": "reset"
+        }
+      },
+      "d98347b13622c52b": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_UFS_AHB N",
+        "template": {
+          "symbol": "RST_BUS_UFS_AHB",
+          "value": 40,
+          "domain": "reset"
+        }
+      },
+      "750fe64abf7bdc73": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_UART0 N",
+        "template": {
+          "symbol": "RST_BUS_UART0",
+          "value": 41,
+          "domain": "reset"
+        }
+      },
+      "7c2f1e1fa8b12cf8": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_UART1 N",
+        "template": {
+          "symbol": "RST_BUS_UART1",
+          "value": 42,
+          "domain": "reset"
+        }
+      },
+      "3005c2e90d2afd3f": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_UART2 N",
+        "template": {
+          "symbol": "RST_BUS_UART2",
+          "value": 43,
+          "domain": "reset"
+        }
+      },
+      "73b868f039f12f53": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_UART3 N",
+        "template": {
+          "symbol": "RST_BUS_UART3",
+          "value": 44,
+          "domain": "reset"
+        }
+      },
+      "fe291d8605fe9cf0": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_UART4 N",
+        "template": {
+          "symbol": "RST_BUS_UART4",
+          "value": 45,
+          "domain": "reset"
+        }
+      },
+      "6ded44e020e32789": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_UART5 N",
+        "template": {
+          "symbol": "RST_BUS_UART5",
+          "value": 46,
+          "domain": "reset"
+        }
+      },
+      "b9519b657f446e6e": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_UART6 N",
+        "template": {
+          "symbol": "RST_BUS_UART6",
+          "value": 47,
+          "domain": "reset"
+        }
+      },
+      "dc6b5143c0b47487": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_TWI0 N",
+        "template": {
+          "symbol": "RST_BUS_TWI0",
+          "value": 48,
+          "domain": "reset"
+        }
+      },
+      "d0181dd9b3bf6697": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_TWI1 N",
+        "template": {
+          "symbol": "RST_BUS_TWI1",
+          "value": 49,
+          "domain": "reset"
+        }
+      },
+      "849a60194be90b4b": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_TWI2 N",
+        "template": {
+          "symbol": "RST_BUS_TWI2",
+          "value": 50,
+          "domain": "reset"
+        }
+      },
+      "606058824b78b996": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_TWI3 N",
+        "template": {
+          "symbol": "RST_BUS_TWI3",
+          "value": 51,
+          "domain": "reset"
+        }
+      },
+      "abbb61c3f8f97acf": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_TWI4 N",
+        "template": {
+          "symbol": "RST_BUS_TWI4",
+          "value": 52,
+          "domain": "reset"
+        }
+      },
+      "fd987ea2516bc3f8": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_TWI5 N",
+        "template": {
+          "symbol": "RST_BUS_TWI5",
+          "value": 53,
+          "domain": "reset"
+        }
+      },
+      "3d6e46729df34aec": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_TWI6 N",
+        "template": {
+          "symbol": "RST_BUS_TWI6",
+          "value": 54,
+          "domain": "reset"
+        }
+      },
+      "22e4c9a768064a5e": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_TWI7 N",
+        "template": {
+          "symbol": "RST_BUS_TWI7",
+          "value": 55,
+          "domain": "reset"
+        }
+      },
+      "e05e00fdd8df9eed": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_TWI8 N",
+        "template": {
+          "symbol": "RST_BUS_TWI8",
+          "value": 56,
+          "domain": "reset"
+        }
+      },
+      "635fc0200bb98c20": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_TWI9 N",
+        "template": {
+          "symbol": "RST_BUS_TWI9",
+          "value": 57,
+          "domain": "reset"
+        }
+      },
+      "dcf0ebd4d65d9374": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_TWI10 N",
+        "template": {
+          "symbol": "RST_BUS_TWI10",
+          "value": 58,
+          "domain": "reset"
+        }
+      },
+      "7e44a4c190610db3": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_TWI11 N",
+        "template": {
+          "symbol": "RST_BUS_TWI11",
+          "value": 59,
+          "domain": "reset"
+        }
+      },
+      "1886f080a2145074": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_TWI12 N",
+        "template": {
+          "symbol": "RST_BUS_TWI12",
+          "value": 60,
+          "domain": "reset"
+        }
+      },
+      "4a7e3d662fbef22b": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_SPI0 N",
+        "template": {
+          "symbol": "RST_BUS_SPI0",
+          "value": 61,
+          "domain": "reset"
+        }
+      },
+      "33e320a890422431": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_SPI1 N",
+        "template": {
+          "symbol": "RST_BUS_SPI1",
+          "value": 62,
+          "domain": "reset"
+        }
+      },
+      "8dbdb75887d8068e": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_SPI2 N",
+        "template": {
+          "symbol": "RST_BUS_SPI2",
+          "value": 63,
+          "domain": "reset"
+        }
+      },
+      "ffc44b01b5ae0696": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_SPIF N",
+        "template": {
+          "symbol": "RST_BUS_SPIF",
+          "value": 64,
+          "domain": "reset"
+        }
+      },
+      "b346c406bc79b3e2": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_SPI3 N",
+        "template": {
+          "symbol": "RST_BUS_SPI3",
+          "value": 65,
+          "domain": "reset"
+        }
+      },
+      "fb7f1619166ecd24": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_SPI4 N",
+        "template": {
+          "symbol": "RST_BUS_SPI4",
+          "value": 66,
+          "domain": "reset"
+        }
+      },
+      "ba65322c4453e024": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_GPADC0 N",
+        "template": {
+          "symbol": "RST_BUS_GPADC0",
+          "value": 67,
+          "domain": "reset"
+        }
+      },
+      "087a92038c1f76f4": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_THS0 N",
+        "template": {
+          "symbol": "RST_BUS_THS0",
+          "value": 68,
+          "domain": "reset"
+        }
+      },
+      "30b904543e1d8738": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_IRRX N",
+        "template": {
+          "symbol": "RST_BUS_IRRX",
+          "value": 69,
+          "domain": "reset"
+        }
+      },
+      "3d487e8f78ce5d41": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_IRTX N",
+        "template": {
+          "symbol": "RST_BUS_IRTX",
+          "value": 70,
+          "domain": "reset"
+        }
+      },
+      "1debf59c130a6316": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_LRADC N",
+        "template": {
+          "symbol": "RST_BUS_LRADC",
+          "value": 71,
+          "domain": "reset"
+        }
+      },
+      "baafac50acac7156": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_SGPIO N",
+        "template": {
+          "symbol": "RST_BUS_SGPIO",
+          "value": 72,
+          "domain": "reset"
+        }
+      },
+      "25800eae4f5d3eab": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_LPC N",
+        "template": {
+          "symbol": "RST_BUS_LPC",
+          "value": 73,
+          "domain": "reset"
+        }
+      },
+      "033c84ea6c468a97": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_I2SPCM0 N",
+        "template": {
+          "symbol": "RST_BUS_I2SPCM0",
+          "value": 74,
+          "domain": "reset"
+        }
+      },
+      "c55b4adfeefdbdef": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_I2SPCM1 N",
+        "template": {
+          "symbol": "RST_BUS_I2SPCM1",
+          "value": 75,
+          "domain": "reset"
+        }
+      },
+      "e5e7ab170902e4ff": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_I2SPCM2 N",
+        "template": {
+          "symbol": "RST_BUS_I2SPCM2",
+          "value": 76,
+          "domain": "reset"
+        }
+      },
+      "5cc948432cf605f9": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_I2SPCM3 N",
+        "template": {
+          "symbol": "RST_BUS_I2SPCM3",
+          "value": 77,
+          "domain": "reset"
+        }
+      },
+      "fa513f7e3c1e1348": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_I2SPCM4 N",
+        "template": {
+          "symbol": "RST_BUS_I2SPCM4",
+          "value": 78,
+          "domain": "reset"
+        }
+      },
+      "10231be4c8e579ac": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_OWA N",
+        "template": {
+          "symbol": "RST_BUS_OWA",
+          "value": 79,
+          "domain": "reset"
+        }
+      },
+      "716b53ac2ed36e69": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_DMIC N",
+        "template": {
+          "symbol": "RST_BUS_DMIC",
+          "value": 80,
+          "domain": "reset"
+        }
+      },
+      "54d52f074de59493": {
+        "count": 4,
+        "normalized_preview": "#define RST_USB_0_PHY_RSTN N",
+        "template": {
+          "symbol": "RST_USB_0_PHY_RSTN",
+          "value": 81,
+          "domain": "reset"
+        }
+      },
+      "7dd72454e654c70e": {
+        "count": 4,
+        "normalized_preview": "#define RST_USB_0_DEVICE N",
+        "template": {
+          "symbol": "RST_USB_0_DEVICE",
+          "value": 82,
+          "domain": "reset"
+        }
+      },
+      "fd532af4a1733caa": {
+        "count": 4,
+        "normalized_preview": "#define RST_USB_0_EHCI N",
+        "template": {
+          "symbol": "RST_USB_0_EHCI",
+          "value": 83,
+          "domain": "reset"
+        }
+      },
+      "1e84af2d1bc53a09": {
+        "count": 4,
+        "normalized_preview": "#define RST_USB_0_OHCI N",
+        "template": {
+          "symbol": "RST_USB_0_OHCI",
+          "value": 84,
+          "domain": "reset"
+        }
+      },
+      "6a14ab109c281448": {
+        "count": 4,
+        "normalized_preview": "#define RST_USB_1_PHY_RSTN N",
+        "template": {
+          "symbol": "RST_USB_1_PHY_RSTN",
+          "value": 85,
+          "domain": "reset"
+        }
+      },
+      "cc9ec006de3e32cb": {
+        "count": 4,
+        "normalized_preview": "#define RST_USB_1_EHCI N",
+        "template": {
+          "symbol": "RST_USB_1_EHCI",
+          "value": 86,
+          "domain": "reset"
+        }
+      },
+      "f2cf964e435fc9a8": {
+        "count": 4,
+        "normalized_preview": "#define RST_USB_1_OHCI N",
+        "template": {
+          "symbol": "RST_USB_1_OHCI",
+          "value": 87,
+          "domain": "reset"
+        }
+      },
+      "26468d0d1b72e245": {
+        "count": 4,
+        "normalized_preview": "#define RST_USB_2 N",
+        "template": {
+          "symbol": "RST_USB_2",
+          "value": 88,
+          "domain": "reset"
+        }
+      },
+      "c1babb5b795eb331": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_PCIE0 N",
+        "template": {
+          "symbol": "RST_BUS_PCIE0",
+          "value": 89,
+          "domain": "reset"
+        }
+      },
+      "1d42a6639443d99c": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_PCIE0_PWRUP N",
+        "template": {
+          "symbol": "RST_BUS_PCIE0_PWRUP",
+          "value": 90,
+          "domain": "reset"
+        }
+      },
+      "90b5dd7331f2e050": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_SERDES N",
+        "template": {
+          "symbol": "RST_BUS_SERDES",
+          "value": 91,
+          "domain": "reset"
+        }
+      },
+      "c0470d32285bfb55": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_GMAC0_AXI N",
+        "template": {
+          "symbol": "RST_BUS_GMAC0_AXI",
+          "value": 92,
+          "domain": "reset"
+        }
+      },
+      "7ed69a31e8af34a4": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_GMAC0 N",
+        "template": {
+          "symbol": "RST_BUS_GMAC0",
+          "value": 93,
+          "domain": "reset"
+        }
+      },
+      "8f7fcbdf9189b3f5": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_GMAC1_AXI N",
+        "template": {
+          "symbol": "RST_BUS_GMAC1_AXI",
+          "value": 94,
+          "domain": "reset"
+        }
+      },
+      "72534920aa9a161c": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_GMAC1 N",
+        "template": {
+          "symbol": "RST_BUS_GMAC1",
+          "value": 95,
+          "domain": "reset"
+        }
+      },
+      "56780ea40b62bd8a": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_VO0_TCONLCD0 N",
+        "template": {
+          "symbol": "RST_BUS_VO0_TCONLCD0",
+          "value": 96,
+          "domain": "reset"
+        }
+      },
+      "3d5520caec53fe76": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_VO0_TCONLCD1 N",
+        "template": {
+          "symbol": "RST_BUS_VO0_TCONLCD1",
+          "value": 97,
+          "domain": "reset"
+        }
+      },
+      "212cc54385ac87e4": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_VO0_TCONLCD2 N",
+        "template": {
+          "symbol": "RST_BUS_VO0_TCONLCD2",
+          "value": 98,
+          "domain": "reset"
+        }
+      },
+      "2644a3f301ae8965": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_LVDS0 N",
+        "template": {
+          "symbol": "RST_BUS_LVDS0",
+          "value": 99,
+          "domain": "reset"
+        }
+      },
+      "3e399f6111b5fc1a": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_LVDS1 N",
+        "template": {
+          "symbol": "RST_BUS_LVDS1",
+          "value": 100,
+          "domain": "reset"
+        }
+      },
+      "265ecc2ce4ac4bdb": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_DSI0 N",
+        "template": {
+          "symbol": "RST_BUS_DSI0",
+          "value": 101,
+          "domain": "reset"
+        }
+      },
+      "cfd960d36c8adff1": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_DSI1 N",
+        "template": {
+          "symbol": "RST_BUS_DSI1",
+          "value": 102,
+          "domain": "reset"
+        }
+      },
+      "eaeb3443df40088f": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_TCONTV0 N",
+        "template": {
+          "symbol": "RST_BUS_TCONTV0",
+          "value": 103,
+          "domain": "reset"
+        }
+      },
+      "f16e778e6c10005a": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_TCONTV1 N",
+        "template": {
+          "symbol": "RST_BUS_TCONTV1",
+          "value": 104,
+          "domain": "reset"
+        }
+      },
+      "432eb222f0250b84": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_EDP N",
+        "template": {
+          "symbol": "RST_BUS_EDP",
+          "value": 105,
+          "domain": "reset"
+        }
+      },
+      "75a7646ba790a4ec": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_HDMI_HDCP N",
+        "template": {
+          "symbol": "RST_BUS_HDMI_HDCP",
+          "value": 106,
+          "domain": "reset"
+        }
+      },
+      "6cb582f84fc33a49": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_HDMI_SUB N",
+        "template": {
+          "symbol": "RST_BUS_HDMI_SUB",
+          "value": 107,
+          "domain": "reset"
+        }
+      },
+      "3b6fb0d09e4d84eb": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_HDMI_MAIN N",
+        "template": {
+          "symbol": "RST_BUS_HDMI_MAIN",
+          "value": 108,
+          "domain": "reset"
+        }
+      },
+      "5d88ad3e5b5378a3": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_DPSS_TOP0 N",
+        "template": {
+          "symbol": "RST_BUS_DPSS_TOP0",
+          "value": 109,
+          "domain": "reset"
+        }
+      },
+      "ef240325c0412b48": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_DPSS_TOP1 N",
+        "template": {
+          "symbol": "RST_BUS_DPSS_TOP1",
+          "value": 110,
+          "domain": "reset"
+        }
+      },
+      "24f968e371dec15d": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_VIDEO_OUT0 N",
+        "template": {
+          "symbol": "RST_BUS_VIDEO_OUT0",
+          "value": 111,
+          "domain": "reset"
+        }
+      },
+      "64960275efcd7162": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_VIDEO_OUT1 N",
+        "template": {
+          "symbol": "RST_BUS_VIDEO_OUT1",
+          "value": 112,
+          "domain": "reset"
+        }
+      },
+      "d38b9641ad9e5579": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_LEDC N",
+        "template": {
+          "symbol": "RST_BUS_LEDC",
+          "value": 113,
+          "domain": "reset"
+        }
+      },
+      "a92637ecb45fb016": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_DSC N",
+        "template": {
+          "symbol": "RST_BUS_DSC",
+          "value": 114,
+          "domain": "reset"
+        }
+      },
+      "ff29280a8b6cf558": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_CSI N",
+        "template": {
+          "symbol": "RST_BUS_CSI",
+          "value": 115,
+          "domain": "reset"
+        }
+      },
+      "8109863165e3d1ea": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_VIDEO_IN N",
+        "template": {
+          "symbol": "RST_BUS_VIDEO_IN",
+          "value": 116,
+          "domain": "reset"
+        }
+      },
+      "d542d1ab01229039": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_APB2JTAG N",
+        "template": {
+          "symbol": "RST_BUS_APB2JTAG",
+          "value": 117,
+          "domain": "reset"
+        }
+      },
+      "2eb24af9e2c7cf9e": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_UFS_PHY N",
+        "template": {
+          "symbol": "RST_BUS_UFS_PHY",
+          "value": 119,
+          "domain": "reset"
+        }
+      },
+      "5bee1acc5a299c3a": {
+        "count": 4,
+        "normalized_preview": "#define RST_BUS_UFS_CORE N",
+        "template": {
+          "symbol": "RST_BUS_UFS_CORE",
+          "value": 120,
+          "domain": "reset"
+        }
+      }
+    },
+    "dts": {
+      "a110cc2e502e2629": {
+        "count": 2,
+        "normalized_preview": "cpu0: cpu@N { compatible = \"STR\"; device_type = \"STR\"; reg = <0xN>; enable-method = \"STR\"; clocks = <&cpupll_ccu CLK_PLL_CPU_L>; };",
+        "template": {
+          "node": "cpu@0",
+          "label": "cpu0",
+          "name": "cpu",
+          "unit_addr": "0",
+          "compatible": "arm,cortex-a55",
+          "status": "",
+          "clocks_refs": 1,
+          "resets_refs": 0
+        }
+      },
+      "6fc6df57c1493394": {
+        "count": 2,
+        "normalized_preview": "cpu1: cpu@N { compatible = \"STR\"; device_type = \"STR\"; reg = <0xN>; enable-method = \"STR\"; clocks = <&cpupll_ccu CLK_PLL_CPU_L>; };",
+        "template": {
+          "node": "cpu@100",
+          "label": "cpu1",
+          "name": "cpu",
+          "unit_addr": "100",
+          "compatible": "arm,cortex-a55",
+          "status": "",
+          "clocks_refs": 1,
+          "resets_refs": 0
+        }
+      },
+      "083a98b0bd256052": {
+        "count": 2,
+        "normalized_preview": "cpu2: cpu@N { compatible = \"STR\"; device_type = \"STR\"; reg = <0xN>; enable-method = \"STR\"; clocks = <&cpupll_ccu CLK_PLL_CPU_L>; };",
+        "template": {
+          "node": "cpu@200",
+          "label": "cpu2",
+          "name": "cpu",
+          "unit_addr": "200",
+          "compatible": "arm,cortex-a55",
+          "status": "",
+          "clocks_refs": 1,
+          "resets_refs": 0
+        }
+      },
+      "c02d5947d817f27a": {
+        "count": 2,
+        "normalized_preview": "cpu3: cpu@N { compatible = \"STR\"; device_type = \"STR\"; reg = <0xN>; enable-method = \"STR\"; clocks = <&cpupll_ccu CLK_PLL_CPU_L>; };",
+        "template": {
+          "node": "cpu@300",
+          "label": "cpu3",
+          "name": "cpu",
+          "unit_addr": "300",
+          "compatible": "arm,cortex-a55",
+          "status": "",
+          "clocks_refs": 1,
+          "resets_refs": 0
+        }
+      },
+      "3a30704e59c68825": {
+        "count": 2,
+        "normalized_preview": "cpu4: cpu@N { compatible = \"STR\"; device_type = \"STR\"; reg = <0xN>; enable-method = \"STR\"; clocks = <&cpupll_ccu CLK_PLL_CPU_L>; };",
+        "template": {
+          "node": "cpu@400",
+          "label": "cpu4",
+          "name": "cpu",
+          "unit_addr": "400",
+          "compatible": "arm,cortex-a55",
+          "status": "",
+          "clocks_refs": 1,
+          "resets_refs": 0
+        }
+      },
+      "3a5e2c3c084919e8": {
+        "count": 2,
+        "normalized_preview": "cpu5: cpu@N { compatible = \"STR\"; device_type = \"STR\"; reg = <0xN>; enable-method = \"STR\"; clocks = <&cpupll_ccu CLK_PLL_CPU_L>; };",
+        "template": {
+          "node": "cpu@500",
+          "label": "cpu5",
+          "name": "cpu",
+          "unit_addr": "500",
+          "compatible": "arm,cortex-a55",
+          "status": "",
+          "clocks_refs": 1,
+          "resets_refs": 0
+        }
+      },
+      "914c46f94133b499": {
+        "count": 2,
+        "normalized_preview": "cpu6: cpu@N { compatible = \"STR\"; device_type = \"STR\"; reg = <0xN>; enable-method = \"STR\"; clocks = <&cpupll_ccu CLK_PLL_CPU_B>; };",
+        "template": {
+          "node": "cpu@600",
+          "label": "cpu6",
+          "name": "cpu",
+          "unit_addr": "600",
+          "compatible": "arm,cortex-a76",
+          "status": "",
+          "clocks_refs": 1,
+          "resets_refs": 0
+        }
+      },
+      "b5b7c461cf115ad1": {
+        "count": 2,
+        "normalized_preview": "cpu7: cpu@N { compatible = \"STR\"; device_type = \"STR\"; reg = <0xN>; enable-method = \"STR\"; clocks = <&cpupll_ccu CLK_PLL_CPU_B>; };",
+        "template": {
+          "node": "cpu@700",
+          "label": "cpu7",
+          "name": "cpu",
+          "unit_addr": "700",
+          "compatible": "arm,cortex-a76",
+          "status": "",
+          "clocks_refs": 1,
+          "resets_refs": 0
+        }
+      },
+      "9e92a0fce8bb6718": {
+        "count": 2,
+        "normalized_preview": "osc24M: osc24M-clk { #clock-cells = <N>; compatible = \"STR\"; clock-frequency = <N>; clock-output-names = \"STR\"; };",
+        "template": {
+          "node": "osc24M-clk",
+          "label": "osc24M",
+          "name": "osc24M-clk",
+          "unit_addr": "",
+          "compatible": "fixed-clock",
+          "status": "",
+          "clocks_refs": 0,
+          "resets_refs": 0
+        }
+      },
+      "0ab4885bd26f7561": {
+        "count": 2,
+        "normalized_preview": "gic: interrupt-controller@N { compatible = \"STR\"; #address-cells = <N>; #interrupt-cells = <N>; #size-cells = <N>; ranges; interrupt-controller; reg = <0xN 0xN>, <0xN 0xN>; interrupts = <GIC_PPI N IRQ",
+        "template": {
+          "node": "interrupt-controller@3400000",
+          "label": "gic",
+          "name": "interrupt-controller",
+          "unit_addr": "3400000",
+          "compatible": "arm,gic-v3",
+          "status": "",
+          "clocks_refs": 0,
+          "resets_refs": 0
+        }
+      },
+      "3d14d8e37cd1876a": {
+        "count": 2,
+        "normalized_preview": "ccu: clock-controller@N { compatible = \"STR\"; reg = <0xN 0xN>; clocks = <&osc24M>, <&rtc_ccu CLK_OSC32K>; clock-names = \"STR\", \"STR\"; #clock-cells = <N>; #reset-cells = <N>; };",
+        "template": {
+          "node": "clock-controller@2002000",
+          "label": "ccu",
+          "name": "clock-controller",
+          "unit_addr": "2002000",
+          "compatible": "allwinner,sun60i-a733-ccu",
+          "status": "",
+          "clocks_refs": 2,
+          "resets_refs": 0
+        }
+      },
+      "db56ec4b9c26c951": {
+        "count": 2,
+        "normalized_preview": "r_ccu: clock-controller@N { compatible = \"STR\"; reg = <0xN 0xN>; clocks = <&osc24M>, <&rtc_ccu CLK_OSC32K>; clock-names = \"STR\", \"STR\"; #clock-cells = <N>; #reset-cells = <N>; };",
+        "template": {
+          "node": "clock-controller@7010000",
+          "label": "r_ccu",
+          "name": "clock-controller",
+          "unit_addr": "7010000",
+          "compatible": "allwinner,sun60i-a733-r-ccu",
+          "status": "",
+          "clocks_refs": 2,
+          "resets_refs": 0
+        }
+      },
+      "6c1a53e2408fd13f": {
+        "count": 2,
+        "normalized_preview": "rtc_ccu: clock-controller@N { compatible = \"STR\"; reg = <0xN 0xN>; #clock-cells = <N>; #reset-cells = <N>; };",
+        "template": {
+          "node": "clock-controller@7090000",
+          "label": "rtc_ccu",
+          "name": "clock-controller",
+          "unit_addr": "7090000",
+          "compatible": "allwinner,sun60i-a733-rtc-ccu",
+          "status": "",
+          "clocks_refs": 0,
+          "resets_refs": 0
+        }
+      },
+      "ef139eb7a5e75e9f": {
+        "count": 2,
+        "normalized_preview": "cpupll_ccu: clock-controller@N { compatible = \"STR\"; reg = <0xN 0xN>; clocks = <&rtc_ccu CLK_DCXO>; clock-names = \"STR\"; #clock-cells = <N>; #reset-cells = <N>; };",
+        "template": {
+          "node": "clock-controller@8870000",
+          "label": "cpupll_ccu",
+          "name": "clock-controller",
+          "unit_addr": "8870000",
+          "compatible": "allwinner,sun60i-a733-cpupll",
+          "status": "",
+          "clocks_refs": 1,
+          "resets_refs": 0
+        }
+      },
+      "ff7e74414ceb09ec": {
+        "count": 2,
+        "normalized_preview": "pio: pinctrl@N { compatible = \"STR\"; reg = <0xN 0xN>; interrupts = <GIC_SPI N IRQ_TYPE_LEVEL_HIGH>, <GIC_SPI N IRQ_TYPE_LEVEL_HIGH>, <GIC_SPI N IRQ_TYPE_LEVEL_HIGH>, <GIC_SPI N IRQ_TYPE_LEVEL_HIGH>, <",
+        "template": {
+          "node": "pinctrl@2000000",
+          "label": "pio",
+          "name": "pinctrl",
+          "unit_addr": "2000000",
+          "compatible": "allwinner,sun60i-a733-pinctrl",
+          "status": "",
+          "clocks_refs": 3,
+          "resets_refs": 0
+        }
+      },
+      "c5f831348b9cbde1": {
+        "count": 2,
+        "normalized_preview": "r_pio: pinctrl@N { compatible = \"STR\"; reg = <0xN 0xN>; interrupts = <GIC_SPI N IRQ_TYPE_LEVEL_HIGH>, <GIC_SPI N IRQ_TYPE_LEVEL_HIGH>; clocks = <&r_ccu CLK_R_APBS0>, <&osc24M>, <&rtc_ccu CLK_OSC32K>; ",
+        "template": {
+          "node": "pinctrl@7025000",
+          "label": "r_pio",
+          "name": "pinctrl",
+          "unit_addr": "7025000",
+          "compatible": "allwinner,sun60i-a733-r-pinctrl",
+          "status": "",
+          "clocks_refs": 3,
+          "resets_refs": 0
+        }
+      },
+      "302572a7804588dc": {
+        "count": 2,
+        "normalized_preview": "wdt: watchdog@N { compatible = \"STR\"; reg = <0xN 0xN>; interrupts = <GIC_SPI N IRQ_TYPE_LEVEL_HIGH>; };",
+        "template": {
+          "node": "watchdog@2050000",
+          "label": "wdt",
+          "name": "watchdog",
+          "unit_addr": "2050000",
+          "compatible": "allwinner,sun60i-a733-wdt",
+          "status": "",
+          "clocks_refs": 0,
+          "resets_refs": 0
+        }
+      },
+      "59b956ef6908b883": {
+        "count": 2,
+        "normalized_preview": "soc_timer0: timer@N { compatible = \"STR\"; reg = <0xN 0xN>; interrupts = <GIC_SPI N IRQ_TYPE_LEVEL_HIGH>; clocks = <&osc24M>, <&ccu CLK_BUS_TIMER>; clock-names = \"STR\", \"STR\"; resets = <&ccu RST_BUS_TI",
+        "template": {
+          "node": "timer@3009000",
+          "label": "soc_timer0",
+          "name": "timer",
+          "unit_addr": "3009000",
+          "compatible": "allwinner,sun50i-timer",
+          "status": "",
+          "clocks_refs": 2,
+          "resets_refs": 1
+        }
+      },
+      "c9f60a54041cff79": {
+        "count": 2,
+        "normalized_preview": "dma: dma-controller@N { compatible = \"STR\"; reg = <0xN 0xN>; interrupts = <GIC_SPI N IRQ_TYPE_LEVEL_HIGH>; clocks = <&ccu CLK_DMA0>, <&ccu CLK_MBUS_DMA0>; clock-names = \"STR\", \"STR\"; dma-channels = <N",
+        "template": {
+          "node": "dma-controller@4601000",
+          "label": "dma",
+          "name": "dma-controller",
+          "unit_addr": "4601000",
+          "compatible": "allwinner,sun60i-a733-dma",
+          "status": "",
+          "clocks_refs": 2,
+          "resets_refs": 1
+        }
+      },
+      "cf3140e24def27f4": {
+        "count": 2,
+        "normalized_preview": "sid: efuse@N { compatible = \"STR\"; reg = <0xN 0xN>; #address-cells = <N>; #size-cells = <N>; };",
+        "template": {
+          "node": "efuse@3006000",
+          "label": "sid",
+          "name": "efuse",
+          "unit_addr": "3006000",
+          "compatible": "allwinner,sun60i-a733-sid",
+          "status": "",
+          "clocks_refs": 0,
+          "resets_refs": 0
+        }
+      },
+      "d080020d5992090f": {
+        "count": 2,
+        "normalized_preview": "nmi_intc: interrupt-controller@N { compatible = \"STR\"; reg = <0xN 0xN>; interrupt-controller; #interrupt-cells = <N>; interrupts = <GIC_SPI N IRQ_TYPE_LEVEL_HIGH>; };",
+        "template": {
+          "node": "interrupt-controller@7010320",
+          "label": "nmi_intc",
+          "name": "interrupt-controller",
+          "unit_addr": "7010320",
+          "compatible": "allwinner,sun60i-a733-nmi",
+          "status": "",
+          "clocks_refs": 0,
+          "resets_refs": 0
+        }
+      },
+      "f148661b9b06953e": {
+        "count": 2,
+        "normalized_preview": "uart0: serial@N { compatible = \"STR\"; reg = <0xN 0xN>; interrupts = <GIC_SPI N IRQ_TYPE_LEVEL_HIGH>; reg-shift = <N>; reg-io-width = <N>; clocks = <&ccu CLK_UART0>; resets = <&ccu RST_BUS_UART0>; stat",
+        "template": {
+          "node": "serial@2500000",
+          "label": "uart0",
+          "name": "serial",
+          "unit_addr": "2500000",
+          "compatible": "snps,dw-apb-uart",
+          "status": "disabled",
+          "clocks_refs": 1,
+          "resets_refs": 1
+        }
+      },
+      "4fd3a18f15a68604": {
+        "count": 2,
+        "normalized_preview": "uart1: serial@N { compatible = \"STR\"; reg = <0xN 0xN>; interrupts = <GIC_SPI N IRQ_TYPE_LEVEL_HIGH>; reg-shift = <N>; reg-io-width = <N>; clocks = <&ccu CLK_UART1>; resets = <&ccu RST_BUS_UART1>; stat",
+        "template": {
+          "node": "serial@2501000",
+          "label": "uart1",
+          "name": "serial",
+          "unit_addr": "2501000",
+          "compatible": "snps,dw-apb-uart",
+          "status": "disabled",
+          "clocks_refs": 1,
+          "resets_refs": 1
+        }
+      },
+      "6aceb800a2bd8c05": {
+        "count": 2,
+        "normalized_preview": "uart2: serial@N { compatible = \"STR\"; reg = <0xN 0xN>; interrupts = <GIC_SPI N IRQ_TYPE_LEVEL_HIGH>; reg-shift = <N>; reg-io-width = <N>; clocks = <&ccu CLK_UART2>; resets = <&ccu RST_BUS_UART2>; stat",
+        "template": {
+          "node": "serial@2502000",
+          "label": "uart2",
+          "name": "serial",
+          "unit_addr": "2502000",
+          "compatible": "snps,dw-apb-uart",
+          "status": "disabled",
+          "clocks_refs": 1,
+          "resets_refs": 1
+        }
+      },
+      "5227e02598888c16": {
+        "count": 2,
+        "normalized_preview": "uart3: serial@N { compatible = \"STR\"; reg = <0xN 0xN>; interrupts = <GIC_SPI N IRQ_TYPE_LEVEL_HIGH>; reg-shift = <N>; reg-io-width = <N>; clocks = <&ccu CLK_UART3>; resets = <&ccu RST_BUS_UART3>; stat",
+        "template": {
+          "node": "serial@2503000",
+          "label": "uart3",
+          "name": "serial",
+          "unit_addr": "2503000",
+          "compatible": "snps,dw-apb-uart",
+          "status": "disabled",
+          "clocks_refs": 1,
+          "resets_refs": 1
+        }
+      },
+      "f35504f67b662adf": {
+        "count": 2,
+        "normalized_preview": "uart4: serial@N { compatible = \"STR\"; reg = <0xN 0xN>; interrupts = <GIC_SPI N IRQ_TYPE_LEVEL_HIGH>; reg-shift = <N>; reg-io-width = <N>; clocks = <&ccu CLK_UART4>; resets = <&ccu RST_BUS_UART4>; stat",
+        "template": {
+          "node": "serial@2504000",
+          "label": "uart4",
+          "name": "serial",
+          "unit_addr": "2504000",
+          "compatible": "snps,dw-apb-uart",
+          "status": "disabled",
+          "clocks_refs": 1,
+          "resets_refs": 1
+        }
+      },
+      "e5b663f07ea45315": {
+        "count": 2,
+        "normalized_preview": "uart5: serial@N { compatible = \"STR\"; reg = <0xN 0xN>; interrupts = <GIC_SPI N IRQ_TYPE_LEVEL_HIGH>; reg-shift = <N>; reg-io-width = <N>; clocks = <&ccu CLK_UART5>; resets = <&ccu RST_BUS_UART5>; stat",
+        "template": {
+          "node": "serial@2505000",
+          "label": "uart5",
+          "name": "serial",
+          "unit_addr": "2505000",
+          "compatible": "snps,dw-apb-uart",
+          "status": "disabled",
+          "clocks_refs": 1,
+          "resets_refs": 1
+        }
+      },
+      "4a76c7f19c601bd5": {
+        "count": 2,
+        "normalized_preview": "uart6: serial@N { compatible = \"STR\"; reg = <0xN 0xN>; interrupts = <GIC_SPI N IRQ_TYPE_LEVEL_HIGH>; reg-shift = <N>; reg-io-width = <N>; clocks = <&ccu CLK_UART6>; resets = <&ccu RST_BUS_UART6>; stat",
+        "template": {
+          "node": "serial@2506000",
+          "label": "uart6",
+          "name": "serial",
+          "unit_addr": "2506000",
+          "compatible": "snps,dw-apb-uart",
+          "status": "disabled",
+          "clocks_refs": 1,
+          "resets_refs": 1
+        }
+      },
+      "ab7c0045e6249df7": {
+        "count": 1,
+        "normalized_preview": "&uart0 { status = \"STR\"; };",
+        "template": {
+          "node": "&uart0",
+          "label": "uart0",
+          "name": "uart0",
+          "unit_addr": "",
+          "compatible": "",
+          "status": "okay",
+          "clocks_refs": 0,
+          "resets_refs": 0,
+          "overlay": true
+        }
+      }
+    }
+  },
   "vendor_history": {
     "/home/grec-alexander/Documents/porting/linux-orangepi/bsp/drivers/clk/sunxi-ng/ccu-sun60iw2.c": {
       "checksum": "1d32bb8555f8ff20",
@@ -109,14 +4520,66 @@
     },
     "/home/runner/work/sun60iw2-upstream/sun60iw2-upstream/drivers/clk/sunxi-ng/ccu-sun60i-a733.c": {
       "checksum": "dbb41cc2129cf7a0",
-      "last_run": 1776841086.021338,
-      "last_run_iso": "2026-04-22T06:58:06.021338+00:00",
-      "run_count": 1,
+      "last_run": 1776841474.983764,
+      "last_run_iso": "2026-04-22T07:04:34.983764+00:00",
+      "run_count": 9,
       "stats": {
-        "subsystem": "clocks",
-        "items": 2,
+        "subsystem": "resets",
+        "items": 1,
         "confidence": 1.0,
-        "errors": 2,
+        "errors": 0,
+        "unparsed": 0
+      }
+    },
+    "/home/runner/work/sun60iw2-upstream/sun60iw2-upstream/include/dt-bindings/clock/sun60i-a733-ccu.h": {
+      "checksum": "aab2d129b4770796",
+      "last_run": 1776841474.992662,
+      "last_run_iso": "2026-04-22T07:04:34.992662+00:00",
+      "run_count": 5,
+      "stats": {
+        "subsystem": "bindings",
+        "items": 319,
+        "confidence": 1.0,
+        "errors": 0,
+        "unparsed": 0
+      }
+    },
+    "/home/runner/work/sun60iw2-upstream/sun60iw2-upstream/include/dt-bindings/reset/sun60i-a733-ccu.h": {
+      "checksum": "5b641f0a070f7b1d",
+      "last_run": 1776841475.000167,
+      "last_run_iso": "2026-04-22T07:04:35.000167+00:00",
+      "run_count": 4,
+      "stats": {
+        "subsystem": "bindings",
+        "items": 120,
+        "confidence": 1.0,
+        "errors": 0,
+        "unparsed": 0
+      }
+    },
+    "/home/runner/work/sun60iw2-upstream/sun60iw2-upstream/arch/arm64/boot/dts/allwinner/sun60i-a733.dtsi": {
+      "checksum": "e55f99c46380d75f",
+      "last_run": 1776841475.00786,
+      "last_run_iso": "2026-04-22T07:04:35.007860+00:00",
+      "run_count": 2,
+      "stats": {
+        "subsystem": "dts",
+        "items": 28,
+        "confidence": 1.0,
+        "errors": 0,
+        "unparsed": 0
+      }
+    },
+    "/home/runner/work/sun60iw2-upstream/sun60iw2-upstream/arch/arm64/boot/dts/allwinner/sun60i-a733-orangepi-4-pro.dts": {
+      "checksum": "916497cb9a5ec1b7",
+      "last_run": 1776841475.014627,
+      "last_run_iso": "2026-04-22T07:04:35.014627+00:00",
+      "run_count": 2,
+      "stats": {
+        "subsystem": "dts",
+        "items": 1,
+        "confidence": 1.0,
+        "errors": 0,
         "unparsed": 0
       }
     }

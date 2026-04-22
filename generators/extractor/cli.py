@@ -154,9 +154,14 @@ def cmd_phase1_audit(args):
     resets = engine.extract("resets", source_file=ccu_driver, validate=True)
     clk_ids = engine.extract("bindings", source_file=clk_bindings, validate=True)
     rst_ids = engine.extract("bindings", source_file=rst_bindings, validate=True)
+    dtsi_nodes = engine.extract("dts", source_file=dtsi, validate=True) if dtsi.exists() else None
+    board_nodes = engine.extract("dts", source_file=board_dts, validate=True) if board_dts.exists() else None
+    dtsi_items = dtsi_nodes.items if dtsi_nodes else []
+    board_items = board_nodes.items if board_nodes else []
 
-    dtsi_text = dtsi.read_text() if dtsi.exists() else ""
     board_text = board_dts.read_text() if board_dts.exists() else ""
+    dtsi_by_label = {item.get("label"): item for item in dtsi_items if item.get("label")}
+    dtsi_by_node = {item.get("node"): item for item in dtsi_items}
 
     checks = [
         ("Base DTSI exists", dtsi.exists()),
@@ -164,9 +169,9 @@ def cmd_phase1_audit(args):
         ("CCU driver exists", ccu_driver.exists()),
         ('Board enables uart0 (`&uart0 { status = "okay"; }`)', '&uart0' in board_text and 'status = "okay"' in board_text),
         ('Board defines serial stdout-path', "stdout-path" in board_text and "serial0:" in board_text),
-        ("SoC DTSI has CCU node", "clock-controller@2002000" in dtsi_text),
-        ("SoC DTSI has main pinctrl node", "pinctrl@2000000" in dtsi_text),
-        ("SoC DTSI has uart0 node", "uart0: serial@2500000" in dtsi_text),
+        ("SoC DTSI has CCU node", "clock-controller@2002000" in dtsi_by_node),
+        ("SoC DTSI has main pinctrl node", "pinctrl@2000000" in dtsi_by_node),
+        ("SoC DTSI has uart0 node", "uart0" in dtsi_by_label),
     ]
 
     passed = sum(1 for _, ok in checks if ok)
@@ -181,6 +186,8 @@ def cmd_phase1_audit(args):
         f"- Extracted resets from CCU driver: **{len(resets.items)}**",
         f"- Clock IDs from dt-bindings: **{len([x for x in clk_ids.items if x.get('domain') == 'clock'])}**",
         f"- Reset IDs from dt-bindings: **{len([x for x in rst_ids.items if x.get('domain') == 'reset'])}**",
+        f"- Extracted DTSI nodes: **{len(dtsi_items)}**",
+        f"- Extracted board DTS nodes: **{len(board_items)}**",
         "",
         "## Bringup Checklist",
     ]
@@ -195,6 +202,8 @@ def cmd_phase1_audit(args):
             f"- CCU reset extraction errors: {len(resets.errors)}",
             f"- Clock bindings extraction errors: {len(clk_ids.errors)}",
             f"- Reset bindings extraction errors: {len(rst_ids.errors)}",
+            f"- DTSI extraction errors: {len(dtsi_nodes.errors) if dtsi_nodes else 0}",
+            f"- Board DTS extraction errors: {len(board_nodes.errors) if board_nodes else 0}",
         ]
     )
 
@@ -228,7 +237,7 @@ def main():
     extract_parser.add_argument(
         "--subsystem",
         required=True,
-        choices=["clocks", "resets", "registers", "bindings"],
+        choices=["clocks", "resets", "registers", "bindings", "dts"],
         help="Subsystem plugin to use",
     )
     extract_parser.add_argument(

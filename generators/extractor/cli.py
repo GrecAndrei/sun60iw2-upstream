@@ -134,6 +134,80 @@ def cmd_extract(args):
         print(f"Exported output to {args.output} ({args.export})")
 
 
+def cmd_phase1_audit(args):
+    """Run a focused Phase 1 bringup audit using SSEE."""
+    from generators.extractor import Engine
+
+    repo_root = Path(args.repo_root).resolve()
+    dtsi = (
+        repo_root / "arch/arm64/boot/dts/allwinner/sun60i-a733.dtsi"
+    )
+    board_dts = (
+        repo_root / "arch/arm64/boot/dts/allwinner/sun60i-a733-orangepi-4-pro.dts"
+    )
+    ccu_driver = repo_root / "drivers/clk/sunxi-ng/ccu-sun60i-a733.c"
+    clk_bindings = repo_root / "include/dt-bindings/clock/sun60i-a733-ccu.h"
+    rst_bindings = repo_root / "include/dt-bindings/reset/sun60i-a733-ccu.h"
+
+    engine = Engine()
+    clocks = engine.extract("clocks", source_file=ccu_driver, validate=True)
+    resets = engine.extract("resets", source_file=ccu_driver, validate=True)
+    clk_ids = engine.extract("bindings", source_file=clk_bindings, validate=True)
+    rst_ids = engine.extract("bindings", source_file=rst_bindings, validate=True)
+
+    dtsi_text = dtsi.read_text() if dtsi.exists() else ""
+    board_text = board_dts.read_text() if board_dts.exists() else ""
+
+    checks = [
+        ("Base DTSI exists", dtsi.exists()),
+        ("Board DTS exists", board_dts.exists()),
+        ("CCU driver exists", ccu_driver.exists()),
+        ('Board enables uart0 (`&uart0 { status = "okay"; }`)', '&uart0' in board_text and 'status = "okay"' in board_text),
+        ('Board defines serial stdout-path', "stdout-path" in board_text and "serial0:" in board_text),
+        ("SoC DTSI has CCU node", "clock-controller@2002000" in dtsi_text),
+        ("SoC DTSI has main pinctrl node", "pinctrl@2000000" in dtsi_text),
+        ("SoC DTSI has uart0 node", "uart0: serial@2500000" in dtsi_text),
+    ]
+
+    passed = sum(1 for _, ok in checks if ok)
+    total = len(checks)
+
+    lines = [
+        "# Phase 1 Audit Report (SSEE)",
+        "",
+        f"- Repo: `{repo_root}`",
+        f"- Checks passed: **{passed}/{total}**",
+        f"- Extracted clocks from CCU driver: **{len(clocks.items)}**",
+        f"- Extracted resets from CCU driver: **{len(resets.items)}**",
+        f"- Clock IDs from dt-bindings: **{len([x for x in clk_ids.items if x.get('domain') == 'clock'])}**",
+        f"- Reset IDs from dt-bindings: **{len([x for x in rst_ids.items if x.get('domain') == 'reset'])}**",
+        "",
+        "## Bringup Checklist",
+    ]
+    for name, ok in checks:
+        lines.append(f"- [{'x' if ok else ' '}] {name}")
+
+    lines.extend(
+        [
+            "",
+            "## Extraction Validation",
+            f"- CCU clock extraction errors: {len(clocks.errors)}",
+            f"- CCU reset extraction errors: {len(resets.errors)}",
+            f"- Clock bindings extraction errors: {len(clk_ids.errors)}",
+            f"- Reset bindings extraction errors: {len(rst_ids.errors)}",
+        ]
+    )
+
+    report_text = "\n".join(lines) + "\n"
+    print(report_text)
+
+    if args.output:
+        out_path = Path(args.output)
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        out_path.write_text(report_text)
+        print(f"Audit report written: {out_path}")
+
+
 def main():
     parser = argparse.ArgumentParser(description="SSEE Management CLI")
     subparsers = parser.add_subparsers(dest="command")
@@ -154,7 +228,7 @@ def main():
     extract_parser.add_argument(
         "--subsystem",
         required=True,
-        choices=["clocks", "resets", "registers"],
+        choices=["clocks", "resets", "registers", "bindings"],
         help="Subsystem plugin to use",
     )
     extract_parser.add_argument(
@@ -177,6 +251,16 @@ def main():
         "--output", help="Output path for exported data (required with --export)"
     )
 
+    phase1_parser = subparsers.add_parser(
+        "phase1-audit", help="Run Phase 1 bringup audit with SSEE"
+    )
+    phase1_parser.add_argument(
+        "--repo-root", default=".", help="Repository root path (default: current dir)"
+    )
+    phase1_parser.add_argument(
+        "--output", help="Optional markdown output path for the audit report"
+    )
+
     args = parser.parse_args()
 
     if args.command == "status":
@@ -191,6 +275,8 @@ def main():
         if args.export and not args.output:
             raise SystemExit("--output is required when --export is provided")
         cmd_extract(args)
+    elif args.command == "phase1-audit":
+        cmd_phase1_audit(args)
     else:
         parser.print_help()
 

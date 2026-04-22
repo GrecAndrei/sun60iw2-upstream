@@ -10,6 +10,9 @@ Last updated: 2026-04-22
 - :white_check_mark: SSEE clock extraction improved for more gate macro/bit expression forms
 - :white_check_mark: SSEE CLI now supports direct file/directory extraction + export
 - :white_check_mark: Added unit tests for SSEE learning, parser, cache, and parent resolution
+- :white_check_mark: SSEE now tracks observed successful patterns (self-learning semantic memory)
+- :white_check_mark: SSEE now extracts dt-binding constants via new `bindings` plugin
+- :white_check_mark: Added `phase1-audit` CLI workflow to evaluate bringup readiness quickly
 
 ## Legend
 

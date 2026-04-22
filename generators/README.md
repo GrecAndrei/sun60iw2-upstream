@@ -24,7 +24,9 @@ learned semantic knowledge in `extractor/data/semantic_map.json`.
 
 **Key capabilities:**
 - Plugin-based extraction (`clocks`, `resets`, `registers`)
+- DT-binding constants extraction plugin (`bindings`) for `CLK_*`/`RST_*`/`PD_*`
 - Persistent learned-pattern fallback for failed blocks
+- Persistent observed-pattern memory from successful extractions (self-learning cache)
 - Parent symbol normalization and clock relationship graph building
 - Conflict/cross-reference validation and extraction metrics
 - Batch extraction with checksum-based skip for unchanged files
@@ -43,6 +45,12 @@ python3 -m generators.extractor.cli extract \
   --input /path/to/ccu.c \
   --validate
 
+# Extract dt-binding constants from a header
+python3 -m generators.extractor.cli extract \
+  --subsystem bindings \
+  --input include/dt-bindings/clock/sun60i-a733-ccu.h \
+  --validate
+
 # Extract a directory, skip unchanged files, export merged json
 python3 -m generators.extractor.cli extract \
   --subsystem clocks \
@@ -50,6 +58,11 @@ python3 -m generators.extractor.cli extract \
   --skip-unchanged \
   --export json \
   --output /tmp/clocks.json
+
+# Run a Phase 1 bringup audit report
+python3 -m generators.extractor.cli phase1-audit \
+  --repo-root . \
+  --output docs/reports/phase1-audit.md
 ```
 
 ### `generate_pinctrl.py`

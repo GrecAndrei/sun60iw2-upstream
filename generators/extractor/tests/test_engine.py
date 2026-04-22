@@ -75,6 +75,41 @@ static SUNXI_CCU_GATE(foo, "f", p, 0x0, 1, 0);"""
         uart0 = next(item for item in resolved if item.get("name") == "uart0")
         self.assertEqual(uart0.get("parent"), "pll-peri0")
 
+    def test_hws_parent_resolution(self):
+        items = [
+            {"name": "pll-periph0-2x", "type": "divider", "reg": "0x20"},
+            {
+                "name": "apb1",
+                "type": "gate",
+                "reg": "0x100",
+                "bit": 0,
+                "parent": "pll_periph0_2x_hws",
+            },
+        ]
+        self.engine.symbol_table.index(items)
+        resolved = self.engine.resolve_parents(items)
+        apb1 = next(item for item in resolved if item.get("name") == "apb1")
+        self.assertEqual(apb1.get("parent"), "pll-periph0-2x")
+
+    def test_observed_pattern_reuse(self):
+        raw = "static SUNXI_CCU_GATE(example_clk);"
+        self.engine.semantic_map.record_observation(
+            "clocks",
+            raw,
+            {
+                "name": "example",
+                "type": "gate",
+                "parent": "apb1",
+                "reg": "0x0",
+                "bit": 0,
+            },
+        )
+        result = self.engine.extract(
+            "clocks", blocks=[{"type": "macro", "content": raw, "raw": raw}]
+        )
+        self.assertEqual(len(result.items), 1)
+        self.assertEqual(result.items[0]["name"], "example")
+
 
 if __name__ == "__main__":
     unittest.main()

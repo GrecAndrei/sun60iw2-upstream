@@ -51,6 +51,7 @@ PATTERN_PREVIEW_LENGTH = 200
 LEARNED_PATTERN_MIN_SIMILARITY = 0.92
 NORMALIZED_PREFIX_LENGTH = 24
 PREVIEW_PREFIX_MATCH_LENGTH = 8
+SYMBOL_SUFFIX_ALIASES = ("_clk", "_hws", "_hw")
 
 
 @dataclass
@@ -90,6 +91,7 @@ class SemanticMap:
         self.validation_rules: List[Dict] = []
         self.relationships: Dict[str, List[str]] = {}
         self.learned_patterns: List[Dict] = []
+        self.observed_patterns: Dict[str, Dict[str, Dict[str, Any]]] = {}
         self.vendor_history: Dict[str, Dict] = {}
         self.root_sources: Set[str] = set()
 
@@ -175,6 +177,7 @@ class SemanticMap:
         self.validation_rules = data.get("validation_rules", [])
         self.relationships = data.get("relationships", {})
         self.learned_patterns = data.get("learned_patterns", [])
+        self.observed_patterns = data.get("observed_patterns", {})
         self.vendor_history = data.get("vendor_history", {})
         self.root_sources = set(data.get("root_sources", list(DEFAULT_ROOT_SOURCES)))
 
@@ -186,6 +189,7 @@ class SemanticMap:
             "validation_rules": self.validation_rules,
             "relationships": self.relationships,
             "learned_patterns": self.learned_patterns,
+            "observed_patterns": self.observed_patterns,
             "vendor_history": self.vendor_history,
             "root_sources": sorted(self.root_sources),
         }
@@ -227,6 +231,23 @@ class SemanticMap:
 
     def has_seen_vendor(self, filepath: Path) -> bool:
         return str(filepath) in self.vendor_history
+
+    def record_observation(self, subsystem: str, raw_block: str, extracted: Dict[str, Any]):
+        normalized = self._normalize_for_learning(raw_block)
+        normalized_hash = hashlib.sha256(normalized.encode()).hexdigest()[:16]
+        by_subsystem = self.observed_patterns.setdefault(subsystem, {})
+        existing = by_subsystem.get(normalized_hash)
+        if existing:
+            existing["count"] = int(existing.get("count", 0)) + 1
+        else:
+            by_subsystem[normalized_hash] = {
+                "count": 1,
+                "normalized_preview": normalized[:PATTERN_PREVIEW_LENGTH],
+                "template": extracted,
+            }
+
+    def get_observation(self, subsystem: str, normalized_hash: str) -> Optional[Dict[str, Any]]:
+        return self.observed_patterns.get(subsystem, {}).get(normalized_hash)
 
     def _file_checksum(self, filepath: Path) -> str:
         content = filepath.read_bytes()
@@ -408,11 +429,13 @@ class SymbolTable:
             if not name:
                 continue
             self.by_name[name] = item
-            # Also index by normalized variable name
-            var_name = name.replace("-", "_") + "_clk"
-            self.symbols[var_name] = name
-            # And without _clk suffix
-            self.symbols[name.replace("-", "_")] = name
+            self._index_name_aliases(name)
+
+    def _index_name_aliases(self, name: str):
+        normalized = name.replace("-", "_")
+        self.symbols[normalized] = name
+        for suffix in SYMBOL_SUFFIX_ALIASES:
+            self.symbols[f"{normalized}{suffix}"] = name
 
     def resolve(self, parent_ref: str) -> Optional[str]:
         """Resolve a parent reference to a clock name."""
@@ -423,7 +446,14 @@ class SymbolTable:
         if parent_ref.startswith('"') and parent_ref.endswith('"'):
             return parent_ref.strip('"')
         # Variable name
-        return self.symbols.get(parent_ref)
+        direct = self.symbols.get(parent_ref)
+        if direct:
+            return direct
+
+        fallback = self._normalize_symbol_candidate(parent_ref)
+        if fallback:
+            return self.symbols.get(fallback)
+        return None
 
     @staticmethod
     def _normalize_parent_ref(parent_ref: str) -> str:
@@ -444,6 +474,16 @@ class SymbolTable:
         if fn_match:
             ref = _strip_member_and_index(fn_match.group(1))
         return ref.strip()
+
+    @staticmethod
+    def _normalize_symbol_candidate(ref: str) -> str:
+        candidate = ref.strip()
+        for suffix in SYMBOL_SUFFIX_ALIASES:
+            if candidate.endswith(suffix):
+                return candidate
+        if candidate.endswith("_parents"):
+            return candidate[:-8]
+        return candidate
 
     def get_item(self, name: str) -> Optional[Dict]:
         return self.by_name.get(name)
@@ -608,7 +648,9 @@ class BatchProcessor:
     ) -> Dict[str, ExtractionResult]:
         """Process all matching source files in a directory."""
         results = {}
-        patterns = ["*.h"] if subsystem == "registers" else ["*.c"]
+        patterns = ["*.c"]
+        if subsystem in ("registers", "bindings"):
+            patterns = ["*.h"]
         if subsystem == "registers":
             patterns.append("*.c")
         source_files: List[Path] = []
@@ -691,10 +733,12 @@ class Engine:
         from generators.extractor.plugins.clocks import ClockExtractor
         from generators.extractor.plugins.resets import ResetExtractor
         from generators.extractor.plugins.registers import RegisterExtractor
+        from generators.extractor.plugins.bindings import DtBindingsExtractor
 
         self.registry.register("clocks", ClockExtractor(self.semantic_map))
         self.registry.register("resets", ResetExtractor(self.semantic_map))
         self.registry.register("registers", RegisterExtractor(self.semantic_map))
+        self.registry.register("bindings", DtBindingsExtractor(self.semantic_map))
 
     def extract(
         self,
@@ -751,6 +795,9 @@ class Engine:
                 if item:
                     result.items.append(item)
                     extracted_count += 1
+                    self.semantic_map.record_observation(
+                        subsystem, block.get("raw", ""), item
+                    )
                 else:
                     failed_count += 1
                     result.raw_blocks.append(block.get("raw", ""))
@@ -814,6 +861,9 @@ class Engine:
         block_hash = hashlib.sha256(raw_block.encode()).hexdigest()[:16]
         normalized = self.semantic_map._normalize_for_learning(raw_block)
         normalized_hash = hashlib.sha256(normalized.encode()).hexdigest()[:16]
+        observed = self.semantic_map.get_observation(subsystem, normalized_hash)
+        if observed and observed.get("template"):
+            return dict(observed["template"])
         best: Optional[Dict[str, Any]] = None
         best_score = 0.0
         normalized_prefix = normalized[:NORMALIZED_PREFIX_LENGTH]

@@ -8,6 +8,7 @@
 #include <dt-bindings/reset/sun60i-a733-ccu.h>
 #include <dt-bindings/reset/sun60i-a733-r-ccu.h>
 #include <dt-bindings/power/sun60i-a733-power.h>
+#include <dt-bindings/thermal/thermal.h>
 
 / {
 	interrupt-parent = <&gic>;
@@ -182,6 +183,45 @@
 			#gpio-cells = <3>;
 			interrupt-controller;
 			#interrupt-cells = <3>;
+
+			/omit-if-no-ref/
+			mmc0_pins: mmc0-pins {
+				pins = "PF0", "PF1", "PF2", "PF3", "PF4", "PF5";
+				allwinner,pinmux = <2>;
+				function = "mmc0";
+				drive-strength = <30>;
+				bias-pull-up;
+			};
+
+			/omit-if-no-ref/
+			mmc1_pins: mmc1-pins {
+				pins = "PG0", "PG1", "PG2", "PG3", "PG4", "PG5";
+				allwinner,pinmux = <2>;
+				function = "mmc1";
+				drive-strength = <30>;
+				bias-pull-up;
+			};
+
+			mmc2_pins: mmc2-pins {
+				pins = "PC0", "PC1", "PC5", "PC6", "PC8",
+				       "PC9", "PC10", "PC11", "PC13", "PC14",
+				       "PC15", "PC16";
+				allwinner,pinmux = <3>;
+				function = "mmc2";
+				drive-strength = <30>;
+				bias-pull-up;
+			};
+
+			/omit-if-no-ref/
+			mmc3_pins: mmc3-pins {
+				pins = "PC0", "PC1", "PC5", "PC6", "PC8",
+				       "PC9", "PC10", "PC11", "PC13", "PC14",
+				       "PC15", "PC16";
+				allwinner,pinmux = <4>;
+				function = "mmc3";
+				drive-strength = <30>;
+				bias-pull-up;
+			};
 		};
 
 		r_pio: pinctrl@7025000 {
@@ -215,7 +255,8 @@
 		};
 
 		dma: dma-controller@4601000 {
-			compatible = "allwinner,sun60i-a733-dma";
+			compatible = "allwinner,sun60i-a733-dma",
+				     "allwinner,sun50i-a100-dma";
 			reg = <0x4601000 0x2000>;
 			interrupts = <GIC_SPI 111 IRQ_TYPE_LEVEL_HIGH>;
 			clocks = <&ccu CLK_DMA0>, <&ccu CLK_MBUS_DMA0>;
@@ -249,6 +290,8 @@
 			reg-io-width = <4>;
 			clocks = <&ccu CLK_UART0>;
 			resets = <&ccu RST_BUS_UART0>;
+			dmas = <&dma 14>, <&dma 14>;
+			dma-names = "tx", "rx";
 			status = "disabled";
 		};
 
@@ -260,6 +303,8 @@
 			reg-io-width = <4>;
 			clocks = <&ccu CLK_UART1>;
 			resets = <&ccu RST_BUS_UART1>;
+			dmas = <&dma 15>, <&dma 15>;
+			dma-names = "tx", "rx";
 			status = "disabled";
 		};
 
@@ -271,6 +316,8 @@
 			reg-io-width = <4>;
 			clocks = <&ccu CLK_UART2>;
 			resets = <&ccu RST_BUS_UART2>;
+			dmas = <&dma 16>, <&dma 16>;
+			dma-names = "tx", "rx";
 			status = "disabled";
 		};
 
@@ -282,6 +329,8 @@
 			reg-io-width = <4>;
 			clocks = <&ccu CLK_UART3>;
 			resets = <&ccu RST_BUS_UART3>;
+			dmas = <&dma 17>, <&dma 17>;
+			dma-names = "tx", "rx";
 			status = "disabled";
 		};
 
@@ -293,6 +342,8 @@
 			reg-io-width = <4>;
 			clocks = <&ccu CLK_UART4>;
 			resets = <&ccu RST_BUS_UART4>;
+			dmas = <&dma 18>, <&dma 18>;
+			dma-names = "tx", "rx";
 			status = "disabled";
 		};
 
@@ -304,6 +355,8 @@
 			reg-io-width = <4>;
 			clocks = <&ccu CLK_UART5>;
 			resets = <&ccu RST_BUS_UART5>;
+			dmas = <&dma 19>, <&dma 19>;
+			dma-names = "tx", "rx";
 			status = "disabled";
 		};
 
@@ -315,7 +368,93 @@
 			reg-io-width = <4>;
 			clocks = <&ccu CLK_UART6>;
 			resets = <&ccu RST_BUS_UART6>;
+			dmas = <&dma 20>, <&dma 20>;
+			dma-names = "tx", "rx";
 			status = "disabled";
+		};
+
+		mmc0: mmc@4020000 {
+			compatible = "allwinner,sun60i-a733-mmc",
+				     "allwinner,sun20i-d1-mmc";
+			reg = <0x04020000 0x1000>;
+			clocks = <&ccu CLK_BUS_SMHC0>, <&ccu CLK_SMHC0>;
+			clock-names = "ahb", "mmc";
+			resets = <&ccu RST_BUS_SMHC0>;
+			reset-names = "ahb";
+			interrupts = <GIC_SPI 161 IRQ_TYPE_LEVEL_HIGH>;
+			pinctrl-names = "default";
+			pinctrl-0 = <&mmc0_pins>;
+			status = "disabled";
+
+			max-frequency = <150000000>;
+			cap-sd-highspeed;
+			cap-mmc-highspeed;
+			cap-sdio-irq;
+			#address-cells = <1>;
+			#size-cells = <0>;
+		};
+
+		mmc1: mmc@4021000 {
+			compatible = "allwinner,sun60i-a733-mmc",
+				     "allwinner,sun20i-d1-mmc";
+			reg = <0x04021000 0x1000>;
+			clocks = <&ccu CLK_BUS_SMHC1>, <&ccu CLK_SMHC1>;
+			clock-names = "ahb", "mmc";
+			resets = <&ccu RST_BUS_SMHC1>;
+			reset-names = "ahb";
+			interrupts = <GIC_SPI 162 IRQ_TYPE_LEVEL_HIGH>;
+			pinctrl-names = "default";
+			pinctrl-0 = <&mmc1_pins>;
+			status = "disabled";
+
+			max-frequency = <150000000>;
+			cap-sd-highspeed;
+			cap-mmc-highspeed;
+			cap-sdio-irq;
+			#address-cells = <1>;
+			#size-cells = <0>;
+		};
+
+		mmc2: mmc@4022000 {
+			compatible = "allwinner,sun60i-a733-mmc",
+				     "allwinner,sun20i-d1-mmc";
+			reg = <0x04022000 0x1000>;
+			clocks = <&ccu CLK_BUS_SMHC2>, <&ccu CLK_SMHC2>;
+			clock-names = "ahb", "mmc";
+			resets = <&ccu RST_BUS_SMHC2>;
+			reset-names = "ahb";
+			interrupts = <GIC_SPI 163 IRQ_TYPE_LEVEL_HIGH>;
+			pinctrl-names = "default";
+			pinctrl-0 = <&mmc2_pins>;
+			status = "disabled";
+
+			max-frequency = <150000000>;
+			cap-sd-highspeed;
+			cap-mmc-highspeed;
+			cap-sdio-irq;
+			#address-cells = <1>;
+			#size-cells = <0>;
+		};
+
+		mmc3: mmc@4023000 {
+			compatible = "allwinner,sun60i-a733-mmc",
+				     "allwinner,sun20i-d1-mmc";
+			reg = <0x04023000 0x1000>;
+			clocks = <&ccu CLK_BUS_SMHC3>, <&ccu CLK_SMHC3>;
+			clock-names = "ahb", "mmc";
+			resets = <&ccu RST_BUS_SMHC3>;
+			reset-names = "ahb";
+			interrupts = <GIC_SPI 164 IRQ_TYPE_LEVEL_HIGH>;
+			pinctrl-names = "default";
+			pinctrl-0 = <&mmc3_pins>;
+			status = "disabled";
+
+			max-frequency = <150000000>;
+			cap-sd-highspeed;
+			cap-mmc-highspeed;
+			cap-sdio-irq;
+			#address-cells = <1>;
+			#size-cells = <0>;
 		};
 	};
 };

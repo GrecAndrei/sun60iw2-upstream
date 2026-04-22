@@ -1,0 +1,5199 @@
+{
+  "soc": "sun60i-a733",
+  "banks": {
+    "PA": 0,
+    "PB": 11,
+    "PC": 17,
+    "PD": 24,
+    "PE": 16,
+    "PF": 7,
+    "PG": 15,
+    "PH": 20,
+    "PI": 17,
+    "PJ": 28,
+    "PK": 26
+  },
+  "irq": {
+    "bank_mux": [
+      0,
+      14,
+      14,
+      14,
+      14,
+      14,
+      14,
+      14,
+      14,
+      14,
+      14
+    ],
+    "bank_map": [
+      0,
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9
+    ]
+  },
+  "name_map": {
+    "twi": "i2c",
+    "sdc": "mmc",
+    "spif": "spi",
+    "ndfc": "nand",
+    "dpss": "lcd0",
+    "sd": "mmc"
+  },
+  "pins": [
+    {
+      "bank": "PB",
+      "pin": 0,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "uart2"
+        },
+        {
+          "mux": 3,
+          "name": "uart0"
+        },
+        {
+          "mux": 4,
+          "name": "spi2"
+        },
+        {
+          "mux": 5,
+          "name": "dsi"
+        },
+        {
+          "mux": 6,
+          "name": "lcd0"
+        },
+        {
+          "mux": 7,
+          "name": "jtag"
+        }
+      ],
+      "irq_bank": 0,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PB",
+      "pin": 1,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "uart2"
+        },
+        {
+          "mux": 3,
+          "name": "uart0"
+        },
+        {
+          "mux": 4,
+          "name": "spi2"
+        },
+        {
+          "mux": 6,
+          "name": "lcd0"
+        },
+        {
+          "mux": 7,
+          "name": "jtag"
+        }
+      ],
+      "irq_bank": 0,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PB",
+      "pin": 2,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "uart2"
+        },
+        {
+          "mux": 4,
+          "name": "spi2"
+        },
+        {
+          "mux": 5,
+          "name": "hdmi"
+        },
+        {
+          "mux": 6,
+          "name": "lcd0"
+        },
+        {
+          "mux": 7,
+          "name": "jtag"
+        },
+        {
+          "mux": 8,
+          "name": "i2c0",
+          "signal": "twi0_sck"
+        }
+      ],
+      "irq_bank": 0,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PB",
+      "pin": 3,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "uart2"
+        },
+        {
+          "mux": 4,
+          "name": "spi2"
+        },
+        {
+          "mux": 5,
+          "name": "hdmi"
+        },
+        {
+          "mux": 6,
+          "name": "lcd0"
+        },
+        {
+          "mux": 7,
+          "name": "jtag"
+        },
+        {
+          "mux": 8,
+          "name": "i2c0",
+          "signal": "twi0_sda"
+        }
+      ],
+      "irq_bank": 0,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PB",
+      "pin": 4,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "pwm0_0"
+        },
+        {
+          "mux": 3,
+          "name": "i2s0_mclk"
+        },
+        {
+          "mux": 4,
+          "name": "spi2"
+        },
+        {
+          "mux": 5,
+          "name": "hdmi"
+        },
+        {
+          "mux": 6,
+          "name": "lcd0"
+        },
+        {
+          "mux": 7,
+          "name": "trace"
+        },
+        {
+          "mux": 8,
+          "name": "i2c1",
+          "signal": "twi1_sck"
+        }
+      ],
+      "irq_bank": 0,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PB",
+      "pin": 5,
+      "functions": [
+        {
+          "mux": 3,
+          "name": "i2s0_bclk"
+        },
+        {
+          "mux": 4,
+          "name": "spi2"
+        },
+        {
+          "mux": 5,
+          "name": "pwm0_1"
+        },
+        {
+          "mux": 6,
+          "name": "lcd0"
+        },
+        {
+          "mux": 7,
+          "name": "trace"
+        },
+        {
+          "mux": 8,
+          "name": "i2c1",
+          "signal": "twi1_sda"
+        }
+      ],
+      "irq_bank": 0,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PB",
+      "pin": 6,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "clk"
+        },
+        {
+          "mux": 3,
+          "name": "i2s0_lrck"
+        },
+        {
+          "mux": 4,
+          "name": "spi2"
+        },
+        {
+          "mux": 5,
+          "name": "pwm0_2"
+        },
+        {
+          "mux": 6,
+          "name": "pwm0_8"
+        },
+        {
+          "mux": 7,
+          "name": "trace"
+        }
+      ],
+      "irq_bank": 0,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PB",
+      "pin": 7,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "clk"
+        },
+        {
+          "mux": 3,
+          "name": "i2s0_dout0"
+        },
+        {
+          "mux": 4,
+          "name": "i2s0_din1"
+        },
+        {
+          "mux": 5,
+          "name": "pwm0_9"
+        },
+        {
+          "mux": 6,
+          "name": "owa0"
+        },
+        {
+          "mux": 7,
+          "name": "trace"
+        },
+        {
+          "mux": 8,
+          "name": "i2c1",
+          "signal": "twi1_sck"
+        }
+      ],
+      "irq_bank": 0,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PB",
+      "pin": 8,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "clk"
+        },
+        {
+          "mux": 3,
+          "name": "i2s0_din0"
+        },
+        {
+          "mux": 4,
+          "name": "i2s0_dout1"
+        },
+        {
+          "mux": 5,
+          "name": "pwm1_0"
+        },
+        {
+          "mux": 6,
+          "name": "owa0"
+        },
+        {
+          "mux": 7,
+          "name": "trace"
+        },
+        {
+          "mux": 8,
+          "name": "i2c1",
+          "signal": "twi1_sda"
+        }
+      ],
+      "irq_bank": 0,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PB",
+      "pin": 9,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "uart0"
+        },
+        {
+          "mux": 3,
+          "name": "i2s0_din2"
+        },
+        {
+          "mux": 4,
+          "name": "i2s0_dout2"
+        },
+        {
+          "mux": 5,
+          "name": "pwm1_1"
+        },
+        {
+          "mux": 6,
+          "name": "watchdog"
+        },
+        {
+          "mux": 7,
+          "name": "lcd0"
+        },
+        {
+          "mux": 8,
+          "name": "i2c8",
+          "signal": "twi8_sck"
+        },
+        {
+          "mux": 9,
+          "name": "i2c0",
+          "signal": "twi0_sck"
+        }
+      ],
+      "irq_bank": 0,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PB",
+      "pin": 10,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "uart0"
+        },
+        {
+          "mux": 3,
+          "name": "i2s0_din3"
+        },
+        {
+          "mux": 4,
+          "name": "i2s0_dout3"
+        },
+        {
+          "mux": 5,
+          "name": "pwm1_2"
+        },
+        {
+          "mux": 6,
+          "name": "pll"
+        },
+        {
+          "mux": 7,
+          "name": "lcd0"
+        },
+        {
+          "mux": 8,
+          "name": "i2c8",
+          "signal": "twi8_sda"
+        },
+        {
+          "mux": 9,
+          "name": "i2c0",
+          "signal": "twi0_sda"
+        }
+      ],
+      "irq_bank": 0,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PC",
+      "pin": 0,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "nand"
+        },
+        {
+          "mux": 3,
+          "name": "mmc2",
+          "signal": "sdc2"
+        },
+        {
+          "mux": 4,
+          "name": "mmc3",
+          "signal": "sdc3"
+        }
+      ],
+      "irq_bank": 1,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PC",
+      "pin": 1,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "nand"
+        },
+        {
+          "mux": 3,
+          "name": "mmc2",
+          "signal": "sdc2"
+        },
+        {
+          "mux": 4,
+          "name": "mmc3",
+          "signal": "sdc3"
+        }
+      ],
+      "irq_bank": 1,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PC",
+      "pin": 2,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "nand"
+        },
+        {
+          "mux": 5,
+          "name": "spi0"
+        },
+        {
+          "mux": 6,
+          "name": "spi0",
+          "signal": "spif0"
+        }
+      ],
+      "irq_bank": 1,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PC",
+      "pin": 3,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "nand"
+        },
+        {
+          "mux": 5,
+          "name": "spi0"
+        },
+        {
+          "mux": 6,
+          "name": "spi0",
+          "signal": "spif0"
+        }
+      ],
+      "irq_bank": 1,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PC",
+      "pin": 4,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "nand"
+        },
+        {
+          "mux": 5,
+          "name": "spi0"
+        },
+        {
+          "mux": 6,
+          "name": "spi0",
+          "signal": "spif0"
+        }
+      ],
+      "irq_bank": 1,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PC",
+      "pin": 5,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "nand"
+        },
+        {
+          "mux": 3,
+          "name": "mmc2",
+          "signal": "sdc2"
+        },
+        {
+          "mux": 4,
+          "name": "mmc3",
+          "signal": "sdc3"
+        }
+      ],
+      "irq_bank": 1,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PC",
+      "pin": 6,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "nand"
+        },
+        {
+          "mux": 3,
+          "name": "mmc2",
+          "signal": "sdc2"
+        },
+        {
+          "mux": 4,
+          "name": "mmc3",
+          "signal": "sdc3"
+        }
+      ],
+      "irq_bank": 1,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PC",
+      "pin": 7,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "nand"
+        },
+        {
+          "mux": 5,
+          "name": "spi0"
+        },
+        {
+          "mux": 6,
+          "name": "spi0",
+          "signal": "spif0"
+        }
+      ],
+      "irq_bank": 1,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PC",
+      "pin": 8,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "nand"
+        },
+        {
+          "mux": 3,
+          "name": "mmc2",
+          "signal": "sdc2"
+        },
+        {
+          "mux": 4,
+          "name": "mmc3",
+          "signal": "sdc3"
+        },
+        {
+          "mux": 6,
+          "name": "spi0",
+          "signal": "spif0"
+        }
+      ],
+      "irq_bank": 1,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PC",
+      "pin": 9,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "nand"
+        },
+        {
+          "mux": 3,
+          "name": "mmc2",
+          "signal": "sdc2"
+        },
+        {
+          "mux": 4,
+          "name": "mmc3",
+          "signal": "sdc3"
+        },
+        {
+          "mux": 6,
+          "name": "spi0",
+          "signal": "spif0"
+        }
+      ],
+      "irq_bank": 1,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PC",
+      "pin": 10,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "nand"
+        },
+        {
+          "mux": 3,
+          "name": "mmc2",
+          "signal": "sdc2"
+        },
+        {
+          "mux": 4,
+          "name": "mmc3",
+          "signal": "sdc3"
+        },
+        {
+          "mux": 6,
+          "name": "spi0",
+          "signal": "spif0"
+        }
+      ],
+      "irq_bank": 1,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PC",
+      "pin": 11,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "nand"
+        },
+        {
+          "mux": 3,
+          "name": "mmc2",
+          "signal": "sdc2"
+        },
+        {
+          "mux": 4,
+          "name": "mmc3",
+          "signal": "sdc3"
+        },
+        {
+          "mux": 6,
+          "name": "spi0",
+          "signal": "spif0"
+        }
+      ],
+      "irq_bank": 1,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PC",
+      "pin": 12,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "nand"
+        },
+        {
+          "mux": 5,
+          "name": "spi0"
+        },
+        {
+          "mux": 6,
+          "name": "spi0",
+          "signal": "spif0"
+        }
+      ],
+      "irq_bank": 1,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PC",
+      "pin": 13,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "nand"
+        },
+        {
+          "mux": 3,
+          "name": "mmc2",
+          "signal": "sdc2"
+        },
+        {
+          "mux": 4,
+          "name": "mmc3",
+          "signal": "sdc3"
+        }
+      ],
+      "irq_bank": 1,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PC",
+      "pin": 14,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "nand"
+        },
+        {
+          "mux": 3,
+          "name": "mmc2",
+          "signal": "sdc2"
+        },
+        {
+          "mux": 4,
+          "name": "mmc3",
+          "signal": "sdc3"
+        }
+      ],
+      "irq_bank": 1,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PC",
+      "pin": 15,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "nand"
+        },
+        {
+          "mux": 3,
+          "name": "mmc2",
+          "signal": "sdc2"
+        },
+        {
+          "mux": 4,
+          "name": "mmc3",
+          "signal": "sdc3"
+        },
+        {
+          "mux": 5,
+          "name": "spi0"
+        },
+        {
+          "mux": 6,
+          "name": "spi0",
+          "signal": "spif0"
+        }
+      ],
+      "irq_bank": 1,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PC",
+      "pin": 16,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "nand"
+        },
+        {
+          "mux": 3,
+          "name": "mmc2",
+          "signal": "sdc2"
+        },
+        {
+          "mux": 4,
+          "name": "mmc3",
+          "signal": "sdc3"
+        },
+        {
+          "mux": 5,
+          "name": "spi0"
+        },
+        {
+          "mux": 6,
+          "name": "spi0",
+          "signal": "spif0"
+        }
+      ],
+      "irq_bank": 1,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PD",
+      "pin": 0,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "lcd0"
+        },
+        {
+          "mux": 3,
+          "name": "lvds0"
+        },
+        {
+          "mux": 4,
+          "name": "dsi0"
+        },
+        {
+          "mux": 5,
+          "name": "eink"
+        },
+        {
+          "mux": 7,
+          "name": "pwm0_0"
+        }
+      ],
+      "irq_bank": 2,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PD",
+      "pin": 1,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "lcd0"
+        },
+        {
+          "mux": 3,
+          "name": "lvds0"
+        },
+        {
+          "mux": 4,
+          "name": "dsi0"
+        },
+        {
+          "mux": 5,
+          "name": "eink"
+        },
+        {
+          "mux": 7,
+          "name": "pwm0_1"
+        }
+      ],
+      "irq_bank": 2,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PD",
+      "pin": 2,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "lcd0"
+        },
+        {
+          "mux": 3,
+          "name": "lvds0"
+        },
+        {
+          "mux": 4,
+          "name": "dsi0"
+        },
+        {
+          "mux": 5,
+          "name": "eink"
+        },
+        {
+          "mux": 7,
+          "name": "pwm0_2"
+        }
+      ],
+      "irq_bank": 2,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PD",
+      "pin": 3,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "lcd0"
+        },
+        {
+          "mux": 3,
+          "name": "lvds0"
+        },
+        {
+          "mux": 4,
+          "name": "dsi0"
+        },
+        {
+          "mux": 5,
+          "name": "eink"
+        },
+        {
+          "mux": 7,
+          "name": "pwm0_3"
+        }
+      ],
+      "irq_bank": 2,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PD",
+      "pin": 4,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "lcd0"
+        },
+        {
+          "mux": 3,
+          "name": "lvds0"
+        },
+        {
+          "mux": 4,
+          "name": "dsi0"
+        },
+        {
+          "mux": 5,
+          "name": "eink"
+        },
+        {
+          "mux": 7,
+          "name": "pwm0_4"
+        }
+      ],
+      "irq_bank": 2,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PD",
+      "pin": 5,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "lcd0"
+        },
+        {
+          "mux": 3,
+          "name": "lvds0"
+        },
+        {
+          "mux": 4,
+          "name": "dsi0"
+        },
+        {
+          "mux": 5,
+          "name": "eink"
+        },
+        {
+          "mux": 7,
+          "name": "pwm0_5"
+        }
+      ],
+      "irq_bank": 2,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PD",
+      "pin": 6,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "lcd0"
+        },
+        {
+          "mux": 3,
+          "name": "lvds0"
+        },
+        {
+          "mux": 4,
+          "name": "dsi0"
+        },
+        {
+          "mux": 5,
+          "name": "eink"
+        },
+        {
+          "mux": 7,
+          "name": "pwm0_6"
+        }
+      ],
+      "irq_bank": 2,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PD",
+      "pin": 7,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "lcd0"
+        },
+        {
+          "mux": 3,
+          "name": "lvds0"
+        },
+        {
+          "mux": 4,
+          "name": "dsi0"
+        },
+        {
+          "mux": 5,
+          "name": "eink"
+        },
+        {
+          "mux": 7,
+          "name": "pwm0_7"
+        }
+      ],
+      "irq_bank": 2,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PD",
+      "pin": 8,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "lcd0"
+        },
+        {
+          "mux": 3,
+          "name": "lvds0"
+        },
+        {
+          "mux": 4,
+          "name": "dsi0"
+        },
+        {
+          "mux": 5,
+          "name": "eink"
+        },
+        {
+          "mux": 7,
+          "name": "pwm0_8"
+        }
+      ],
+      "irq_bank": 2,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PD",
+      "pin": 9,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "lcd0"
+        },
+        {
+          "mux": 3,
+          "name": "lvds0"
+        },
+        {
+          "mux": 4,
+          "name": "dsi0"
+        },
+        {
+          "mux": 5,
+          "name": "eink"
+        },
+        {
+          "mux": 7,
+          "name": "pwm0_9"
+        }
+      ],
+      "irq_bank": 2,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PD",
+      "pin": 10,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "lcd0"
+        },
+        {
+          "mux": 3,
+          "name": "lvds1"
+        },
+        {
+          "mux": 4,
+          "name": "dsi1"
+        },
+        {
+          "mux": 5,
+          "name": "eink"
+        },
+        {
+          "mux": 6,
+          "name": "spi1"
+        },
+        {
+          "mux": 7,
+          "name": "pwm1_0"
+        }
+      ],
+      "irq_bank": 2,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PD",
+      "pin": 11,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "lcd0"
+        },
+        {
+          "mux": 3,
+          "name": "lvds1"
+        },
+        {
+          "mux": 4,
+          "name": "dsi1"
+        },
+        {
+          "mux": 5,
+          "name": "eink"
+        },
+        {
+          "mux": 6,
+          "name": "spi1"
+        },
+        {
+          "mux": 7,
+          "name": "pwm1_1"
+        }
+      ],
+      "irq_bank": 2,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PD",
+      "pin": 12,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "lcd0"
+        },
+        {
+          "mux": 3,
+          "name": "lvds1"
+        },
+        {
+          "mux": 4,
+          "name": "dsi1"
+        },
+        {
+          "mux": 5,
+          "name": "eink"
+        },
+        {
+          "mux": 6,
+          "name": "spi1"
+        },
+        {
+          "mux": 7,
+          "name": "pwm1_2"
+        }
+      ],
+      "irq_bank": 2,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PD",
+      "pin": 13,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "lcd0"
+        },
+        {
+          "mux": 3,
+          "name": "lvds1"
+        },
+        {
+          "mux": 4,
+          "name": "dsi1"
+        },
+        {
+          "mux": 5,
+          "name": "eink"
+        },
+        {
+          "mux": 6,
+          "name": "spi1"
+        },
+        {
+          "mux": 7,
+          "name": "pwm1_3"
+        }
+      ],
+      "irq_bank": 2,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PD",
+      "pin": 14,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "lcd0"
+        },
+        {
+          "mux": 3,
+          "name": "lvds1"
+        },
+        {
+          "mux": 4,
+          "name": "dsi1"
+        },
+        {
+          "mux": 5,
+          "name": "eink"
+        },
+        {
+          "mux": 6,
+          "name": "spi1"
+        },
+        {
+          "mux": 7,
+          "name": "uart3"
+        }
+      ],
+      "irq_bank": 2,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PD",
+      "pin": 15,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "lcd0"
+        },
+        {
+          "mux": 3,
+          "name": "lvds1"
+        },
+        {
+          "mux": 4,
+          "name": "dsi1"
+        },
+        {
+          "mux": 5,
+          "name": "eink"
+        },
+        {
+          "mux": 6,
+          "name": "spi1"
+        },
+        {
+          "mux": 7,
+          "name": "uart3"
+        }
+      ],
+      "irq_bank": 2,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PD",
+      "pin": 16,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "lcd0"
+        },
+        {
+          "mux": 3,
+          "name": "lvds1"
+        },
+        {
+          "mux": 4,
+          "name": "dsi1"
+        },
+        {
+          "mux": 5,
+          "name": "eink"
+        },
+        {
+          "mux": 6,
+          "name": "i2c2",
+          "signal": "twi2"
+        },
+        {
+          "mux": 7,
+          "name": "uart3"
+        }
+      ],
+      "irq_bank": 2,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PD",
+      "pin": 17,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "lcd0"
+        },
+        {
+          "mux": 3,
+          "name": "lvds1"
+        },
+        {
+          "mux": 4,
+          "name": "dsi1"
+        },
+        {
+          "mux": 5,
+          "name": "eink"
+        },
+        {
+          "mux": 6,
+          "name": "i2c2",
+          "signal": "twi2"
+        },
+        {
+          "mux": 7,
+          "name": "uart3"
+        }
+      ],
+      "irq_bank": 2,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PD",
+      "pin": 18,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "lcd0"
+        },
+        {
+          "mux": 3,
+          "name": "lvds1"
+        },
+        {
+          "mux": 4,
+          "name": "dsi1"
+        },
+        {
+          "mux": 5,
+          "name": "eink"
+        },
+        {
+          "mux": 6,
+          "name": "spi1"
+        },
+        {
+          "mux": 7,
+          "name": "uart4"
+        }
+      ],
+      "irq_bank": 2,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PD",
+      "pin": 19,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "lcd0"
+        },
+        {
+          "mux": 3,
+          "name": "lvds1"
+        },
+        {
+          "mux": 4,
+          "name": "dsi1"
+        },
+        {
+          "mux": 5,
+          "name": "eink"
+        },
+        {
+          "mux": 6,
+          "name": "pwm1_5"
+        },
+        {
+          "mux": 7,
+          "name": "uart4"
+        }
+      ],
+      "irq_bank": 2,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PD",
+      "pin": 20,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "lcd0"
+        },
+        {
+          "mux": 3,
+          "name": "dsi"
+        },
+        {
+          "mux": 4,
+          "name": "i2c0",
+          "signal": "twi0"
+        },
+        {
+          "mux": 5,
+          "name": "eink"
+        },
+        {
+          "mux": 6,
+          "name": "pcie"
+        },
+        {
+          "mux": 7,
+          "name": "uart4"
+        },
+        {
+          "mux": 8,
+          "name": "i2c3",
+          "signal": "twi3_sck"
+        },
+        {
+          "mux": 9,
+          "name": "pwm0_2"
+        }
+      ],
+      "irq_bank": 2,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PD",
+      "pin": 21,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "lcd0"
+        },
+        {
+          "mux": 4,
+          "name": "i2c0",
+          "signal": "twi0"
+        },
+        {
+          "mux": 5,
+          "name": "eink"
+        },
+        {
+          "mux": 6,
+          "name": "pcie"
+        },
+        {
+          "mux": 7,
+          "name": "uart4"
+        },
+        {
+          "mux": 8,
+          "name": "i2c3",
+          "signal": "twi3_sda"
+        },
+        {
+          "mux": 9,
+          "name": "pwm0_3"
+        }
+      ],
+      "irq_bank": 2,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PD",
+      "pin": 22,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "pwm0_4"
+        },
+        {
+          "mux": 5,
+          "name": "eink"
+        },
+        {
+          "mux": 6,
+          "name": "pcie"
+        },
+        {
+          "mux": 7,
+          "name": "i2c0",
+          "signal": "twi0"
+        },
+        {
+          "mux": 8,
+          "name": "i2c2",
+          "signal": "twi2_sck"
+        },
+        {
+          "mux": 9,
+          "name": "pwm1_4"
+        }
+      ],
+      "irq_bank": 2,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PD",
+      "pin": 23,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "pwm0_5"
+        },
+        {
+          "mux": 6,
+          "name": "pcie"
+        },
+        {
+          "mux": 7,
+          "name": "i2c0",
+          "signal": "twi0"
+        },
+        {
+          "mux": 8,
+          "name": "i2c2",
+          "signal": "twi2_sda"
+        },
+        {
+          "mux": 9,
+          "name": "pwm1_5"
+        }
+      ],
+      "irq_bank": 2,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PE",
+      "pin": 0,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "mcsi0"
+        },
+        {
+          "mux": 3,
+          "name": "csi0"
+        },
+        {
+          "mux": 5,
+          "name": "spi3"
+        },
+        {
+          "mux": 6,
+          "name": "lpc"
+        },
+        {
+          "mux": 7,
+          "name": "ncsi0"
+        },
+        {
+          "mux": 8,
+          "name": "uart6",
+          "signal": "uart6_tx"
+        }
+      ],
+      "irq_bank": 3,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PE",
+      "pin": 1,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "i2c2",
+          "signal": "twi2"
+        },
+        {
+          "mux": 3,
+          "name": "csi1"
+        },
+        {
+          "mux": 5,
+          "name": "spi3"
+        },
+        {
+          "mux": 6,
+          "name": "lpc"
+        },
+        {
+          "mux": 7,
+          "name": "ncsi0"
+        },
+        {
+          "mux": 8,
+          "name": "uart6",
+          "signal": "uart6_rx"
+        }
+      ],
+      "irq_bank": 3,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PE",
+      "pin": 2,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "i2c2",
+          "signal": "twi2"
+        },
+        {
+          "mux": 3,
+          "name": "csi0"
+        },
+        {
+          "mux": 5,
+          "name": "spi3"
+        },
+        {
+          "mux": 6,
+          "name": "lpc"
+        },
+        {
+          "mux": 7,
+          "name": "ncsi0"
+        },
+        {
+          "mux": 8,
+          "name": "uart6",
+          "signal": "uart6_rts"
+        }
+      ],
+      "irq_bank": 3,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PE",
+      "pin": 3,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "i2c3",
+          "signal": "twi3"
+        },
+        {
+          "mux": 3,
+          "name": "csi1"
+        },
+        {
+          "mux": 4,
+          "name": "pwm0_0"
+        },
+        {
+          "mux": 5,
+          "name": "spi3"
+        },
+        {
+          "mux": 6,
+          "name": "lpc"
+        },
+        {
+          "mux": 7,
+          "name": "ncsi0"
+        },
+        {
+          "mux": 8,
+          "name": "uart6",
+          "signal": "uart6_cts"
+        }
+      ],
+      "irq_bank": 3,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PE",
+      "pin": 4,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "i2c3",
+          "signal": "twi3"
+        },
+        {
+          "mux": 3,
+          "name": "ledc"
+        },
+        {
+          "mux": 4,
+          "name": "pwm0_1"
+        },
+        {
+          "mux": 5,
+          "name": "spi3"
+        },
+        {
+          "mux": 6,
+          "name": "lpc"
+        },
+        {
+          "mux": 7,
+          "name": "ncsi0"
+        },
+        {
+          "mux": 8,
+          "name": "uart6",
+          "signal": "uart6_dcd"
+        }
+      ],
+      "irq_bank": 3,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PE",
+      "pin": 5,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "mcsi1"
+        },
+        {
+          "mux": 3,
+          "name": "pll"
+        },
+        {
+          "mux": 5,
+          "name": "pwm0_2"
+        },
+        {
+          "mux": 6,
+          "name": "lpc"
+        },
+        {
+          "mux": 7,
+          "name": "ncsi0"
+        },
+        {
+          "mux": 8,
+          "name": "uart6",
+          "signal": "uart6_dsr"
+        }
+      ],
+      "irq_bank": 3,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PE",
+      "pin": 6,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "clk"
+        },
+        {
+          "mux": 3,
+          "name": "hdmi"
+        },
+        {
+          "mux": 4,
+          "name": "i2s3_din0"
+        },
+        {
+          "mux": 5,
+          "name": "i2s3_dout1"
+        },
+        {
+          "mux": 6,
+          "name": "lpc"
+        },
+        {
+          "mux": 7,
+          "name": "ncsi0"
+        },
+        {
+          "mux": 8,
+          "name": "uart6",
+          "signal": "uart6_dtr"
+        }
+      ],
+      "irq_bank": 3,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PE",
+      "pin": 7,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "clk"
+        },
+        {
+          "mux": 3,
+          "name": "hdmi"
+        },
+        {
+          "mux": 4,
+          "name": "i2s3_bclk"
+        },
+        {
+          "mux": 6,
+          "name": "lpc"
+        },
+        {
+          "mux": 7,
+          "name": "ncsi0"
+        },
+        {
+          "mux": 8,
+          "name": "i2c11",
+          "signal": "twi11_sck"
+        }
+      ],
+      "irq_bank": 3,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PE",
+      "pin": 8,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "clk"
+        },
+        {
+          "mux": 3,
+          "name": "hdmi"
+        },
+        {
+          "mux": 4,
+          "name": "i2s3_lrck"
+        },
+        {
+          "mux": 6,
+          "name": "lpc"
+        },
+        {
+          "mux": 7,
+          "name": "ncsi0"
+        },
+        {
+          "mux": 8,
+          "name": "i2c11",
+          "signal": "twi11_sda"
+        }
+      ],
+      "irq_bank": 3,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PE",
+      "pin": 9,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "mcsi2"
+        },
+        {
+          "mux": 3,
+          "name": "tcon"
+        },
+        {
+          "mux": 4,
+          "name": "i2s3_mclk"
+        },
+        {
+          "mux": 6,
+          "name": "lpc"
+        },
+        {
+          "mux": 7,
+          "name": "ncsi0"
+        },
+        {
+          "mux": 8,
+          "name": "uart6",
+          "signal": "uart6_ri"
+        }
+      ],
+      "irq_bank": 3,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PE",
+      "pin": 10,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "i2c4",
+          "signal": "twi4"
+        },
+        {
+          "mux": 3,
+          "name": "tcon"
+        },
+        {
+          "mux": 4,
+          "name": "i2s3_din3"
+        },
+        {
+          "mux": 5,
+          "name": "i2s3_dout3"
+        },
+        {
+          "mux": 6,
+          "name": "lpc"
+        },
+        {
+          "mux": 7,
+          "name": "ncsi0"
+        },
+        {
+          "mux": 8,
+          "name": "uart1",
+          "signal": "uart6_rts"
+        }
+      ],
+      "irq_bank": 3,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PE",
+      "pin": 11,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "i2c4",
+          "signal": "twi4"
+        },
+        {
+          "mux": 3,
+          "name": "spi3"
+        },
+        {
+          "mux": 4,
+          "name": "i2s3_din2"
+        },
+        {
+          "mux": 5,
+          "name": "i2s3_dout2"
+        },
+        {
+          "mux": 6,
+          "name": "pcie"
+        },
+        {
+          "mux": 7,
+          "name": "ncsi0"
+        },
+        {
+          "mux": 8,
+          "name": "uart1",
+          "signal": "uart6_cts"
+        }
+      ],
+      "irq_bank": 3,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PE",
+      "pin": 12,
+      "functions": [
+        {
+          "mux": 3,
+          "name": "spi3"
+        },
+        {
+          "mux": 4,
+          "name": "i2s3_dout0"
+        },
+        {
+          "mux": 5,
+          "name": "i2s3_din1"
+        },
+        {
+          "mux": 6,
+          "name": "pcie"
+        },
+        {
+          "mux": 8,
+          "name": "uart1",
+          "signal": "uart6_tx"
+        }
+      ],
+      "irq_bank": 3,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PE",
+      "pin": 13,
+      "functions": [
+        {
+          "mux": 3,
+          "name": "spi3"
+        },
+        {
+          "mux": 6,
+          "name": "pcie"
+        },
+        {
+          "mux": 8,
+          "name": "uart1",
+          "signal": "uart6_rx"
+        }
+      ],
+      "irq_bank": 3,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PE",
+      "pin": 14,
+      "functions": [
+        {
+          "mux": 3,
+          "name": "spi3"
+        },
+        {
+          "mux": 5,
+          "name": "pwm1_8"
+        },
+        {
+          "mux": 6,
+          "name": "pcie"
+        },
+        {
+          "mux": 7,
+          "name": "ir"
+        },
+        {
+          "mux": 8,
+          "name": "i2c9",
+          "signal": "twi9_sck"
+        }
+      ],
+      "irq_bank": 3,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PE",
+      "pin": 15,
+      "functions": [
+        {
+          "mux": 3,
+          "name": "spi3"
+        },
+        {
+          "mux": 5,
+          "name": "pwm1_9"
+        },
+        {
+          "mux": 6,
+          "name": "ir"
+        },
+        {
+          "mux": 8,
+          "name": "i2c9",
+          "signal": "twi9_sda"
+        }
+      ],
+      "irq_bank": 3,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PF",
+      "pin": 0,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "mmc0",
+          "signal": "sdc0"
+        },
+        {
+          "mux": 3,
+          "name": "jtag"
+        },
+        {
+          "mux": 4,
+          "name": "trace"
+        },
+        {
+          "mux": 5,
+          "name": "uart5"
+        },
+        {
+          "mux": 6,
+          "name": "i2c2",
+          "signal": "twi2"
+        }
+      ],
+      "irq_bank": 4,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PF",
+      "pin": 1,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "mmc0",
+          "signal": "sdc0"
+        },
+        {
+          "mux": 3,
+          "name": "jtag"
+        },
+        {
+          "mux": 4,
+          "name": "trace"
+        }
+      ],
+      "irq_bank": 4,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PF",
+      "pin": 2,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "mmc0",
+          "signal": "sdc0"
+        },
+        {
+          "mux": 3,
+          "name": "uart0"
+        },
+        {
+          "mux": 4,
+          "name": "trace"
+        }
+      ],
+      "irq_bank": 4,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PF",
+      "pin": 3,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "mmc0",
+          "signal": "sdc0"
+        },
+        {
+          "mux": 3,
+          "name": "jtag"
+        },
+        {
+          "mux": 4,
+          "name": "trace"
+        },
+        {
+          "mux": 5,
+          "name": "uart5"
+        },
+        {
+          "mux": 6,
+          "name": "i2c2",
+          "signal": "twi2"
+        }
+      ],
+      "irq_bank": 4,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PF",
+      "pin": 4,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "mmc0",
+          "signal": "sdc0"
+        },
+        {
+          "mux": 3,
+          "name": "uart0"
+        },
+        {
+          "mux": 5,
+          "name": "uart5"
+        }
+      ],
+      "irq_bank": 4,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PF",
+      "pin": 5,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "mmc0",
+          "signal": "sdc0"
+        },
+        {
+          "mux": 3,
+          "name": "jtag"
+        },
+        {
+          "mux": 4,
+          "name": "trace"
+        },
+        {
+          "mux": 5,
+          "name": "uart5"
+        }
+      ],
+      "irq_bank": 4,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PF",
+      "pin": 6,
+      "functions": [],
+      "irq_bank": 4,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PG",
+      "pin": 0,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "mmc1",
+          "signal": "sdc1"
+        },
+        {
+          "mux": 3,
+          "name": "lcd0"
+        },
+        {
+          "mux": 4,
+          "name": "pwm1_1"
+        },
+        {
+          "mux": 5,
+          "name": "lpc"
+        }
+      ],
+      "irq_bank": 5,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PG",
+      "pin": 1,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "mmc1",
+          "signal": "sdc1"
+        },
+        {
+          "mux": 3,
+          "name": "lcd0"
+        },
+        {
+          "mux": 4,
+          "name": "pwm1_2"
+        },
+        {
+          "mux": 5,
+          "name": "lpc"
+        }
+      ],
+      "irq_bank": 5,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PG",
+      "pin": 2,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "mmc1",
+          "signal": "sdc1"
+        },
+        {
+          "mux": 3,
+          "name": "lcd0"
+        },
+        {
+          "mux": 4,
+          "name": "pwm1_3"
+        },
+        {
+          "mux": 5,
+          "name": "lpc"
+        }
+      ],
+      "irq_bank": 5,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PG",
+      "pin": 3,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "mmc1",
+          "signal": "sdc1"
+        },
+        {
+          "mux": 3,
+          "name": "lcd0"
+        },
+        {
+          "mux": 4,
+          "name": "pwm1_4"
+        },
+        {
+          "mux": 5,
+          "name": "lpc"
+        }
+      ],
+      "irq_bank": 5,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PG",
+      "pin": 4,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "mmc1",
+          "signal": "sdc1"
+        },
+        {
+          "mux": 3,
+          "name": "lcd0"
+        },
+        {
+          "mux": 4,
+          "name": "pwm1_5"
+        },
+        {
+          "mux": 5,
+          "name": "lpc"
+        }
+      ],
+      "irq_bank": 5,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PG",
+      "pin": 5,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "mmc1",
+          "signal": "sdc1"
+        },
+        {
+          "mux": 3,
+          "name": "lcd0"
+        },
+        {
+          "mux": 4,
+          "name": "pwm1_6"
+        },
+        {
+          "mux": 5,
+          "name": "lpc"
+        }
+      ],
+      "irq_bank": 5,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PG",
+      "pin": 6,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "uart1"
+        },
+        {
+          "mux": 3,
+          "name": "uart4"
+        },
+        {
+          "mux": 4,
+          "name": "pwm1_7"
+        },
+        {
+          "mux": 5,
+          "name": "lpc"
+        }
+      ],
+      "irq_bank": 5,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PG",
+      "pin": 7,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "uart1"
+        },
+        {
+          "mux": 3,
+          "name": "uart4"
+        },
+        {
+          "mux": 4,
+          "name": "pwm1_8"
+        },
+        {
+          "mux": 5,
+          "name": "lpc"
+        }
+      ],
+      "irq_bank": 5,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PG",
+      "pin": 8,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "uart1"
+        },
+        {
+          "mux": 3,
+          "name": "uart4"
+        },
+        {
+          "mux": 4,
+          "name": "uart5"
+        },
+        {
+          "mux": 5,
+          "name": "lpc"
+        },
+        {
+          "mux": 6,
+          "name": "i2c0",
+          "signal": "twi0"
+        }
+      ],
+      "irq_bank": 5,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PG",
+      "pin": 9,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "uart1"
+        },
+        {
+          "mux": 3,
+          "name": "uart4"
+        },
+        {
+          "mux": 4,
+          "name": "uart5"
+        },
+        {
+          "mux": 5,
+          "name": "lpc"
+        },
+        {
+          "mux": 6,
+          "name": "i2c0",
+          "signal": "twi0"
+        }
+      ],
+      "irq_bank": 5,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PG",
+      "pin": 10,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "i2s1_mclk"
+        },
+        {
+          "mux": 3,
+          "name": "clk"
+        },
+        {
+          "mux": 4,
+          "name": "pwm1_9"
+        },
+        {
+          "mux": 5,
+          "name": "lpc"
+        },
+        {
+          "mux": 6,
+          "name": "dmic"
+        }
+      ],
+      "irq_bank": 5,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PG",
+      "pin": 11,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "i2s1_bclk"
+        },
+        {
+          "mux": 3,
+          "name": "i2c12",
+          "signal": "twi12"
+        },
+        {
+          "mux": 4,
+          "name": "i2c9",
+          "signal": "twi9"
+        },
+        {
+          "mux": 5,
+          "name": "sgpio"
+        },
+        {
+          "mux": 6,
+          "name": "dmic"
+        },
+        {
+          "mux": 7,
+          "name": "hdmi"
+        }
+      ],
+      "irq_bank": 5,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PG",
+      "pin": 12,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "i2s1_lrck"
+        },
+        {
+          "mux": 3,
+          "name": "i2c12",
+          "signal": "twi12"
+        },
+        {
+          "mux": 4,
+          "name": "i2c9",
+          "signal": "twi9"
+        },
+        {
+          "mux": 5,
+          "name": "sgpio"
+        },
+        {
+          "mux": 6,
+          "name": "dmic"
+        },
+        {
+          "mux": 7,
+          "name": "hdmi"
+        }
+      ],
+      "irq_bank": 5,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PG",
+      "pin": 13,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "i2s1_dout0"
+        },
+        {
+          "mux": 3,
+          "name": "i2s1_din1"
+        },
+        {
+          "mux": 4,
+          "name": "i2c6",
+          "signal": "twi6"
+        },
+        {
+          "mux": 5,
+          "name": "sgpio"
+        },
+        {
+          "mux": 6,
+          "name": "dmic"
+        },
+        {
+          "mux": 7,
+          "name": "hdmi"
+        }
+      ],
+      "irq_bank": 5,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PG",
+      "pin": 14,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "i2s1_din0"
+        },
+        {
+          "mux": 3,
+          "name": "i2s1_dout1"
+        },
+        {
+          "mux": 4,
+          "name": "i2c6",
+          "signal": "twi6"
+        },
+        {
+          "mux": 5,
+          "name": "sgpio"
+        },
+        {
+          "mux": 6,
+          "name": "dmic"
+        }
+      ],
+      "irq_bank": 5,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PH",
+      "pin": 0,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "i2c0",
+          "signal": "twi0"
+        },
+        {
+          "mux": 3,
+          "name": "i2s2_dout2"
+        },
+        {
+          "mux": 4,
+          "name": "i2s2_din2"
+        },
+        {
+          "mux": 5,
+          "name": "rgmii0"
+        },
+        {
+          "mux": 6,
+          "name": "i2c3",
+          "signal": "twi3"
+        },
+        {
+          "mux": 7,
+          "name": "spi1"
+        }
+      ],
+      "irq_bank": 6,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PH",
+      "pin": 1,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "i2c0",
+          "signal": "twi0"
+        },
+        {
+          "mux": 3,
+          "name": "i2s2_dout3"
+        },
+        {
+          "mux": 4,
+          "name": "i2s2_din3"
+        },
+        {
+          "mux": 5,
+          "name": "rgmii0"
+        },
+        {
+          "mux": 6,
+          "name": "i2c3",
+          "signal": "twi3"
+        },
+        {
+          "mux": 7,
+          "name": "spi1"
+        }
+      ],
+      "irq_bank": 6,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PH",
+      "pin": 2,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "i2c1",
+          "signal": "twi1"
+        },
+        {
+          "mux": 4,
+          "name": "i2s2_mclk"
+        },
+        {
+          "mux": 5,
+          "name": "rgmii0"
+        },
+        {
+          "mux": 7,
+          "name": "spi1"
+        }
+      ],
+      "irq_bank": 6,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PH",
+      "pin": 3,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "i2c1",
+          "signal": "twi1"
+        },
+        {
+          "mux": 4,
+          "name": "i2s2_bclk"
+        },
+        {
+          "mux": 5,
+          "name": "rgmii0"
+        },
+        {
+          "mux": 7,
+          "name": "spi1"
+        }
+      ],
+      "irq_bank": 6,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PH",
+      "pin": 4,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "uart3"
+        },
+        {
+          "mux": 3,
+          "name": "spi2"
+        },
+        {
+          "mux": 4,
+          "name": "i2s2_lrck"
+        },
+        {
+          "mux": 5,
+          "name": "rgmii0"
+        },
+        {
+          "mux": 7,
+          "name": "spi1"
+        }
+      ],
+      "irq_bank": 6,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PH",
+      "pin": 5,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "uart3"
+        },
+        {
+          "mux": 3,
+          "name": "i2s2_din1"
+        },
+        {
+          "mux": 4,
+          "name": "i2s2_dout0"
+        },
+        {
+          "mux": 5,
+          "name": "rgmii0"
+        },
+        {
+          "mux": 7,
+          "name": "spi1"
+        }
+      ],
+      "irq_bank": 6,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PH",
+      "pin": 6,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "uart3"
+        },
+        {
+          "mux": 3,
+          "name": "i2s2_dout1"
+        },
+        {
+          "mux": 4,
+          "name": "i2s2_din0"
+        },
+        {
+          "mux": 5,
+          "name": "rgmii0"
+        },
+        {
+          "mux": 7,
+          "name": "spi1"
+        }
+      ],
+      "irq_bank": 6,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PH",
+      "pin": 7,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "uart3"
+        },
+        {
+          "mux": 3,
+          "name": "spi2"
+        },
+        {
+          "mux": 4,
+          "name": "dsi"
+        },
+        {
+          "mux": 5,
+          "name": "rgmii0"
+        }
+      ],
+      "irq_bank": 6,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PH",
+      "pin": 8,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "dmic"
+        },
+        {
+          "mux": 3,
+          "name": "spi2"
+        },
+        {
+          "mux": 5,
+          "name": "rgmii0"
+        }
+      ],
+      "irq_bank": 6,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PH",
+      "pin": 9,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "dmic"
+        },
+        {
+          "mux": 3,
+          "name": "spi2"
+        },
+        {
+          "mux": 5,
+          "name": "rgmii0"
+        }
+      ],
+      "irq_bank": 6,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PH",
+      "pin": 10,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "dmic"
+        },
+        {
+          "mux": 3,
+          "name": "spi2"
+        },
+        {
+          "mux": 5,
+          "name": "rgmii0"
+        }
+      ],
+      "irq_bank": 6,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PH",
+      "pin": 11,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "dmic"
+        },
+        {
+          "mux": 3,
+          "name": "spi2"
+        },
+        {
+          "mux": 5,
+          "name": "rgmii0"
+        }
+      ],
+      "irq_bank": 6,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PH",
+      "pin": 12,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "dmic"
+        },
+        {
+          "mux": 3,
+          "name": "spi2"
+        },
+        {
+          "mux": 5,
+          "name": "rgmii0"
+        }
+      ],
+      "irq_bank": 6,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PH",
+      "pin": 13,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "uart5"
+        },
+        {
+          "mux": 5,
+          "name": "rgmii0"
+        },
+        {
+          "mux": 6,
+          "name": "i2c7",
+          "signal": "twi7"
+        }
+      ],
+      "irq_bank": 6,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PH",
+      "pin": 14,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "uart5"
+        },
+        {
+          "mux": 5,
+          "name": "rgmii0"
+        },
+        {
+          "mux": 6,
+          "name": "i2c7",
+          "signal": "twi7"
+        }
+      ],
+      "irq_bank": 6,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PH",
+      "pin": 15,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "uart5"
+        },
+        {
+          "mux": 3,
+          "name": "ledc"
+        },
+        {
+          "mux": 4,
+          "name": "dsi"
+        },
+        {
+          "mux": 5,
+          "name": "rgmii0"
+        }
+      ],
+      "irq_bank": 6,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PH",
+      "pin": 16,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "uart5"
+        },
+        {
+          "mux": 4,
+          "name": "spi2"
+        },
+        {
+          "mux": 5,
+          "name": "ir"
+        },
+        {
+          "mux": 6,
+          "name": "i2c5",
+          "signal": "twi5"
+        },
+        {
+          "mux": 7,
+          "name": "i2c6",
+          "signal": "twi6"
+        }
+      ],
+      "irq_bank": 6,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PH",
+      "pin": 17,
+      "functions": [
+        {
+          "mux": 4,
+          "name": "spi2"
+        },
+        {
+          "mux": 5,
+          "name": "ir"
+        },
+        {
+          "mux": 6,
+          "name": "i2c5",
+          "signal": "twi5"
+        },
+        {
+          "mux": 7,
+          "name": "i2c6",
+          "signal": "twi6"
+        }
+      ],
+      "irq_bank": 6,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PH",
+      "pin": 18,
+      "functions": [
+        {
+          "mux": 4,
+          "name": "spi2"
+        },
+        {
+          "mux": 5,
+          "name": "pwm1_8"
+        },
+        {
+          "mux": 7,
+          "name": "i2c7",
+          "signal": "twi7"
+        }
+      ],
+      "irq_bank": 6,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PH",
+      "pin": 19,
+      "functions": [
+        {
+          "mux": 4,
+          "name": "spi2"
+        },
+        {
+          "mux": 5,
+          "name": "pwm1_9"
+        },
+        {
+          "mux": 7,
+          "name": "i2c7",
+          "signal": "twi7"
+        }
+      ],
+      "irq_bank": 6,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PI",
+      "pin": 0,
+      "functions": [
+        {
+          "mux": 3,
+          "name": "uart4"
+        },
+        {
+          "mux": 5,
+          "name": "pwm0_1"
+        },
+        {
+          "mux": 6,
+          "name": "i2c3",
+          "signal": "twi3"
+        },
+        {
+          "mux": 7,
+          "name": "i2c4",
+          "signal": "twi4"
+        }
+      ],
+      "irq_bank": 7,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PI",
+      "pin": 1,
+      "functions": [
+        {
+          "mux": 3,
+          "name": "uart4"
+        },
+        {
+          "mux": 5,
+          "name": "pwm0_2"
+        },
+        {
+          "mux": 6,
+          "name": "i2c3",
+          "signal": "twi3"
+        },
+        {
+          "mux": 7,
+          "name": "i2c4",
+          "signal": "twi4"
+        }
+      ],
+      "irq_bank": 7,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PI",
+      "pin": 2,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "uart6"
+        },
+        {
+          "mux": 4,
+          "name": "spi4"
+        },
+        {
+          "mux": 5,
+          "name": "pwm0_3"
+        }
+      ],
+      "irq_bank": 7,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PI",
+      "pin": 3,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "uart6"
+        },
+        {
+          "mux": 4,
+          "name": "spi4"
+        },
+        {
+          "mux": 5,
+          "name": "pwm0_4"
+        }
+      ],
+      "irq_bank": 7,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PI",
+      "pin": 4,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "uart6"
+        },
+        {
+          "mux": 4,
+          "name": "spi4"
+        },
+        {
+          "mux": 5,
+          "name": "pwm0_5"
+        },
+        {
+          "mux": 6,
+          "name": "i2c11",
+          "signal": "twi11"
+        }
+      ],
+      "irq_bank": 7,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PI",
+      "pin": 5,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "uart6"
+        },
+        {
+          "mux": 4,
+          "name": "spi4"
+        },
+        {
+          "mux": 5,
+          "name": "pwm0_6"
+        },
+        {
+          "mux": 6,
+          "name": "i2c11",
+          "signal": "twi11"
+        }
+      ],
+      "irq_bank": 7,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PI",
+      "pin": 6,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "uart6"
+        },
+        {
+          "mux": 3,
+          "name": "uart0"
+        },
+        {
+          "mux": 4,
+          "name": "spi4"
+        },
+        {
+          "mux": 5,
+          "name": "pwm0_7"
+        }
+      ],
+      "irq_bank": 7,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PI",
+      "pin": 7,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "uart6"
+        },
+        {
+          "mux": 3,
+          "name": "uart0"
+        },
+        {
+          "mux": 4,
+          "name": "spi4"
+        },
+        {
+          "mux": 5,
+          "name": "pwm0_8"
+        }
+      ],
+      "irq_bank": 7,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PI",
+      "pin": 8,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "uart6"
+        },
+        {
+          "mux": 3,
+          "name": "uart5"
+        },
+        {
+          "mux": 4,
+          "name": "ir"
+        },
+        {
+          "mux": 5,
+          "name": "pwm0_9"
+        }
+      ],
+      "irq_bank": 7,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PI",
+      "pin": 9,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "uart6"
+        },
+        {
+          "mux": 3,
+          "name": "uart5"
+        },
+        {
+          "mux": 4,
+          "name": "spi4"
+        },
+        {
+          "mux": 5,
+          "name": "pwm1_0"
+        }
+      ],
+      "irq_bank": 7,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PI",
+      "pin": 10,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "owa0"
+        },
+        {
+          "mux": 4,
+          "name": "pcie"
+        },
+        {
+          "mux": 5,
+          "name": "pwm1_1"
+        }
+      ],
+      "irq_bank": 7,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PI",
+      "pin": 11,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "owa0"
+        },
+        {
+          "mux": 3,
+          "name": "uart5"
+        },
+        {
+          "mux": 4,
+          "name": "uart3"
+        },
+        {
+          "mux": 5,
+          "name": "pwm1_2"
+        },
+        {
+          "mux": 6,
+          "name": "i2c5",
+          "signal": "twi5"
+        }
+      ],
+      "irq_bank": 7,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PI",
+      "pin": 12,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "ir"
+        },
+        {
+          "mux": 3,
+          "name": "uart5"
+        },
+        {
+          "mux": 4,
+          "name": "uart3"
+        },
+        {
+          "mux": 5,
+          "name": "pwm1_3"
+        },
+        {
+          "mux": 6,
+          "name": "i2c5",
+          "signal": "twi5"
+        }
+      ],
+      "irq_bank": 7,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PI",
+      "pin": 13,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "uart2"
+        },
+        {
+          "mux": 3,
+          "name": "uart3"
+        },
+        {
+          "mux": 4,
+          "name": "pcie"
+        },
+        {
+          "mux": 5,
+          "name": "pwm1_4"
+        }
+      ],
+      "irq_bank": 7,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PI",
+      "pin": 14,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "uart2"
+        },
+        {
+          "mux": 3,
+          "name": "uart3"
+        },
+        {
+          "mux": 4,
+          "name": "pcie"
+        },
+        {
+          "mux": 5,
+          "name": "pwm1_5"
+        }
+      ],
+      "irq_bank": 7,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PI",
+      "pin": 15,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "uart3"
+        },
+        {
+          "mux": 3,
+          "name": "uart1"
+        },
+        {
+          "mux": 5,
+          "name": "pwm1_6"
+        },
+        {
+          "mux": 6,
+          "name": "i2c8",
+          "signal": "twi8"
+        },
+        {
+          "mux": 7,
+          "name": "i2c2",
+          "signal": "twi2"
+        }
+      ],
+      "irq_bank": 7,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PI",
+      "pin": 16,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "uart3"
+        },
+        {
+          "mux": 3,
+          "name": "uart1"
+        },
+        {
+          "mux": 5,
+          "name": "pwm1_7"
+        },
+        {
+          "mux": 6,
+          "name": "i2c8",
+          "signal": "twi8"
+        },
+        {
+          "mux": 7,
+          "name": "i2c2",
+          "signal": "twi2"
+        }
+      ],
+      "irq_bank": 7,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PJ",
+      "pin": 0,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "lcd1"
+        },
+        {
+          "mux": 3,
+          "name": "lvds2"
+        },
+        {
+          "mux": 5,
+          "name": "rgmii1"
+        }
+      ],
+      "irq_bank": 8,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PJ",
+      "pin": 1,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "lcd1"
+        },
+        {
+          "mux": 3,
+          "name": "lvds2"
+        },
+        {
+          "mux": 5,
+          "name": "rgmii1"
+        }
+      ],
+      "irq_bank": 8,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PJ",
+      "pin": 2,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "lcd1"
+        },
+        {
+          "mux": 3,
+          "name": "lvds2"
+        },
+        {
+          "mux": 5,
+          "name": "rgmii1"
+        }
+      ],
+      "irq_bank": 8,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PJ",
+      "pin": 3,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "lcd1"
+        },
+        {
+          "mux": 3,
+          "name": "lvds2"
+        },
+        {
+          "mux": 5,
+          "name": "rgmii1"
+        }
+      ],
+      "irq_bank": 8,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PJ",
+      "pin": 4,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "lcd1"
+        },
+        {
+          "mux": 3,
+          "name": "lvds2"
+        },
+        {
+          "mux": 5,
+          "name": "rgmii1"
+        }
+      ],
+      "irq_bank": 8,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PJ",
+      "pin": 5,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "lcd1"
+        },
+        {
+          "mux": 3,
+          "name": "lvds2"
+        },
+        {
+          "mux": 5,
+          "name": "rgmii1"
+        }
+      ],
+      "irq_bank": 8,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PJ",
+      "pin": 6,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "lcd1"
+        },
+        {
+          "mux": 3,
+          "name": "lvds2"
+        },
+        {
+          "mux": 5,
+          "name": "rgmii1"
+        }
+      ],
+      "irq_bank": 8,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PJ",
+      "pin": 7,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "lcd1"
+        },
+        {
+          "mux": 3,
+          "name": "lvds2"
+        },
+        {
+          "mux": 5,
+          "name": "rgmii1"
+        }
+      ],
+      "irq_bank": 8,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PJ",
+      "pin": 8,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "lcd1"
+        },
+        {
+          "mux": 3,
+          "name": "lvds2"
+        },
+        {
+          "mux": 5,
+          "name": "rgmii1"
+        }
+      ],
+      "irq_bank": 8,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PJ",
+      "pin": 9,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "lcd1"
+        },
+        {
+          "mux": 3,
+          "name": "lvds2"
+        },
+        {
+          "mux": 5,
+          "name": "rgmii1"
+        }
+      ],
+      "irq_bank": 8,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PJ",
+      "pin": 10,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "lcd1"
+        },
+        {
+          "mux": 3,
+          "name": "lvds3"
+        },
+        {
+          "mux": 5,
+          "name": "rgmii1"
+        }
+      ],
+      "irq_bank": 8,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PJ",
+      "pin": 11,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "lcd1"
+        },
+        {
+          "mux": 3,
+          "name": "lvds3"
+        },
+        {
+          "mux": 5,
+          "name": "rgmii1"
+        }
+      ],
+      "irq_bank": 8,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PJ",
+      "pin": 12,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "lcd1"
+        },
+        {
+          "mux": 3,
+          "name": "lvds3"
+        },
+        {
+          "mux": 5,
+          "name": "rgmii1"
+        }
+      ],
+      "irq_bank": 8,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PJ",
+      "pin": 13,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "lcd1"
+        },
+        {
+          "mux": 3,
+          "name": "lvds3"
+        },
+        {
+          "mux": 5,
+          "name": "rgmii1"
+        }
+      ],
+      "irq_bank": 8,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PJ",
+      "pin": 14,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "lcd1"
+        },
+        {
+          "mux": 3,
+          "name": "lvds3"
+        },
+        {
+          "mux": 5,
+          "name": "rgmii1"
+        }
+      ],
+      "irq_bank": 8,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PJ",
+      "pin": 15,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "lcd1"
+        },
+        {
+          "mux": 3,
+          "name": "lvds3"
+        },
+        {
+          "mux": 5,
+          "name": "rgmii1"
+        }
+      ],
+      "irq_bank": 8,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PJ",
+      "pin": 16,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "lcd1"
+        },
+        {
+          "mux": 3,
+          "name": "lvds3"
+        },
+        {
+          "mux": 4,
+          "name": "uart5"
+        },
+        {
+          "mux": 5,
+          "name": "i2s4_bclk",
+          "signal": "i2s4_bclk<mux_edp>"
+        },
+        {
+          "mux": 7,
+          "name": "i2c7",
+          "signal": "twi7"
+        }
+      ],
+      "irq_bank": 8,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PJ",
+      "pin": 17,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "lcd1"
+        },
+        {
+          "mux": 3,
+          "name": "lvds3"
+        },
+        {
+          "mux": 4,
+          "name": "uart5"
+        },
+        {
+          "mux": 5,
+          "name": "i2s4_mclk",
+          "signal": "i2s4_mclk<mux_edp>"
+        },
+        {
+          "mux": 7,
+          "name": "i2c7",
+          "signal": "twi7"
+        },
+        {
+          "mux": 8,
+          "name": "spi3",
+          "signal": "spi3_sc1"
+        }
+      ],
+      "irq_bank": 8,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PJ",
+      "pin": 18,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "lcd1"
+        },
+        {
+          "mux": 3,
+          "name": "lvds3"
+        },
+        {
+          "mux": 4,
+          "name": "uart5"
+        },
+        {
+          "mux": 5,
+          "name": "i2s4_lrck",
+          "signal": "i2s4_lrck<mux_edp>"
+        },
+        {
+          "mux": 6,
+          "name": "pwm0_0"
+        },
+        {
+          "mux": 8,
+          "name": "i2c4",
+          "signal": "twi4_sck"
+        }
+      ],
+      "irq_bank": 8,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PJ",
+      "pin": 19,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "lcd1"
+        },
+        {
+          "mux": 3,
+          "name": "lvds3"
+        },
+        {
+          "mux": 4,
+          "name": "uart5"
+        },
+        {
+          "mux": 5,
+          "name": "i2s4_din0",
+          "signal": "i2s4_din0<mux_edp>"
+        },
+        {
+          "mux": 6,
+          "name": "i2s4_dout1",
+          "signal": "i2s4_dout1<mux_edp>"
+        },
+        {
+          "mux": 8,
+          "name": "i2c4",
+          "signal": "twi4_sda"
+        }
+      ],
+      "irq_bank": 8,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PJ",
+      "pin": 20,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "lcd1"
+        },
+        {
+          "mux": 4,
+          "name": "uart3"
+        },
+        {
+          "mux": 5,
+          "name": "i2s4_dout0",
+          "signal": "i2s4_dout0<mux_edp>"
+        },
+        {
+          "mux": 6,
+          "name": "i2s4_din1",
+          "signal": "i2s4_din1<mux_edp>"
+        },
+        {
+          "mux": 7,
+          "name": "i2c12",
+          "signal": "twi12"
+        },
+        {
+          "mux": 8,
+          "name": "i2c10",
+          "signal": "twi10_sda"
+        },
+        {
+          "mux": 9,
+          "name": "lcd0",
+          "signal": "lcd0_d0"
+        }
+      ],
+      "irq_bank": 8,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PJ",
+      "pin": 21,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "lcd1"
+        },
+        {
+          "mux": 3,
+          "name": "pwm1_3"
+        },
+        {
+          "mux": 4,
+          "name": "uart3"
+        },
+        {
+          "mux": 6,
+          "name": "spi3"
+        },
+        {
+          "mux": 7,
+          "name": "i2c12",
+          "signal": "twi12"
+        },
+        {
+          "mux": 8,
+          "name": "i2c10",
+          "signal": "twi10_sck"
+        },
+        {
+          "mux": 9,
+          "name": "lcd0",
+          "signal": "lcd0_d1"
+        }
+      ],
+      "irq_bank": 8,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PJ",
+      "pin": 22,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "lcd1"
+        },
+        {
+          "mux": 3,
+          "name": "pwm1_4"
+        },
+        {
+          "mux": 4,
+          "name": "uart3"
+        },
+        {
+          "mux": 5,
+          "name": "uart2"
+        },
+        {
+          "mux": 6,
+          "name": "i2c7",
+          "signal": "twi7"
+        },
+        {
+          "mux": 7,
+          "name": "i2c3",
+          "signal": "twi3"
+        },
+        {
+          "mux": 8,
+          "name": "i2c11",
+          "signal": "twi11_sck"
+        },
+        {
+          "mux": 9,
+          "name": "lcd0",
+          "signal": "lcd0_d8"
+        }
+      ],
+      "irq_bank": 8,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PJ",
+      "pin": 23,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "lcd1"
+        },
+        {
+          "mux": 3,
+          "name": "pwm1_5"
+        },
+        {
+          "mux": 4,
+          "name": "uart3"
+        },
+        {
+          "mux": 5,
+          "name": "uart2"
+        },
+        {
+          "mux": 6,
+          "name": "i2c7",
+          "signal": "twi7"
+        },
+        {
+          "mux": 7,
+          "name": "i2c3",
+          "signal": "twi3"
+        },
+        {
+          "mux": 8,
+          "name": "i2c11",
+          "signal": "twi11_sda"
+        },
+        {
+          "mux": 9,
+          "name": "lcd0",
+          "signal": "lcd0_d9"
+        }
+      ],
+      "irq_bank": 8,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PJ",
+      "pin": 24,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "lcd1"
+        },
+        {
+          "mux": 3,
+          "name": "pwm1_6"
+        },
+        {
+          "mux": 4,
+          "name": "uart4"
+        },
+        {
+          "mux": 7,
+          "name": "i2c4",
+          "signal": "twi4"
+        },
+        {
+          "mux": 8,
+          "name": "spi3",
+          "signal": "spi3_clk"
+        }
+      ],
+      "irq_bank": 8,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PJ",
+      "pin": 25,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "lcd1"
+        },
+        {
+          "mux": 3,
+          "name": "pwm1_7"
+        },
+        {
+          "mux": 4,
+          "name": "uart4"
+        },
+        {
+          "mux": 7,
+          "name": "i2c4",
+          "signal": "twi4"
+        },
+        {
+          "mux": 8,
+          "name": "spi3",
+          "signal": "spi3_mosi"
+        }
+      ],
+      "irq_bank": 8,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PJ",
+      "pin": 26,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "lcd1"
+        },
+        {
+          "mux": 3,
+          "name": "pwm1_8"
+        },
+        {
+          "mux": 4,
+          "name": "uart4"
+        },
+        {
+          "mux": 5,
+          "name": "uart2"
+        },
+        {
+          "mux": 7,
+          "name": "i2c5",
+          "signal": "twi5"
+        },
+        {
+          "mux": 8,
+          "name": "spi3",
+          "signal": "spi3_miso"
+        },
+        {
+          "mux": 9,
+          "name": "lcd0",
+          "signal": "lcd0_d16"
+        }
+      ],
+      "irq_bank": 8,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PJ",
+      "pin": 27,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "lcd1"
+        },
+        {
+          "mux": 3,
+          "name": "pwm1_9"
+        },
+        {
+          "mux": 4,
+          "name": "uart4"
+        },
+        {
+          "mux": 5,
+          "name": "uart2"
+        },
+        {
+          "mux": 6,
+          "name": "dsi"
+        },
+        {
+          "mux": 7,
+          "name": "i2c5",
+          "signal": "twi5"
+        },
+        {
+          "mux": 8,
+          "name": "spi3",
+          "signal": "spi3_cs0"
+        },
+        {
+          "mux": 9,
+          "name": "lcd0",
+          "signal": "lcd0_d17"
+        }
+      ],
+      "irq_bank": 8,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PK",
+      "pin": 0,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "mcsia"
+        },
+        {
+          "mux": 3,
+          "name": "uart6"
+        },
+        {
+          "mux": 4,
+          "name": "i2s4_bclk"
+        },
+        {
+          "mux": 5,
+          "name": "hdmi"
+        },
+        {
+          "mux": 6,
+          "name": "i2c1",
+          "signal": "twi1"
+        },
+        {
+          "mux": 7,
+          "name": "ncsi1"
+        },
+        {
+          "mux": 8,
+          "name": "sgpio",
+          "signal": "sgpio_sload"
+        }
+      ],
+      "irq_bank": 9,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PK",
+      "pin": 1,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "mcsia"
+        },
+        {
+          "mux": 3,
+          "name": "uart6"
+        },
+        {
+          "mux": 4,
+          "name": "i2s4_mclk"
+        },
+        {
+          "mux": 5,
+          "name": "hdmi"
+        },
+        {
+          "mux": 6,
+          "name": "i2c1",
+          "signal": "twi1"
+        },
+        {
+          "mux": 7,
+          "name": "ncsi1"
+        },
+        {
+          "mux": 8,
+          "name": "sgpio",
+          "signal": "sgpio_sclk"
+        }
+      ],
+      "irq_bank": 9,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PK",
+      "pin": 2,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "mcsia"
+        },
+        {
+          "mux": 3,
+          "name": "uart6"
+        },
+        {
+          "mux": 4,
+          "name": "i2s4_lrck"
+        },
+        {
+          "mux": 5,
+          "name": "hdmi"
+        },
+        {
+          "mux": 6,
+          "name": "i2c5",
+          "signal": "twi5"
+        },
+        {
+          "mux": 7,
+          "name": "ncsi1"
+        },
+        {
+          "mux": 8,
+          "name": "sgpio",
+          "signal": "sgpio_sdatain"
+        }
+      ],
+      "irq_bank": 9,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PK",
+      "pin": 3,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "mcsia"
+        },
+        {
+          "mux": 3,
+          "name": "uart6"
+        },
+        {
+          "mux": 4,
+          "name": "i2s4_din0"
+        },
+        {
+          "mux": 5,
+          "name": "i2s4_dout1"
+        },
+        {
+          "mux": 6,
+          "name": "i2c5",
+          "signal": "twi5"
+        },
+        {
+          "mux": 7,
+          "name": "ncsi1"
+        },
+        {
+          "mux": 8,
+          "name": "sgpio",
+          "signal": "sgpio_sdataout"
+        }
+      ],
+      "irq_bank": 9,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PK",
+      "pin": 4,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "mcsia"
+        },
+        {
+          "mux": 3,
+          "name": "pcie"
+        },
+        {
+          "mux": 4,
+          "name": "i2s4_dout0"
+        },
+        {
+          "mux": 5,
+          "name": "i2s4_din1"
+        },
+        {
+          "mux": 6,
+          "name": "spi3"
+        },
+        {
+          "mux": 7,
+          "name": "ncsi1"
+        },
+        {
+          "mux": 8,
+          "name": "jtag",
+          "signal": "jtag_mas_ms"
+        }
+      ],
+      "irq_bank": 9,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PK",
+      "pin": 5,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "mcsia"
+        },
+        {
+          "mux": 3,
+          "name": "pcie"
+        },
+        {
+          "mux": 4,
+          "name": "pwm1_8"
+        },
+        {
+          "mux": 5,
+          "name": "pwm1_9"
+        },
+        {
+          "mux": 6,
+          "name": "spi3"
+        },
+        {
+          "mux": 7,
+          "name": "ncsi1"
+        },
+        {
+          "mux": 8,
+          "name": "jtag",
+          "signal": "jtag_mas_ck"
+        }
+      ],
+      "irq_bank": 9,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PK",
+      "pin": 6,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "mcsia"
+        },
+        {
+          "mux": 3,
+          "name": "i2c2",
+          "signal": "twi2"
+        },
+        {
+          "mux": 4,
+          "name": "uart4"
+        },
+        {
+          "mux": 5,
+          "name": "uart2"
+        },
+        {
+          "mux": 6,
+          "name": "spi3"
+        },
+        {
+          "mux": 7,
+          "name": "ncsi1"
+        },
+        {
+          "mux": 8,
+          "name": "jtag",
+          "signal": "jtag_mas_do"
+        }
+      ],
+      "irq_bank": 9,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PK",
+      "pin": 7,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "mcsia"
+        },
+        {
+          "mux": 3,
+          "name": "i2c2",
+          "signal": "twi2"
+        },
+        {
+          "mux": 4,
+          "name": "uart4"
+        },
+        {
+          "mux": 5,
+          "name": "uart2"
+        },
+        {
+          "mux": 6,
+          "name": "spi3"
+        },
+        {
+          "mux": 7,
+          "name": "ncsi1"
+        },
+        {
+          "mux": 8,
+          "name": "jtag",
+          "signal": "jtag_mas_di"
+        }
+      ],
+      "irq_bank": 9,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PK",
+      "pin": 8,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "mcsia"
+        },
+        {
+          "mux": 3,
+          "name": "mcsi0"
+        },
+        {
+          "mux": 4,
+          "name": "uart4"
+        },
+        {
+          "mux": 5,
+          "name": "uart2"
+        },
+        {
+          "mux": 6,
+          "name": "spi3"
+        },
+        {
+          "mux": 7,
+          "name": "ncsi1"
+        },
+        {
+          "mux": 8,
+          "name": "jtag",
+          "signal": "jtag_mas_ntrst"
+        }
+      ],
+      "irq_bank": 9,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PK",
+      "pin": 9,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "mcsia"
+        },
+        {
+          "mux": 3,
+          "name": "mcsi2"
+        },
+        {
+          "mux": 4,
+          "name": "uart4"
+        },
+        {
+          "mux": 5,
+          "name": "uart2"
+        },
+        {
+          "mux": 7,
+          "name": "ncsi1"
+        },
+        {
+          "mux": 8,
+          "name": "jtag",
+          "signal": "jtag_mas_srst"
+        }
+      ],
+      "irq_bank": 9,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PK",
+      "pin": 10,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "mcsib"
+        },
+        {
+          "mux": 3,
+          "name": "uart6"
+        },
+        {
+          "mux": 5,
+          "name": "pwm0_3"
+        },
+        {
+          "mux": 7,
+          "name": "ncsi1"
+        }
+      ],
+      "irq_bank": 9,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PK",
+      "pin": 11,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "mcsib"
+        },
+        {
+          "mux": 3,
+          "name": "uart6"
+        },
+        {
+          "mux": 5,
+          "name": "pwm0_4"
+        },
+        {
+          "mux": 7,
+          "name": "ncsi1"
+        }
+      ],
+      "irq_bank": 9,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PK",
+      "pin": 12,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "mcsib"
+        },
+        {
+          "mux": 3,
+          "name": "uart6"
+        },
+        {
+          "mux": 5,
+          "name": "pwm0_5"
+        },
+        {
+          "mux": 7,
+          "name": "ncsi1"
+        }
+      ],
+      "irq_bank": 9,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PK",
+      "pin": 13,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "mcsib"
+        },
+        {
+          "mux": 3,
+          "name": "uart6"
+        },
+        {
+          "mux": 5,
+          "name": "pwm0_6"
+        },
+        {
+          "mux": 7,
+          "name": "ncsi1"
+        }
+      ],
+      "irq_bank": 9,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PK",
+      "pin": 14,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "mcsib"
+        },
+        {
+          "mux": 3,
+          "name": "pcie"
+        },
+        {
+          "mux": 5,
+          "name": "pwm0_7"
+        },
+        {
+          "mux": 7,
+          "name": "ncsi1"
+        }
+      ],
+      "irq_bank": 9,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PK",
+      "pin": 15,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "mcsib"
+        },
+        {
+          "mux": 5,
+          "name": "pwm0_8"
+        },
+        {
+          "mux": 7,
+          "name": "ncsi1"
+        }
+      ],
+      "irq_bank": 9,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PK",
+      "pin": 16,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "mcsib"
+        },
+        {
+          "mux": 3,
+          "name": "i2c3",
+          "signal": "twi3"
+        },
+        {
+          "mux": 4,
+          "name": "uart2"
+        },
+        {
+          "mux": 5,
+          "name": "pwm0_9"
+        },
+        {
+          "mux": 7,
+          "name": "ncsi1"
+        }
+      ],
+      "irq_bank": 9,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PK",
+      "pin": 17,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "mcsib"
+        },
+        {
+          "mux": 3,
+          "name": "i2c3",
+          "signal": "twi3"
+        },
+        {
+          "mux": 4,
+          "name": "uart2"
+        },
+        {
+          "mux": 5,
+          "name": "pwm1_0"
+        },
+        {
+          "mux": 7,
+          "name": "ncsi1"
+        }
+      ],
+      "irq_bank": 9,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PK",
+      "pin": 18,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "mcsib"
+        },
+        {
+          "mux": 3,
+          "name": "mcsi1"
+        },
+        {
+          "mux": 4,
+          "name": "uart2"
+        },
+        {
+          "mux": 5,
+          "name": "pwm1_1"
+        },
+        {
+          "mux": 7,
+          "name": "ncsi1"
+        },
+        {
+          "mux": 8,
+          "name": "i2c9",
+          "signal": "twi9_sck"
+        }
+      ],
+      "irq_bank": 9,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PK",
+      "pin": 19,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "mcsib"
+        },
+        {
+          "mux": 3,
+          "name": "mcsi2"
+        },
+        {
+          "mux": 4,
+          "name": "uart2"
+        },
+        {
+          "mux": 5,
+          "name": "pwm1_2"
+        },
+        {
+          "mux": 7,
+          "name": "ncsi1"
+        },
+        {
+          "mux": 8,
+          "name": "i2c9",
+          "signal": "twi9_sda"
+        }
+      ],
+      "irq_bank": 9,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PK",
+      "pin": 20,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "mcsic"
+        },
+        {
+          "mux": 3,
+          "name": "i2c2",
+          "signal": "twi2"
+        },
+        {
+          "mux": 4,
+          "name": "uart3"
+        },
+        {
+          "mux": 5,
+          "name": "pwm0_1"
+        },
+        {
+          "mux": 7,
+          "name": "ncsi1"
+        },
+        {
+          "mux": 8,
+          "name": "uart1",
+          "signal": "uart1_rts"
+        }
+      ],
+      "irq_bank": 9,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PK",
+      "pin": 21,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "mcsic"
+        },
+        {
+          "mux": 3,
+          "name": "i2c2",
+          "signal": "twi2"
+        },
+        {
+          "mux": 4,
+          "name": "uart3"
+        },
+        {
+          "mux": 5,
+          "name": "pwm0_2"
+        },
+        {
+          "mux": 7,
+          "name": "ncsi1"
+        },
+        {
+          "mux": 8,
+          "name": "uart1",
+          "signal": "uart1_cts"
+        }
+      ],
+      "irq_bank": 9,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PK",
+      "pin": 22,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "mcsic"
+        },
+        {
+          "mux": 3,
+          "name": "i2c3",
+          "signal": "twi3"
+        },
+        {
+          "mux": 4,
+          "name": "uart3"
+        },
+        {
+          "mux": 5,
+          "name": "pwm1_6"
+        },
+        {
+          "mux": 7,
+          "name": "ncsi1"
+        },
+        {
+          "mux": 8,
+          "name": "uart1",
+          "signal": "uart1_tx"
+        }
+      ],
+      "irq_bank": 9,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PK",
+      "pin": 23,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "mcsic"
+        },
+        {
+          "mux": 3,
+          "name": "i2c3",
+          "signal": "twi3"
+        },
+        {
+          "mux": 4,
+          "name": "uart3"
+        },
+        {
+          "mux": 5,
+          "name": "pwm1_7"
+        },
+        {
+          "mux": 7,
+          "name": "ncsi1"
+        },
+        {
+          "mux": 8,
+          "name": "uart1",
+          "signal": "uart1_rx"
+        }
+      ],
+      "irq_bank": 9,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PK",
+      "pin": 24,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "mcsic"
+        },
+        {
+          "mux": 3,
+          "name": "mcsi0"
+        },
+        {
+          "mux": 4,
+          "name": "pwm0_6"
+        },
+        {
+          "mux": 5,
+          "name": "i2c12",
+          "signal": "twi12"
+        },
+        {
+          "mux": 8,
+          "name": "i2c10",
+          "signal": "twi10_sda"
+        }
+      ],
+      "irq_bank": 9,
+      "irq_mux": 14
+    },
+    {
+      "bank": "PK",
+      "pin": 25,
+      "functions": [
+        {
+          "mux": 2,
+          "name": "mcsic"
+        },
+        {
+          "mux": 3,
+          "name": "mcsi1"
+        },
+        {
+          "mux": 4,
+          "name": "pwm0_7"
+        },
+        {
+          "mux": 5,
+          "name": "i2c12",
+          "signal": "twi12"
+        },
+        {
+          "mux": 8,
+          "name": "i2c10",
+          "signal": "twi10_sck"
+        }
+      ],
+      "irq_bank": 9,
+      "irq_mux": 14
+    }
+  ],
+  "issues": []
+}

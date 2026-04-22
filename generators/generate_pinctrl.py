@@ -8,12 +8,24 @@ frameworks. This minimizes manual C coding and potential bugs.
 
 Usage:
     python3 generators/generate_pinctrl.py > drivers/pinctrl/sunxi/pinctrl-sun60i-a733.c
+    python3 generators/generate_pinctrl.py --with-pinmux=dt > drivers/pinctrl/sunxi/pinctrl-sun60i-a733.c
     python3 generators/generate_ccu.py > drivers/clk/sunxi-ng/ccu-sun60i-a733.c
 """
 
+import argparse
 import json
 import sys
 from pathlib import Path
+
+# Try to import the pinmux emitter plugin
+_PINMUX_AVAILABLE = False
+try:
+    sys.path.insert(0, str(Path(__file__).parent))
+    from plugins import pinmux_emitter
+
+    _PINMUX_AVAILABLE = True
+except Exception:
+    pass
 
 # --- Pinctrl Generator ---
 
@@ -100,6 +112,15 @@ builtin_platform_driver(a733_pinctrl_driver);
 # --- Main ---
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Generate pinctrl driver C code")
+    parser.add_argument(
+        "--with-pinmux",
+        choices=["c", "dt", "none"],
+        default="none",
+        help="Embed pinmux tables emitted by the pinmux_emitter plugin (default: none)",
+    )
+    args = parser.parse_args()
+
     data_file = Path(__file__).parent / "data" / "pinctrl-main.json"
 
     if not data_file.exists():
@@ -110,3 +131,31 @@ if __name__ == "__main__":
         data = json.load(f)
 
     print(generate_pinctrl(data))
+
+    if args.with_pinmux != "none":
+        if not _PINMUX_AVAILABLE:
+            print(
+                "/* ERROR: pinmux_emitter plugin not available */",
+                file=sys.stderr,
+            )
+            sys.exit(1)
+
+        try:
+            pinmux_data = pinmux_emitter.get_pinmux_data()
+            errors = pinmux_emitter.validate_emission(pinmux_data)
+            if errors:
+                print("/* Pinmux validation errors:", file=sys.stderr)
+                for e in errors:
+                    print(f"   - {e}", file=sys.stderr)
+                print(" */", file=sys.stderr)
+                sys.exit(1)
+
+            pinmux_output = pinmux_emitter.emit_pinmux_section(
+                pinmux_data, mode=args.with_pinmux
+            )
+            print()
+            print(f"/* --- Pinmux table ({args.with_pinmux}) --- */")
+            print(pinmux_output)
+        except Exception as exc:
+            print(f"/* ERROR generating pinmux: {exc} */", file=sys.stderr)
+            sys.exit(1)

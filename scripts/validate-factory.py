@@ -119,6 +119,70 @@ def main() -> int:
         f"{len(merged_ids)}/{len(extracted_clocks)}",
     )
 
+    # 8. Pinctrl structural validation
+    from generators.plugins.pinmux_validator import (
+        parse_c_driver,
+        validate_pinctrl_structure,
+        compare_to_mainline,
+    )
+
+    pinctrl_json = json.loads((ROOT / "generators/data/pinctrl-main.json").read_text())
+    struct_errors = validate_pinctrl_structure(pinctrl_json)
+    struct_ok = not any(e["severity"] == "error" for e in struct_errors)
+    check(
+        checks,
+        "pinctrl_structure_valid",
+        struct_ok,
+        "; ".join(f"{e['name']}:{e['message']}" for e in struct_errors),
+    )
+
+    # 9. Pinctrl generated vs mainline comparison
+    generated_c = parse_c_driver(
+        (ROOT / "drivers/pinctrl/sunxi/pinctrl-sun60i-a733.c").read_text()
+    )
+    template_c = parse_c_driver(
+        (ROOT.parent / "linux/drivers/pinctrl/sunxi/pinctrl-sun55i-a523.c").read_text()
+    )
+    mainline_devs = compare_to_mainline(generated_c, template_c)
+    mainline_ok = not any(d["severity"] == "error" for d in mainline_devs)
+    check(
+        checks,
+        "pinctrl_mainline_pattern_match",
+        mainline_ok,
+        "; ".join(f"{d['name']}:{d['message']}" for d in mainline_devs),
+    )
+
+    # 10. Pinctrl JSON vs generated driver consistency
+    json_banks = pinctrl_json.get("banks", {})
+    gen_banks = generated_c.get("banks", {})
+    banks_match = json_banks == gen_banks
+    check(
+        checks,
+        "pinctrl_json_banks_match",
+        banks_match,
+        f"json={json_banks} gen={gen_banks}",
+    )
+
+    json_map = pinctrl_json.get("irq_bank_map", [])
+    gen_map = generated_c.get("irq_bank_map", [])
+    map_match = json_map == gen_map
+    check(
+        checks,
+        "pinctrl_json_irq_map_match",
+        map_match,
+        f"json={json_map} gen={gen_map}",
+    )
+
+    json_muxes = pinctrl_json.get("irq_bank_muxes", [])
+    gen_muxes = generated_c.get("irq_bank_muxes", [])
+    muxes_match = json_muxes == gen_muxes
+    check(
+        checks,
+        "pinctrl_json_irq_muxes_match",
+        muxes_match,
+        f"json={json_muxes} gen={gen_muxes}",
+    )
+
     # Report
     failures = [c for c in checks if not c["pass"]]
     passed = sum(1 for c in checks if c["pass"])

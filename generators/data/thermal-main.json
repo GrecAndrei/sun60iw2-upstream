@@ -1,0 +1,48 @@
+{
+  "chips": [
+    {
+      "name": "sun60i_a733",
+      "compatible": "allwinner,sun60i-a733-ths",
+      "sensor_num": 5,
+      "has_bus_clk_reset": true,
+      "has_mod_clk": true,
+      "temp_data_base": "SUN50I_H6_THS_TEMP_DATA",
+      "ft_deviation": 0,
+      "calc_temp": {
+        "type": "piecewise",
+        "threshold_reg": 1769,
+        "below": {
+          "offset": -2822,
+          "scale": -62
+        },
+        "above": {
+          "offset": -2835,
+          "scale": -59
+        }
+      },
+      "calibrate": {
+        "type": "custom",
+        "efuse_size": 12,
+        "efuse_words": 3,
+        "sensors": [
+          {"id": 0, "reg_extract": "(ths_cal[0] >> 12) & TEMP_CALIB_MASK"},
+          {"id": 1, "reg_extract": "((ths_cal[0] >> 24) | (ths_cal[1] << 8)) & TEMP_CALIB_MASK"},
+          {"id": 2, "reg_extract": "(ths_cal[1] >> 4) & TEMP_CALIB_MASK"},
+          {"id": 3, "reg_extract": "(ths_cal[1] >> 16) & TEMP_CALIB_MASK"},
+          {"id": 4, "reg_extract": "((ths_cal[1] >> 28) | (ths_cal[2] << 4)) & TEMP_CALIB_MASK"}
+        ],
+        "scale_divisor": "SUN60I_A733_SCALE_BELOW"
+      },
+      "init": {
+        "type": "h6_style",
+        "acq": 48,
+        "sample_per": 480,
+        "filter_type": 1,
+        "pc_period": 28,
+        "enable_sensors": "GENMASK(tmdev->chip->sensor_num - 1, 0)",
+        "dic_sensors": "GENMASK(tmdev->chip->sensor_num - 1, 0)"
+      },
+      "irq_ack": "sun50i_h6_irq_ack"
+    }
+  ]
+}

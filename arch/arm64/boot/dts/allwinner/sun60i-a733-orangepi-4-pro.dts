@@ -2,6 +2,7 @@
 
 /dts-v1/;
 
+#include <dt-bindings/gpio/gpio.h>
 #include "sun60i-a733.dtsi"
 
 / {
@@ -19,4 +20,34 @@
 
 &uart0 {
 	status = "okay";
+};
+
+&mmc0 {
+	status = "okay";
+	cd-gpios = <&pio 5 6 GPIO_ACTIVE_LOW>;
+	bus-width = <4>;
+	cap-sd-highspeed;
+	no-sdio;
+	no-mmc;
+};
+
+&mmc1 {
+	status = "okay";
+	bus-width = <4>;
+	cap-sd-highspeed;
+	cap-sdio-irq;
+	keep-power-in-suspend;
+	no-sd;
+	no-mmc;
+};
+
+&mmc2 {
+	status = "okay";
+	bus-width = <8>;
+	non-removable;
+	cap-mmc-highspeed;
+	mmc-ddr-1_8v;
+	mmc-hs200-1_8v;
+	no-sdio;
+	no-sd;
 };

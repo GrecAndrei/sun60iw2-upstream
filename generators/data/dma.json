@@ -1,0 +1,34 @@
+{
+  "soc": "sun60i-a733",
+  "compatible": "allwinner,sun60i-a733-dma",
+  "fallback": "allwinner,sun50i-a100-dma",
+  "dt": {
+    "reg": "0x4601000",
+    "size": "0x2000",
+    "interrupts": "<GIC_SPI 111 IRQ_TYPE_LEVEL_HIGH>",
+    "dma_channels": 16,
+    "dma_requests": 64,
+    "clocks": ["&ccu CLK_DMA0", "&ccu CLK_MBUS_DMA0"],
+    "clock_names": ["bus", "mbus"],
+    "reset": "&ccu RST_BUS_DMA0"
+  },
+  "driver_config": {
+    "clock_autogate_enable": "sun6i_enable_clock_autogate_h3",
+    "set_burst_length": "sun6i_set_burst_length_h3",
+    "set_drq": "sun6i_set_drq_h6",
+    "set_mode": "sun6i_set_mode_h6",
+    "src_burst_lengths": [1, 4, 8, 16],
+    "dst_burst_lengths": [1, 4, 8, 16],
+    "src_addr_widths": [1, 2, 4],
+    "dst_addr_widths": [1, 2, 4],
+    "has_high_addr": true,
+    "has_mbus_clk": true
+  },
+  "devices": {
+    "uart": {
+      "ports": [0, 1, 2, 3, 4, 5, 6],
+      "request_lines": [14, 15, 16, 17, 18, 19, 20],
+      "dma_names": ["tx", "rx"]
+    }
+  }
+}

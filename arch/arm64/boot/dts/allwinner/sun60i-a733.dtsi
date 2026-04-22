@@ -198,18 +198,20 @@
 		};
 
 		wdt: watchdog@2050000 {
-			compatible = "allwinner,sun60i-a733-wdt";
+			compatible = "allwinner,sun60i-a733-wdt",
+				     "allwinner,sun55i-a523-wdt";
 			reg = <0x2050000 0x20>;
 			interrupts = <GIC_SPI 106 IRQ_TYPE_LEVEL_HIGH>;
+			clocks = <&osc24M>, <&rtc_ccu CLK_OSC32K>;
+			clock-names = "hosc", "losc";
 		};
 
 		soc_timer0: timer@3009000 {
-			compatible = "allwinner,sun50i-timer";
-			reg = <0x3009000 0x400>;
+			compatible = "allwinner,sun60i-a733-timer",
+				     "allwinner,sun8i-a23-timer";
+			reg = <0x3009000 0xa0>;
 			interrupts = <GIC_SPI 89 IRQ_TYPE_LEVEL_HIGH>;
-			clocks = <&osc24M>, <&ccu CLK_BUS_TIMER>;
-			clock-names = "timer", "bus";
-			resets = <&ccu RST_BUS_TIMER0>;
+			clocks = <&osc24M>;
 		};
 
 		dma: dma-controller@4601000 {

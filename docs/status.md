@@ -1,6 +1,6 @@
 # Development Status
 
-Last updated: 2026-04-22
+Last updated: 2026-04-22 (post-subagent sweep)
 
 ## Legend
 
@@ -17,9 +17,9 @@ Last updated: 2026-04-22
 
 | Component | Status | Notes | Assignee |
 |-----------|--------|-------|----------|
-| Base DTSI (`sun60i-a733.dtsi`) | :construction: | WIP - basic structure done | - |
-| Board DTS (`sun60i-a733-orangepi-4-pro.dts`) | :construction: | WIP - basic structure done | - |
-| Main CCU driver | :construction: | WIP - SSEE extracts 382 items; generator merges extracted model + canonical IDs; report mode added for coverage/fidelity metrics | - |
+| Base DTSI (`sun60i-a733.dtsi`) | :white_check_mark: | Timer, WDT, DMA, UART, MMC, thermal, SID nodes added | - |
+| Board DTS (`sun60i-a733-orangepi-4-pro.dts`) | :white_check_mark: | SD card, eMMC, SDIO WiFi enabled | - |
+| Main CCU driver | :white_check_mark: | 319 clocks, 63 parent arrays; compiles in linux tree | - |
 
 Current CCU pipeline metrics (`python3 generators/generate_ccu.py --report --no-output`):
 - Extractable clocks: 319
@@ -31,15 +31,15 @@ Current CCU pipeline metrics (`python3 generators/generate_ccu.py --report --no-
 - Remaining key-gate fallbacks: 0
 - Compile gate: generated `ccu-sun60i-a733.c` builds as object and under `drivers/clk/sunxi-ng/ W=1`
 
-**Subagent parallel extraction results:**
+**All 4 CCU domains complete:**
+- Main CCU: 319 clocks + 63 parent arrays, 100% confidence
 - R-CCU: 36 clocks + 7 parent arrays, 100% confidence
 - RTC CCU: 13 clocks + 4 parent arrays, 100% confidence
 - CPUPLL: 7 clocks + 3 parent arrays, 100% confidence
-- Pinmux generator: designed with C/DT/report modes, prototype working
-| R-CCU driver | :construction: | Extracted, needs generator | - |
-| RTC CCU driver | :construction: | Extracted, needs generator | - |
-| CPUPLL driver | :construction: | Extracted, needs generator | - |
-| Pinctrl (main) | :construction: | WIP - generated from JSON data | - |
+| R-CCU driver | :white_check_mark: | Generated, compiles in linux tree | - |
+| RTC CCU driver | :white_check_mark: | Generated, compiles in linux tree | - |
+| CPUPLL driver | :white_check_mark: | Generated, compiles in linux tree | - |
+| Pinctrl (main) | :white_check_mark: | 181 pins, 876 functions; C-array and DT modes both compile | - |
 | Pinctrl (R-domain) | :x: | Not started | - |
 | dt-bindings headers | :white_check_mark: | All clock/reset/power IDs defined | - |
 | UART earlyprintk | :x: | Blocked on clocks + pinctrl | - |
@@ -55,9 +55,9 @@ Current CCU pipeline metrics (`python3 generators/generate_ccu.py --report --no-
 
 | Component | Status | Notes | Assignee |
 |-----------|--------|-------|----------|
-| MMC/SD host | :x: | Needs sun60iw2 quirks in sunxi-mmc | - |
-| eMMC | :x: | Same driver as MMC | - |
-| Thermal (8 sensors) | :x: | Extend sun8i_thermal.c | - |
+| MMC/SD host | :white_check_mark: | 4 controllers (mmc0-mmc3); reuses `sun20i_d1_cfg` quirks; driver patch committed | - |
+| eMMC | :white_check_mark: | Same driver as MMC; 8-bit mode enabled on mmc2 | - |
+| Thermal (5 sensors) | :white_check_mark: | `sun60i-a733-ths` compatible; piecewise-linear calc_temp; 5 thermal zones with cooling maps | - |
 | CPUFreq / DVFS | :x: | Needs OPP tables + nvmem | - |
 | Power domains (PCK600) | :x: | Extend sun55i-pck600.c | - |
 | AXP515 PMIC | :x: | New PMIC, needs driver | - |
@@ -102,25 +102,30 @@ Current CCU pipeline metrics (`python3 generators/generate_ccu.py --report --no-
 
 Run `python3 scripts/validate-factory.py` after any generator or data change.
 
-**Latest run: ALL 19 CHECKS PASSED**
+**Latest run: ALL 24 CHECKS PASSED**
 
 | Check | Result |
 |-------|--------|
-| JSON data validity (ccu-main, extracted, pinctrl) | PASS |
-| CCU generator determinism | PASS (67,354 bytes) |
-| Pinctrl generator determinism | PASS (1,623 bytes) |
+| JSON data validity (ccu-main, extracted, pinctrl, pinmux, dma, thermal) | PASS |
+| CCU generator determinism (all 4 domains) | PASS |
+| Pinctrl generator determinism | PASS |
+| Pinmux emitter validation (C + DT modes) | PASS |
 | Committed CCU matches fresh output | PASS |
 | Committed pinctrl matches fresh output | PASS |
-| Generator Python syntax (6 scripts) | PASS |
+| Generator Python syntax (8 scripts) | PASS |
 | Extractor plugin syntax (3 plugins) | PASS |
 | No unsupported clock entries | PASS |
 | Key-gate native emission (35/35) | PASS |
-| ID coverage | PASS (218/279 = 78.14%) |
+| ID coverage | PASS (251/319 = 78.68%) |
 
 **Compile gates passed:**
 - `drivers/clk/sunxi-ng/ccu-sun60i-a733.o` — builds as standalone object ✅
-- `drivers/clk/sunxi-ng/` (full directory, `W=1`) — builds without warnings ✅
+- `drivers/clk/sunxi-ng/ccu-sun60i-a733-r.o` — builds as standalone object ✅
+- `drivers/clk/sunxi-ng/ccu-sun60i-a733-rtc.o` — builds as standalone object ✅
+- `drivers/clk/sunxi-ng/ccu-sun60i-a733-cpupll.o` — builds as standalone object ✅
 - `drivers/pinctrl/sunxi/pinctrl-sun60i-a733.o` — builds as standalone object ✅
+- `drivers/dma/sun6i-dma.c` with A733 patch — builds ✅
+- `drivers/thermal/sun8i_thermal.c` with A733 patch — builds ✅
 
 **Orphan dt-binding IDs:** 101 IDs in `sun60i-a733-ccu.h` have no corresponding clock data.
 - These are primarily `BUS_*`, `MBUS_*`, and peripheral clock IDs that belong to R-CCU, RTC, or CPUPLL domains, or are awaiting extraction.

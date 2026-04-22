@@ -106,6 +106,26 @@
         "errors": 20,
         "unparsed": 33
       }
+    },
+    "/home/runner/work/sun60iw2-upstream/sun60iw2-upstream/drivers/clk/sunxi-ng/ccu-sun60i-a733.c": {
+      "checksum": "dbb41cc2129cf7a0",
+      "last_run": 1776841086.021338,
+      "last_run_iso": "2026-04-22T06:58:06.021338+00:00",
+      "run_count": 1,
+      "stats": {
+        "subsystem": "clocks",
+        "items": 2,
+        "confidence": 1.0,
+        "errors": 2,
+        "unparsed": 0
+      }
     }
-  }
+  },
+  "root_sources": [
+    "dcxo",
+    "ext-osc32k",
+    "hosc",
+    "losc",
+    "osc24M"
+  ]
 }

@@ -178,7 +178,7 @@
 		};
 
 		cpupll_ccu: clock-controller@8870000 {
-			compatible = "allwinner,sun60i-a733-cpupll";
+			compatible = "allwinner,sun60i-a733-cpupll-ccu";
 			reg = <0x08870000 0x4000>;
 			clocks = <&rtc_ccu CLK_DCXO>;
 			clock-names = "dcxo";

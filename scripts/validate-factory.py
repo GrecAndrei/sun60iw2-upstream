@@ -30,13 +30,26 @@ def run_gen(script: str) -> str:
     return result.stdout
 
 
+def run_ccu_domain(domain: str) -> str:
+    return run_gen(f"generators/generate_ccu.py --domain {domain}")
+
+
 def main() -> int:
     checks: list[dict] = []
+    ccu_domains = {
+        "main": "drivers/clk/sunxi-ng/ccu-sun60i-a733.c",
+        "r": "drivers/clk/sunxi-ng/ccu-sun60i-a733-r.c",
+        "rtc": "drivers/clk/sunxi-ng/ccu-sun60i-a733-rtc.c",
+        "cpupll": "drivers/clk/sunxi-ng/ccu-sun60i-a733-cpupll.c",
+    }
 
     # 1. JSON data validity
     for p in [
         "generators/data/ccu-main.json",
         "generators/data/ccu-main-extracted.json",
+        "generators/data/ccu-r-extracted.json",
+        "generators/data/ccu-rtc-extracted.json",
+        "generators/data/ccu-cpupll-extracted.json",
         "generators/data/pinctrl-main.json",
     ]:
         try:
@@ -46,18 +59,31 @@ def main() -> int:
             check(checks, f"json_valid:{Path(p).name}", False, str(e))
 
     # 2. Determinism
-    ccu1 = run_gen("generators/generate_ccu.py")
-    ccu2 = run_gen("generators/generate_ccu.py")
-    check(checks, "ccu_determinism", ccu1 == ccu2, f"len={len(ccu1)}")
+    ccu_outputs = {}
+    for domain in ccu_domains:
+        out1 = run_ccu_domain(domain)
+        out2 = run_ccu_domain(domain)
+        ccu_outputs[domain] = out1
+        check(
+            checks,
+            f"ccu_determinism:{domain}",
+            out1 == out2,
+            f"len={len(out1)}",
+        )
 
     pin1 = run_gen("generators/generate_pinctrl.py --with-pinmux=c")
     pin2 = run_gen("generators/generate_pinctrl.py --with-pinmux=c")
     check(checks, "pinctrl_determinism", pin1 == pin2, f"len={len(pin1)}")
 
     # 3. Committed files match fresh output
-    ccu_committed = (ROOT / "drivers/clk/sunxi-ng/ccu-sun60i-a733.c").read_text()
+    for domain, path in ccu_domains.items():
+        ccu_committed = (ROOT / path).read_text()
+        check(
+            checks,
+            f"ccu_committed_fresh_match:{domain}",
+            ccu_committed == ccu_outputs[domain],
+        )
     pin_committed = (ROOT / "drivers/pinctrl/sunxi/pinctrl-sun60i-a733.c").read_text()
-    check(checks, "ccu_committed_fresh_match", ccu_committed == ccu1)
     check(checks, "pinctrl_committed_fresh_match", pin_committed == pin1)
 
     # 4. Generator Python syntax
@@ -92,22 +118,21 @@ def main() -> int:
     from generators.plugins import DOMAINS
 
     primary = json.loads((ROOT / "generators/data/ccu-main.json").read_text())
-    extracted = json.loads(
-        (ROOT / "generators/data/ccu-main-extracted.json").read_text()
-    )
-    binding_ids = parse_binding_ids(
-        ROOT / "include/dt-bindings/clock/sun60i-a733-ccu.h"
-    )
+    extracted = json.loads((ROOT / "generators/data/ccu-main-extracted.json").read_text())
+    binding_ids = parse_binding_ids(ROOT / "include/dt-bindings/clock/sun60i-a733-ccu.h")
     merged = merge_data(primary, extracted, binding_ids)
-    gen = Generator(merged, DOMAINS["main"])
-    gen.render()
-    check(
-        checks,
-        "generator_no_unsupported",
-        len(gen.unsupported) == 0,
-        str(gen.unsupported),
-    )
-    check(checks, "key_gate_native_all", len(set(gen.key_gate_emitted)) == 35)
+    for domain, cfg in DOMAINS.items():
+        data = merged if domain == "main" else json.loads(cfg["data_file"].read_text())
+        gen = Generator(data, cfg)
+        gen.render()
+        check(
+            checks,
+            f"generator_no_unsupported:{domain}",
+            len(gen.unsupported) == 0,
+            str(gen.unsupported),
+        )
+        if domain == "main":
+            check(checks, "key_gate_native_all", len(set(gen.key_gate_emitted)) == 35)
 
     # 7. ID coverage
     merged_ids = {c["id"] for c in merged["clocks"] if "id" in c}

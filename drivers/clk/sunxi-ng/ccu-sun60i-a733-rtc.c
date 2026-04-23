@@ -117,6 +117,71 @@ static const struct clk_ops sun60i_key_gate_ops = {
 	.recalc_rate	= sun60i_key_gate_recalc_rate,
 };
 
+struct sun60i_fixed_rate_gate {
+	struct ccu_gate gate;
+	unsigned long fixed_rate;
+};
+
+static inline struct sun60i_fixed_rate_gate *hw_to_sun60i_fixed_rate_gate(struct clk_hw *hw)
+{
+	struct ccu_gate *cg = hw_to_ccu_gate(hw);
+
+	return container_of(cg, struct sun60i_fixed_rate_gate, gate);
+}
+
+static int sun60i_fixed_rate_gate_enable(struct clk_hw *hw)
+{
+	struct sun60i_fixed_rate_gate *fg = hw_to_sun60i_fixed_rate_gate(hw);
+
+	return ccu_gate_helper_enable(&fg->gate.common, fg->gate.enable);
+}
+
+static void sun60i_fixed_rate_gate_disable(struct clk_hw *hw)
+{
+	struct sun60i_fixed_rate_gate *fg = hw_to_sun60i_fixed_rate_gate(hw);
+
+	ccu_gate_helper_disable(&fg->gate.common, fg->gate.enable);
+}
+
+static int sun60i_fixed_rate_gate_is_enabled(struct clk_hw *hw)
+{
+	struct sun60i_fixed_rate_gate *fg = hw_to_sun60i_fixed_rate_gate(hw);
+
+	return ccu_gate_helper_is_enabled(&fg->gate.common, fg->gate.enable);
+}
+
+static unsigned long sun60i_fixed_rate_gate_recalc_rate(struct clk_hw *hw,
+							unsigned long parent_rate)
+{
+	struct sun60i_fixed_rate_gate *fg = hw_to_sun60i_fixed_rate_gate(hw);
+
+	return fg->fixed_rate;
+}
+
+static int sun60i_fixed_rate_gate_determine_rate(struct clk_hw *hw,
+						 struct clk_rate_request *req)
+{
+	struct sun60i_fixed_rate_gate *fg = hw_to_sun60i_fixed_rate_gate(hw);
+
+	req->rate = fg->fixed_rate;
+	return 0;
+}
+
+static int sun60i_fixed_rate_gate_set_rate(struct clk_hw *hw, unsigned long rate,
+					   unsigned long parent_rate)
+{
+	return 0;
+}
+
+static const struct clk_ops sun60i_fixed_rate_gate_ops = {
+	.disable	= sun60i_fixed_rate_gate_disable,
+	.enable		= sun60i_fixed_rate_gate_enable,
+	.is_enabled	= sun60i_fixed_rate_gate_is_enabled,
+	.determine_rate	= sun60i_fixed_rate_gate_determine_rate,
+	.set_rate	= sun60i_fixed_rate_gate_set_rate,
+	.recalc_rate	= sun60i_fixed_rate_gate_recalc_rate,
+};
+
 static SUNXI_CCU_GATE(iosc_clk, "iosc", "rc-16m", 0x160, BIT(0), 0);
 
 static struct sun60i_key_gate ext32k_gate_clk = {
@@ -134,11 +199,18 @@ static struct sun60i_key_gate ext32k_gate_clk = {
 
 static CLK_FIXED_FACTOR(iosc_div32k_clk, "iosc-div32k", "iosc", 500, 1, 0);
 
-/* Unsupported clock type 'mux_gate_key' for 'osc32k' */
-
-/* Unsupported clock type 'gate_with_fixed_rate' for 'dcxo24M-div32k' */
-
-/* Unsupported clock type 'mux_gate_key' for 'rtc32k' */
+static struct sun60i_fixed_rate_gate dcxo24M_div32k_clk = {
+	.gate		= {
+		.enable	= BIT(16),
+		.common	= {
+			.reg		= 0x060,
+			.hw.init	= CLK_HW_INIT("dcxo24M-div32k", "dcxo",
+					      &sun60i_fixed_rate_gate_ops,
+					      0),
+		},
+	},
+	.fixed_rate	= 32768,
+};
 
 static CLK_FIXED_FACTOR(rtc_1k_clk, "rtc-1k", "rtc32k", 32, 1, 0);
 
@@ -164,21 +236,50 @@ static const struct clk_parent_data osc32k_parents[] = {
 
 static const struct clk_parent_data rtc32k_clk_parents[] = {
 	{ .fw_name = "osc32k" },
-	{ .fw_name = "dcxo24M-div32k" },
+	{ .hw = &dcxo24M_div32k_clk.gate.common.hw },
 };
 
 static const struct clk_parent_data rtc_32k_fanout_clk_parents[] = {
 	{ .fw_name = "rtc32k" },
 	{ .fw_name = "osc32k" },
-	{ .fw_name = "dcxo24M-div32k" },
+	{ .hw = &dcxo24M_div32k_clk.gate.common.hw },
 };
+static struct ccu_mux osc32k_clk = {
+	.enable	= BIT(0),
+	.mux	= _SUNXI_CCU_MUX(0, 1),
+	.common	= {
+		.reg		= 0x000,
+		.features	= CCU_FEATURE_KEY_FIELD,
+		.hw.init	= CLK_HW_INIT_PARENTS_DATA("osc32k",
+							   osc32k_parents,
+							   &ccu_mux_ops,
+							   0),
+	},
+};
+
+static struct ccu_mux rtc32k_clk = {
+	.enable	= BIT(0),
+	.mux	= _SUNXI_CCU_MUX(1, 1),
+	.common	= {
+		.reg		= 0x000,
+		.features	= CCU_FEATURE_KEY_FIELD,
+		.hw.init	= CLK_HW_INIT_PARENTS_DATA("rtc32k",
+							   rtc32k_clk_parents,
+							   &ccu_mux_ops,
+							   0),
+	},
+};
+
 static SUNXI_CCU_MUX_DATA_WITH_GATE(rtc_32k_fanout_clk, "rtc-32k-fanout", rtc_32k_fanout_clk_parents, 0x060, 1, 2, BIT(0), 0);
 
-static SUNXI_CCU_MUX_DATA(dcxo_clk, "dcxo", dcxo_parents, 0x160, 14, 2, 0);
+static SUNXI_CCU_MUX_DATA(dcxo_clk, "dcxo", dcxo_parents, 0x160, 14, 2, CLK_SET_RATE_NO_REPARENT);
 
 static struct ccu_common *sun60i_a733_rtc_ccu_clks[] = {
 	&iosc_clk.common,
 	&ext32k_gate_clk.gate.common,
+	&osc32k_clk.common,
+	&dcxo24M_div32k_clk.gate.common,
+	&rtc32k_clk.common,
 	&rtc_32k_fanout_clk.common,
 	&dcxo_clk.common,
 	&dcxo_wakeup_clk.common,
@@ -193,6 +294,9 @@ static struct clk_hw_onecell_data sun60i_a733_rtc_ccu_hw_clks = {
 	[CLK_IOSC]	= &iosc_clk.common.hw,
 	[CLK_EXT32K_GATE]	= &ext32k_gate_clk.gate.common.hw,
 	[CLK_IOSC_DIV32K]	= &iosc_div32k_clk.hw,
+	[CLK_OSC32K]	= &osc32k_clk.common.hw,
+	[CLK_DCXO24M_DIV32K]	= &dcxo24M_div32k_clk.gate.common.hw,
+	[CLK_RTC32K]	= &rtc32k_clk.common.hw,
 	[CLK_RTC_1K]	= &rtc_1k_clk.hw,
 	[CLK_RTC_32K_FANOUT]	= &rtc_32k_fanout_clk.common.hw,
 	[CLK_DCXO]	= &dcxo_clk.common.hw,

@@ -26,7 +26,8 @@
         "iosc",
         "pll-peri0-200m",
         "pll-peri0-300m"
-      ]
+      ],
+      "id": "R_AHB"
     },
     {
       "name": "r_apbs_parents",
@@ -54,7 +55,8 @@
         "iosc",
         "pll-peri0-200m",
         "pll-ref"
-      ]
+      ],
+      "id": "R_APBS0"
     },
     {
       "name": "r-apbs1",
@@ -71,7 +73,8 @@
         "iosc",
         "pll-peri0-200m",
         "pll-ref"
-      ]
+      ],
+      "id": "R_APBS1"
     },
     {
       "name": "r_timer_parents",
@@ -99,7 +102,8 @@
         "iosc",
         "pll-peri0-200m",
         "pll-ref"
-      ]
+      ],
+      "id": "R_TIMER0"
     },
     {
       "name": "r-timer1",
@@ -116,7 +120,8 @@
         "iosc",
         "pll-peri0-200m",
         "pll-ref"
-      ]
+      ],
+      "id": "R_TIMER1"
     },
     {
       "name": "r-timer2",
@@ -133,7 +138,8 @@
         "iosc",
         "pll-peri0-200m",
         "pll-ref"
-      ]
+      ],
+      "id": "R_TIMER2"
     },
     {
       "name": "r-timer3",
@@ -150,21 +156,24 @@
         "iosc",
         "pll-peri0-200m",
         "pll-ref"
-      ]
+      ],
+      "id": "R_TIMER3"
     },
     {
       "name": "r-timer",
       "type": "gate",
       "parent": "dcxo",
       "reg": "0x011C",
-      "bit": 0
+      "bit": 0,
+      "id": "R_TIMER"
     },
     {
       "name": "r-twd",
       "type": "gate",
       "parent": "dcxo",
       "reg": "0x012C",
-      "bit": 0
+      "bit": 0,
+      "id": "R_TWD"
     },
     {
       "name": "r_pwm_parents",
@@ -189,14 +198,16 @@
         "rtc32k",
         "iosc",
         "pll-ref"
-      ]
+      ],
+      "id": "R_PWM"
     },
     {
       "name": "r-bus-pwm",
       "type": "gate",
       "parent": "dcxo",
       "reg": "0x013C",
-      "bit": 0
+      "bit": 0,
+      "id": "R_BUS_PWM"
     },
     {
       "name": "r_spi_parents",
@@ -227,77 +238,88 @@
         "pll-peri0-300m",
         "pll-peri1-300m",
         "pll-ref"
-      ]
+      ],
+      "id": "R_SPI"
     },
     {
       "name": "r-bus-spi",
       "type": "gate",
       "parent": "dcxo",
       "reg": "0x015C",
-      "bit": 0
+      "bit": 0,
+      "id": "R_BUS_SPI"
     },
     {
       "name": "r-mbox",
       "type": "gate",
       "parent": "dcxo",
       "reg": "0x017C",
-      "bit": 0
+      "bit": 0,
+      "id": "R_MBOX"
     },
     {
       "name": "r-uart1",
       "type": "gate",
       "parent": "r-apbs1",
       "reg": "0x018C",
-      "bit": 1
+      "bit": 1,
+      "id": "R_UART1"
     },
     {
       "name": "r-uart0",
       "type": "gate",
       "parent": "r-apbs1",
       "reg": "0x018C",
-      "bit": 0
+      "bit": 0,
+      "id": "R_UART0"
     },
     {
       "name": "r-twi2",
       "type": "gate",
       "parent": "r-apbs1",
       "reg": "0x019C",
-      "bit": 2
+      "bit": 2,
+      "id": "R_TWI2"
     },
     {
       "name": "r-twi1",
       "type": "gate",
       "parent": "r-apbs1",
       "reg": "0x019C",
-      "bit": 1
+      "bit": 1,
+      "id": "R_TWI1"
     },
     {
       "name": "r-twi0",
       "type": "gate",
       "parent": "r-apbs1",
       "reg": "0x019C",
-      "bit": 0
+      "bit": 0,
+      "id": "R_TWI0"
     },
     {
       "name": "r-ppu",
       "type": "gate",
       "parent": "dcxo",
       "reg": "0x01AC",
-      "bit": 0
+      "bit": 0,
+      "id": "R_PPU"
     },
     {
       "name": "r-tzma",
       "type": "gate",
       "parent": "dcxo",
       "reg": "0x01B0",
-      "bit": 0
+      "bit": 0,
+      "id": "R_TZMA"
     },
     {
       "name": "r-cpus-bist",
       "type": "gate",
       "parent": "dcxo",
       "reg": "0x01BC",
-      "bit": 0
+      "bit": 0,
+      "id": "R_CPUS_BIST"
     },
     {
       "name": "r_irrx_parents",
@@ -322,21 +344,24 @@
         "rtc32k",
         "dcxo",
         "pll-ref"
-      ]
+      ],
+      "id": "R_IRRX"
     },
     {
       "name": "r-bus-irrx",
       "type": "gate",
       "parent": "dcxo",
       "reg": "0x01CC",
-      "bit": 0
+      "bit": 0,
+      "id": "R_BUS_IRRX"
     },
     {
       "name": "rtc",
       "type": "gate",
       "parent": "dcxo",
       "reg": "0x020C",
-      "bit": 0
+      "bit": 0,
+      "id": "RTC"
     },
     {
       "name": "riscv_24m_parents",
@@ -359,77 +384,88 @@
         "dcxo",
         "osc32k",
         "iosc"
-      ]
+      ],
+      "id": "RISCV_24M"
     },
     {
       "name": "riscv-cfg",
       "type": "gate",
       "parent": "dcxo",
       "reg": "0x021C",
-      "bit": 1
+      "bit": 1,
+      "id": "RISCV_CFG"
     },
     {
       "name": "riscv",
       "type": "gate",
       "parent": "dcxo",
       "reg": "0x021C",
-      "bit": 0
+      "bit": 0,
+      "id": "RISCV"
     },
     {
       "name": "r-cpucfg",
       "type": "gate",
       "parent": "dcxo",
       "reg": "0x022C",
-      "bit": 0
+      "bit": 0,
+      "id": "R_CPUCFG"
     },
     {
       "name": "vdd-usb2cpus",
       "type": "gate",
       "parent": "dcxo",
       "reg": "0x0250",
-      "bit": 8
+      "bit": 8,
+      "id": "VDD_USB2CPUS"
     },
     {
       "name": "vdd-sys2usb",
       "type": "gate",
       "parent": "dcxo",
       "reg": "0x0250",
-      "bit": 3
+      "bit": 3,
+      "id": "VDD_SYS2USB"
     },
     {
       "name": "vdd-sys2cpus",
       "type": "gate",
       "parent": "dcxo",
       "reg": "0x0250",
-      "bit": 2
+      "bit": 2,
+      "id": "VDD_SYS2CPUS"
     },
     {
       "name": "vdd-ddr",
       "type": "gate",
       "parent": "dcxo",
       "reg": "0x0250",
-      "bit": 0
+      "bit": 0,
+      "id": "VDD_DDR"
     },
     {
       "name": "tt-auto",
       "type": "gate",
       "parent": "dcxo",
       "reg": "0x0338",
-      "bit": 9
+      "bit": 9,
+      "id": "TT_AUTO"
     },
     {
       "name": "cpu-icache-auto",
       "type": "gate",
       "parent": "dcxo",
       "reg": "0x0338",
-      "bit": 8
+      "bit": 8,
+      "id": "CPU_ICACHE_AUTO"
     },
     {
       "name": "ahbs-auto-clk",
       "type": "gate",
       "parent": "dcxo",
       "reg": "0x033C",
-      "bit": 24
+      "bit": 24,
+      "id": "AHBS_AUTO_CLK"
     }
   ],
   "errors": []

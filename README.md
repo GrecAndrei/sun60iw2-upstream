@@ -6,18 +6,31 @@ Mainline Linux upstream port for the **Allwinner A733 (sun60iw2p1)** SoC and the
 
 ## Status: WIP / PRE-ALPHA
 
-**Nothing works yet. This repository contains zero bootable code.**
+This repository now contains a real early-bringup port. It is **not usable yet**, but it is no longer just scaffolding.
 
-We are at the very beginning of porting a brand-new SoC that has **zero support** in upstream Linux. If you are looking for a working system, use the [vendor kernel](https://github.com/orangepi-xunlong/linux-orangepi) or [Armbian](https://github.com/jonas5/orangepi-4pro-armbian) instead.
+### Verified So Far
+- Kernel boots on Orange Pi 4 Pro hardware
+- All 8 CPUs come online
+- GICv3, timer, PSCI, and serial console basics are working
+- Generated CCU, R-CCU, RTC CCU, CPUPLL, and pinctrl drivers build in the Linux tree
+- DTS/DTSI, generator pipeline, and factory validation are in active use
+
+### Still Not Working Reliably
+- Storage bringup is incomplete at runtime
+- Main CCU runtime behavior needs re-verification after recent config and clock-tree fixes
+- RTC/root clock interactions still need cleanup
+- No userspace boot yet
+
+If you need a working system today, use the [vendor kernel](https://github.com/orangepi-xunlong/linux-orangepi) or [Armbian](https://github.com/jonas5/orangepi-4pro-armbian) instead.
 
 ### What's Here Now
 - [x] Project scaffolding
-- [ ] Device Tree Source (DTS/DTSI)
-- [ ] Clock drivers (CCU)
-- [ ] Pinctrl drivers
-- [ ] Thermal driver support
-- [ ] UART earlyprintk
-- [ ] MMC/SD host support
+- [x] Device Tree Source (DTS/DTSI)
+- [x] Clock drivers (CCU)
+- [x] Pinctrl drivers
+- [x] Thermal driver support
+- [x] UART console bringup
+- [x] MMC/SD host description and initial driver support
 - [ ] Ethernet (GMAC)
 - [ ] USB host/device
 - [ ] PCIe controller
@@ -181,7 +194,7 @@ All code in this repository is licensed under the [GPL-2.0+](LICENSE) to match t
 
 This project is **not affiliated with** Orange Pi, Xunlong, or Allwinner. We are reverse-engineering and documenting a proprietary SoC using publicly available information, vendor source code (used as reference only), and hardware testing.
 
-**Do not expect this to work anytime soon.** This is a long-term upstreaming effort. If you need a working system today, use the vendor kernel.
+**Do not expect a usable system yet.** This is still an early-stage upstreaming effort. If you need a working system today, use the vendor kernel.
 
 ---
 

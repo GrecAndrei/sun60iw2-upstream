@@ -29,9 +29,11 @@ SUPPORTED_TYPES = {
     "divider",
     "fixed_factor",
     "gate",
+    "gate_with_fixed_rate",
     "gate_with_key",
     "mux",
     "mux_gate",
+    "mux_gate_key",
     "mux_divider",
     "mux_divider_gate",
     "mp_mux_gate_no_index",
@@ -105,6 +107,16 @@ def id_candidates(name: str) -> List[str]:
         add(f"{root}_GATE")
 
     return cands
+
+
+def flag_expr(value) -> str:
+    if not value:
+        return "0"
+    if isinstance(value, str):
+        return value
+    if isinstance(value, list):
+        return " | ".join(value) if value else "0"
+    return str(value)
 
 
 def infer_clock_id(name: str, binding_ids: Set[str]) -> str | None:
@@ -257,6 +269,8 @@ class Generator:
             return f"&{c_name(parent_name)}_clk.hw"
         if t == "gate_with_key":
             return f"&{c_name(parent_name)}_clk.gate.common.hw"
+        if t == "gate_with_fixed_rate":
+            return f"&{c_name(parent_name)}_clk.gate.common.hw"
         return f"&{c_name(parent_name)}_clk.common.hw"
 
     def parent_data_entries(self, parents: List[str]) -> List[str]:
@@ -276,6 +290,9 @@ class Generator:
         binding = d["binding_header"]
         has_resets = d.get("has_resets", True)
         has_key_gates = d.get("has_key_gates", True)
+        has_fixed_rate_gates = any(
+            c.get("type") == "gate_with_fixed_rate" for c in self.clocks
+        )
 
         reset_include = f"#include <dt-bindings/reset/{binding}>" if has_resets else ""
 
@@ -371,6 +388,77 @@ static const struct clk_ops sun60i_key_gate_ops = {
             else ""
         )
 
+        fixed_rate_gate_struct = (
+            """struct sun60i_fixed_rate_gate {
+	struct ccu_gate gate;
+	unsigned long fixed_rate;
+};
+
+static inline struct sun60i_fixed_rate_gate *hw_to_sun60i_fixed_rate_gate(struct clk_hw *hw)
+{
+	struct ccu_gate *cg = hw_to_ccu_gate(hw);
+
+	return container_of(cg, struct sun60i_fixed_rate_gate, gate);
+}
+
+static int sun60i_fixed_rate_gate_enable(struct clk_hw *hw)
+{
+	struct sun60i_fixed_rate_gate *fg = hw_to_sun60i_fixed_rate_gate(hw);
+
+	return ccu_gate_helper_enable(&fg->gate.common, fg->gate.enable);
+}
+
+static void sun60i_fixed_rate_gate_disable(struct clk_hw *hw)
+{
+	struct sun60i_fixed_rate_gate *fg = hw_to_sun60i_fixed_rate_gate(hw);
+
+	ccu_gate_helper_disable(&fg->gate.common, fg->gate.enable);
+}
+
+static int sun60i_fixed_rate_gate_is_enabled(struct clk_hw *hw)
+{
+	struct sun60i_fixed_rate_gate *fg = hw_to_sun60i_fixed_rate_gate(hw);
+
+	return ccu_gate_helper_is_enabled(&fg->gate.common, fg->gate.enable);
+}
+
+static unsigned long sun60i_fixed_rate_gate_recalc_rate(struct clk_hw *hw,
+							unsigned long parent_rate)
+{
+	struct sun60i_fixed_rate_gate *fg = hw_to_sun60i_fixed_rate_gate(hw);
+
+	return fg->fixed_rate;
+}
+
+static int sun60i_fixed_rate_gate_determine_rate(struct clk_hw *hw,
+						 struct clk_rate_request *req)
+{
+	struct sun60i_fixed_rate_gate *fg = hw_to_sun60i_fixed_rate_gate(hw);
+
+	req->rate = fg->fixed_rate;
+	return 0;
+}
+
+static int sun60i_fixed_rate_gate_set_rate(struct clk_hw *hw, unsigned long rate,
+					   unsigned long parent_rate)
+{
+	return 0;
+}
+
+static const struct clk_ops sun60i_fixed_rate_gate_ops = {
+	.disable	= sun60i_fixed_rate_gate_disable,
+	.enable		= sun60i_fixed_rate_gate_enable,
+	.is_enabled	= sun60i_fixed_rate_gate_is_enabled,
+	.determine_rate	= sun60i_fixed_rate_gate_determine_rate,
+	.set_rate	= sun60i_fixed_rate_gate_set_rate,
+	.recalc_rate	= sun60i_fixed_rate_gate_recalc_rate,
+};
+
+"""
+            if has_fixed_rate_gates
+            else ""
+        )
+
         return f"""// SPDX-License-Identifier: GPL-2.0
 /*
  * Copyright (C) 2026 Alexander Grec
@@ -404,7 +492,7 @@ static const struct clk_parent_data osc24M[] = {{
 	{{ .fw_name = "hosc" }},
 }};
 
-{key_gate_struct}"""
+{key_gate_struct}{fixed_rate_gate_struct}"""
 
     def emit_pll(self, c: Dict) -> str:
         name = c_name(c["name"])
@@ -483,8 +571,7 @@ static const struct clk_parent_data osc24M[] = {{
         key_token = c.get("key_value", "0")
         key_literals = {**DEFAULT_KEY_LITERALS, **self.domain.get("key_literals", {})}
         key_literal = key_literals.get(key_token, key_token)
-        flags = c.get("flags") or []
-        flag_expr = " | ".join(flags) if flags else "0"
+        flags = flag_expr(c.get("flags"))
 
         return f"""static struct sun60i_key_gate {name}_clk = {{
 	.gate		= {{
@@ -493,10 +580,31 @@ static const struct clk_parent_data osc24M[] = {{
 			.reg		= {reg_hex(c["reg"])},
 			.hw.init	= CLK_HW_INIT("{c["name"]}", "{c["parent"]}",
 					      &sun60i_key_gate_ops,
-					      {flag_expr}),
+					      {flags}),
 		}},
 	}},
 	.key_value	= {key_literal},
+}};
+
+"""
+
+    def emit_gate_with_fixed_rate(self, c: Dict) -> str:
+        name = c_name(c["name"])
+        self.emitted_common.append(c["name"])
+        self.emitted_hw.append(c["name"])
+        self.defined_names.add(c["name"])
+
+        return f"""static struct sun60i_fixed_rate_gate {name}_clk = {{
+	.gate		= {{
+		.enable	= BIT({c["bit"]}),
+		.common	= {{
+			.reg		= {reg_hex(c["reg"])},
+			.hw.init	= CLK_HW_INIT("{c["name"]}", "{c["parent"]}",
+					      &sun60i_fixed_rate_gate_ops,
+					      0),
+		}},
+	}},
+	.fixed_rate	= {c["rate"]},
 }};
 
 """
@@ -515,9 +623,10 @@ static const struct clk_parent_data osc24M[] = {{
         self.emitted_common.append(c["name"])
         self.emitted_hw.append(c["name"])
         self.defined_names.add(c["name"])
+        flags = flag_expr(c.get("flags"))
         return (
             f'static SUNXI_CCU_MUX_DATA({name}_clk, "{c["name"]}", {c["parents_array"]},'
-            f" {reg_hex(c['reg'])}, {c['mux_shift']}, {c['mux_width']}, 0);\n\n"
+            f" {reg_hex(c['reg'])}, {c['mux_shift']}, {c['mux_width']}, {flags});\n\n"
         )
 
     def emit_mux_gate(self, c: Dict) -> str:
@@ -525,10 +634,32 @@ static const struct clk_parent_data osc24M[] = {{
         self.emitted_common.append(c["name"])
         self.emitted_hw.append(c["name"])
         self.defined_names.add(c["name"])
+        flags = flag_expr(c.get("flags"))
         return (
             f'static SUNXI_CCU_MUX_DATA_WITH_GATE({name}_clk, "{c["name"]}", {c["parents_array"]},'
-            f" {reg_hex(c['reg'])}, {c['mux_shift']}, {c['mux_width']}, BIT({c['gate_bit']}), 0);\n\n"
+            f" {reg_hex(c['reg'])}, {c['mux_shift']}, {c['mux_width']}, BIT({c['gate_bit']}), {flags});\n\n"
         )
+
+    def emit_mux_gate_key(self, c: Dict) -> str:
+        name = c_name(c["name"])
+        self.emitted_common.append(c["name"])
+        self.emitted_hw.append(c["name"])
+        self.defined_names.add(c["name"])
+        flags = flag_expr(c.get("flags"))
+        return f"""static struct ccu_mux {name}_clk = {{
+	.enable	= BIT({c["gate_bit"]}),
+	.mux	= _SUNXI_CCU_MUX({c["mux_shift"]}, {c["mux_width"]}),
+	.common	= {{
+		.reg		= {reg_hex(c["reg"])},
+		.features	= CCU_FEATURE_KEY_FIELD,
+		.hw.init	= CLK_HW_INIT_PARENTS_DATA("{c["name"]}",
+							   {c["parents_array"]},
+							   &ccu_mux_ops,
+							   {flags}),
+	}},
+}};
+
+"""
 
     def emit_mp_mux_gate(self, c: Dict) -> str:
         name = c_name(c["name"])
@@ -546,15 +677,16 @@ static const struct clk_parent_data osc24M[] = {{
         self.emitted_common.append(c["name"])
         self.emitted_hw.append(c["name"])
         self.defined_names.add(c["name"])
+        flags = flag_expr(c.get("flags"))
         if with_gate:
             return (
                 f'static SUNXI_CCU_M_DATA_WITH_MUX_GATE({name}_clk, "{c["name"]}", {c["parents_array"]},'
                 f" {reg_hex(c['reg'])}, {c['div_shift']}, {c['div_width']}, {c['mux_shift']}, {c['mux_width']},"
-                f" BIT({c['gate_bit']}), 0);\n\n"
+                f" BIT({c['gate_bit']}), {flags});\n\n"
             )
         return (
             f'static SUNXI_CCU_M_DATA_WITH_MUX({name}_clk, "{c["name"]}", {c["parents_array"]},'
-            f" {reg_hex(c['reg'])}, {c['div_shift']}, {c['div_width']}, {c['mux_shift']}, {c['mux_width']}, 0);\n\n"
+            f" {reg_hex(c['reg'])}, {c['div_shift']}, {c['div_width']}, {c['mux_shift']}, {c['mux_width']}, {flags});\n\n"
         )
 
     def emit_clock(self, c: Dict) -> str:
@@ -563,6 +695,8 @@ static const struct clk_parent_data osc24M[] = {{
             return self.emit_divider(c)
         if t == "gate":
             return self.emit_gate(c)
+        if t == "gate_with_fixed_rate":
+            return self.emit_gate_with_fixed_rate(c)
         if t == "gate_with_key":
             return self.emit_gate_with_key(c)
         if t == "fixed_factor":
@@ -571,6 +705,8 @@ static const struct clk_parent_data osc24M[] = {{
             return self.emit_mux(c)
         if t == "mux_gate":
             return self.emit_mux_gate(c)
+        if t == "mux_gate_key":
+            return self.emit_mux_gate_key(c)
         if t == "mux_divider":
             return self.emit_mux_divider(c, with_gate=False)
         if t == "mux_divider_gate":
@@ -589,7 +725,7 @@ static const struct clk_parent_data osc24M[] = {{
         lines = []
         for c in self.clocks:
             if c["name"] in self.emitted_common:
-                if c.get("type") == "gate_with_key":
+                if c.get("type") in {"gate_with_key", "gate_with_fixed_rate"}:
                     lines.append(f"\t&{c_name(c['name'])}_clk.gate.common,")
                 else:
                     lines.append(f"\t&{c_name(c['name'])}_clk.common,")
@@ -608,7 +744,7 @@ static const struct clk_parent_data osc24M[] = {{
                 continue
             if c.get("type") == "fixed_factor":
                 lines.append(f"\t[CLK_{clk_id}]\t= &{c_name(c['name'])}_clk.hw,")
-            elif c.get("type") == "gate_with_key":
+            elif c.get("type") in {"gate_with_key", "gate_with_fixed_rate"}:
                 lines.append(
                     f"\t[CLK_{clk_id}]\t= &{c_name(c['name'])}_clk.gate.common.hw,"
                 )
@@ -712,6 +848,7 @@ MODULE_LICENSE("GPL");
         parent_array_types = {
             "mux",
             "mux_gate",
+            "mux_gate_key",
             "mux_divider",
             "mux_divider_gate",
             "mp_mux_gate_no_index",

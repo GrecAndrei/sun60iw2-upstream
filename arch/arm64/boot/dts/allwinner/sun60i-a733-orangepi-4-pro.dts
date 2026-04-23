@@ -16,6 +16,17 @@
 	chosen {
 		stdout-path = "serial0:115200n8";
 	};
+
+	/*
+	 * Orange Pi 4 Pro has 8GB LPDDR4.
+	 * DRAM starts at 0x40000000 (1GB offset).
+	 * U-Boot typically modifies this, but we hardcode
+	 * to avoid panics when U-Boot's memory node is wrong.
+	 */
+	memory@40000000 {
+		device_type = "memory";
+		reg = <0x00000000 0x40000000 0x00000002 0x00000000>;
+	};
 };
 
 &uart0 {

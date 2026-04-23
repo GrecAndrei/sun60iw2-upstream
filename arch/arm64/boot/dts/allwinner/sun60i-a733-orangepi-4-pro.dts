@@ -35,6 +35,8 @@
 
 &mmc0 {
 	status = "okay";
+	pinctrl-0 = <&mmc0_pins>;
+	pinctrl-names = "default";
 	cd-gpios = <&pio 5 6 GPIO_ACTIVE_LOW>;
 	bus-width = <4>;
 	cap-sd-highspeed;
@@ -44,6 +46,8 @@
 
 &mmc1 {
 	status = "okay";
+	pinctrl-0 = <&mmc1_pins>;
+	pinctrl-names = "default";
 	bus-width = <4>;
 	cap-sd-highspeed;
 	cap-sdio-irq;
@@ -54,6 +58,8 @@
 
 &mmc2 {
 	status = "okay";
+	pinctrl-0 = <&mmc2_pins>;
+	pinctrl-names = "default";
 	bus-width = <8>;
 	non-removable;
 	cap-mmc-highspeed;

@@ -99,6 +99,20 @@
 		clock-output-names = "osc24M";
 	};
 
+	sys24M: sys24M-clk {
+		#clock-cells = <0>;
+		compatible = "fixed-clock";
+		clock-frequency = <24000000>;
+		clock-output-names = "sys24M";
+	};
+
+	dcxo: dcxo-clk {
+		#clock-cells = <0>;
+		compatible = "fixed-clock";
+		clock-frequency = <24000000>;
+		clock-output-names = "dcxo";
+	};
+
 	psci {
 		compatible = "arm,psci-1.0";
 		method = "smc";
@@ -141,8 +155,8 @@
 		ccu: clock-controller@2002000 {
 			compatible = "allwinner,sun60i-a733-ccu";
 			reg = <0x02002000 0x2000>;
-			clocks = <&osc24M>, <&rtc_ccu CLK_OSC32K>;
-			clock-names = "hosc", "losc";
+			clocks = <&osc24M>, <&rtc_ccu CLK_OSC32K>, <&sys24M>, <&dcxo>;
+			clock-names = "hosc", "losc", "sys24M", "dcxo";
 			#clock-cells = <1>;
 			#reset-cells = <1>;
 		};

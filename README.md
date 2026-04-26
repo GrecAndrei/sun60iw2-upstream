@@ -68,7 +68,7 @@ Allwinner/Xunlong provides a vendor kernel (`orange-pi-6.6-sun60iw2`) with a mas
 | **CPU** | 6x Cortex-A55 @ 1.8GHz + 2x Cortex-A76 @ 2.0GHz |
 | **GPU** | Imagination BXM-4-64 |
 | **NPU** | 3 TOPS (VeriSilicon/Vivante VIP) |
-| **RAM** | 2GB / 4GB / 8GB LPDDR4X |
+| **RAM** | 2GB / 4GB / 8GB LPDDR5 |
 | **Storage** | microSD, 32-128GB eMMC, UFS |
 | **Network** | Gigabit Ethernet (GMAC), WiFi 6 + BT 5.2 (SDIO) |
 | **USB** | USB 2.0 OTG, USB 2.0 Host, USB 3.0 SS+ |
@@ -82,34 +82,35 @@ Allwinner/Xunlong provides a vendor kernel (`orange-pi-6.6-sun60iw2`) with a mas
 ## Roadmap
 
 ### Phase 1: "Hello World" Boot (~3,750 LoC)
-- Base Device Tree (`sun60i-a733.dtsi`)
-- Orange Pi 4 Pro board DTS
-- Clock Controller Unit (CCU) - main + R-domain
-- Pinctrl (GPIO/Pinmux)
-- UART earlyprintk
-- **Goal:** Kernel prints boot messages over serial
+- [x] Base Device Tree (`sun60i-a733.dtsi`)
+- [x] Orange Pi 4 Pro board DTS
+- [x] Clock Controller Unit (CCU) - main + R-domain
+- [x] Pinctrl (GPIO/Pinmux)
+- [x] UART earlyprintk
+- [x] Kernel prints boot messages over serial
 
 ### Phase 2: Storage & Power (~1,250 LoC)
-- MMC/SD/eMMC host driver
-- Thermal sensor support
-- CPUFreq / DVFS
-- Power domains (PCK600)
-- PMIC drivers (AXP515, AXP8191)
-- **Goal:** SD boot reaches a BusyBox shell; eMMC validation is still pending
+- [x] MMC/SD/eMMC host driver
+- [x] Thermal sensor support
+- [ ] CPUFreq / DVFS
+- [ ] Power domains (PCK600)
+- [ ] PMIC drivers (AXP515, AXP8191)
+- [x] SD boot reaches a BusyBox shell
+- [ ] eMMC validation
 
 ### Phase 3: Connectivity (~2,600 LoC)
-- Ethernet (GMAC200)
-- USB 2.0/3.0 host
-- PCIe controller + PHY
-- **Goal:** Headless server/NAS fully functional
+- [ ] Ethernet (GMAC200)
+- [ ] USB 2.0/3.0 host
+- [ ] PCIe controller + PHY
+- [ ] Headless server/NAS fully functional
 
 ### Phase 4: "Cool Stuff" (~43,000+ LoC)
-- Display Engine (DE v352)
-- HDMI 2.0 / DSI / eDP
-- GPU (Imagination BXM)
-- NPU (3 TOPS)
-- VIN/ISP/Camera pipeline
-- **Goal:** Full desktop/media/AI acceleration
+- [ ] Display Engine (DE v352)
+- [ ] HDMI 2.0 / DSI / eDP
+- [ ] GPU (Imagination BXM)
+- [ ] NPU (3 TOPS)
+- [ ] VIN/ISP/Camera pipeline
+- [ ] Full desktop/media/AI acceleration
 
 **Total estimated upstream code: ~7,600 lines for Phases 1-3 (realistic), ~50,000+ for everything.**
 

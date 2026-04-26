@@ -2,6 +2,7 @@
 #ifndef _DT_BINDINGS_CLK_SUN60I_A733_H_
 #define _DT_BINDINGS_CLK_SUN60I_A733_H_
 
+#define CLK_PLL_REF		0
 #define CLK_PLL_DDR		1
 #define CLK_PLL_PERI0		2
 #define CLK_PLL_PERI0_2X	3
@@ -46,9 +47,11 @@
 #define CLK_AHB			43
 #define CLK_APB0		44
 #define CLK_APB1		45
+#define CLK_APB_UART		46
 #define CLK_TRACE		47
 #define CLK_GIC			48
 #define CLK_CPU_PERI		49
+#define CLK_ITS_PCIE0_ACLK	50
 #define CLK_NSI			51
 #define CLK_NSI_CFG		52
 #define CLK_MBUS		53
@@ -317,7 +320,7 @@
 #define CLK_PLL_VE0_AUTO	316
 #define CLK_PLL_AUDIO1_DIV5_AUTO	317
 #define CLK_PLL_AUDIO1_DIV2_AUTO	318
-#define CLK_PLL_AUDIO0_4X_AUTO		319
+#define CLK_PLL_AUDIO1_4X_AUTO		319
 #define CLK_PLL_NPU_AUTO	320
 #define CLK_PLL_DE_3X_AUTO	321
 #define CLK_PLL_DE_4X_AUTO	322

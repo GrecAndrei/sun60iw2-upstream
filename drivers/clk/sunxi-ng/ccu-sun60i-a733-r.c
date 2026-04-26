@@ -11,9 +11,8 @@
 #include <linux/io.h>
 #include <linux/module.h>
 #include <linux/platform_device.h>
-
 #include <dt-bindings/clock/sun60i-a733-r-ccu.h>
-
+#include <dt-bindings/reset/sun60i-a733-r-ccu.h>
 
 #include "../clk.h"
 
@@ -26,10 +25,6 @@
 #include "ccu_nm.h"
 #include "ccu_nkmp.h"
 #include "ccu_mux.h"
-
-static const struct clk_parent_data osc24M[] = {
-	{ .fw_name = "hosc" },
-};
 
 static SUNXI_CCU_GATE(r_timer_clk, "r-timer", "dcxo", 0x11c, BIT(0), 0);
 
@@ -82,54 +77,54 @@ static SUNXI_CCU_GATE(cpu_icache_auto_clk, "cpu-icache-auto", "dcxo", 0x338, BIT
 static SUNXI_CCU_GATE(ahbs_auto_clk_clk, "ahbs-auto-clk", "dcxo", 0x33c, BIT(24), 0);
 
 static const struct clk_parent_data r_ahb_parents[] = {
-	{ .fw_name = "dcxo" },
-	{ .fw_name = "rtc32k" },
-	{ .fw_name = "iosc" },
-	{ .fw_name = "pll-peri0-200m" },
-	{ .fw_name = "pll-peri0-300m" },
+	{ .fw_name = "dcxo", .name = "dcxo" },
+	{ .fw_name = "rtc32k", .name = "rtc32k" },
+	{ .fw_name = "iosc", .name = "iosc" },
+	{ .fw_name = "pll-peri0-200m", .name = "pll-peri0-200m" },
+	{ .fw_name = "pll-peri0-300m", .name = "pll-peri0-300m" },
 };
 
 static const struct clk_parent_data r_apbs_parents[] = {
-	{ .fw_name = "dcxo" },
-	{ .fw_name = "rtc32k" },
-	{ .fw_name = "iosc" },
-	{ .fw_name = "pll-peri0-200m" },
-	{ .fw_name = "pll-ref" },
+	{ .fw_name = "dcxo", .name = "dcxo" },
+	{ .fw_name = "rtc32k", .name = "rtc32k" },
+	{ .fw_name = "iosc", .name = "iosc" },
+	{ .fw_name = "pll-peri0-200m", .name = "pll-peri0-200m" },
+	{ .fw_name = "pll-ref", .name = "pll-ref" },
 };
 
 static const struct clk_parent_data r_irrx_parents[] = {
-	{ .fw_name = "rtc32k" },
-	{ .fw_name = "dcxo" },
-	{ .fw_name = "pll-ref" },
+	{ .fw_name = "rtc32k", .name = "rtc32k" },
+	{ .fw_name = "dcxo", .name = "dcxo" },
+	{ .fw_name = "pll-ref", .name = "pll-ref" },
 };
 
 static const struct clk_parent_data r_pwm_parents[] = {
-	{ .fw_name = "dcxo" },
-	{ .fw_name = "rtc32k" },
-	{ .fw_name = "iosc" },
-	{ .fw_name = "pll-ref" },
+	{ .fw_name = "dcxo", .name = "dcxo" },
+	{ .fw_name = "rtc32k", .name = "rtc32k" },
+	{ .fw_name = "iosc", .name = "iosc" },
+	{ .fw_name = "pll-ref", .name = "pll-ref" },
 };
 
 static const struct clk_parent_data r_spi_parents[] = {
-	{ .fw_name = "dcxo" },
-	{ .fw_name = "pll-peri0-200m" },
-	{ .fw_name = "pll-peri0-300m" },
-	{ .fw_name = "pll-peri1-300m" },
-	{ .fw_name = "pll-ref" },
+	{ .fw_name = "dcxo", .name = "dcxo" },
+	{ .fw_name = "pll-peri0-200m", .name = "pll-peri0-200m" },
+	{ .fw_name = "pll-peri0-300m", .name = "pll-peri0-300m" },
+	{ .fw_name = "pll-peri1-300m", .name = "pll-peri1-300m" },
+	{ .fw_name = "pll-ref", .name = "pll-ref" },
 };
 
 static const struct clk_parent_data r_timer_parents[] = {
-	{ .fw_name = "dcxo" },
-	{ .fw_name = "rtc32k" },
-	{ .fw_name = "iosc" },
-	{ .fw_name = "pll-peri0-200m" },
-	{ .fw_name = "pll-ref" },
+	{ .fw_name = "dcxo", .name = "dcxo" },
+	{ .fw_name = "rtc32k", .name = "rtc32k" },
+	{ .fw_name = "iosc", .name = "iosc" },
+	{ .fw_name = "pll-peri0-200m", .name = "pll-peri0-200m" },
+	{ .fw_name = "pll-ref", .name = "pll-ref" },
 };
 
 static const struct clk_parent_data riscv_24m_parents[] = {
-	{ .fw_name = "dcxo" },
-	{ .fw_name = "osc32k" },
-	{ .fw_name = "iosc" },
+	{ .fw_name = "dcxo", .name = "dcxo" },
+	{ .fw_name = "osc32k", .name = "osc32k" },
+	{ .fw_name = "iosc", .name = "iosc" },
 };
 static SUNXI_CCU_M_DATA_WITH_MUX(r_ahb_clk, "r-ahb", r_ahb_parents, 0x000, 24, 3, 0, 5, 0);
 
@@ -195,8 +190,60 @@ static struct ccu_common *sun60i_a733_r_ccu_clks[] = {
 static struct clk_hw_onecell_data sun60i_a733_r_ccu_hw_clks = {
 	.num	= CLK_R_NUMBER,
 	.hws	= {
-
+	[CLK_R_AHB]	= &r_ahb_clk.common.hw,
+	[CLK_R_APBS0]	= &r_apbs0_clk.common.hw,
+	[CLK_R_APBS1]	= &r_apbs1_clk.common.hw,
+	[CLK_R_TIMER0]	= &r_timer0_clk.common.hw,
+	[CLK_R_TIMER1]	= &r_timer1_clk.common.hw,
+	[CLK_R_TIMER2]	= &r_timer2_clk.common.hw,
+	[CLK_R_TIMER3]	= &r_timer3_clk.common.hw,
+	[CLK_R_TIMER]	= &r_timer_clk.common.hw,
+	[CLK_R_TWD]	= &r_twd_clk.common.hw,
+	[CLK_R_PWM]	= &r_pwm_clk.common.hw,
+	[CLK_R_BUS_PWM]	= &r_bus_pwm_clk.common.hw,
+	[CLK_R_SPI]	= &r_spi_clk.common.hw,
+	[CLK_R_BUS_SPI]	= &r_bus_spi_clk.common.hw,
+	[CLK_R_MBOX]	= &r_mbox_clk.common.hw,
+	[CLK_R_UART1]	= &r_uart1_clk.common.hw,
+	[CLK_R_UART0]	= &r_uart0_clk.common.hw,
+	[CLK_R_TWI2]	= &r_twi2_clk.common.hw,
+	[CLK_R_TWI1]	= &r_twi1_clk.common.hw,
+	[CLK_R_TWI0]	= &r_twi0_clk.common.hw,
+	[CLK_R_PPU]	= &r_ppu_clk.common.hw,
+	[CLK_R_TZMA]	= &r_tzma_clk.common.hw,
+	[CLK_R_CPUS_BIST]	= &r_cpus_bist_clk.common.hw,
+	[CLK_R_IRRX]	= &r_irrx_clk.common.hw,
+	[CLK_R_BUS_IRRX]	= &r_bus_irrx_clk.common.hw,
+	[CLK_RTC]	= &rtc_clk.common.hw,
+	[CLK_RISCV_24M]	= &riscv_24m_clk.common.hw,
+	[CLK_RISCV_CFG]	= &riscv_cfg_clk.common.hw,
+	[CLK_RISCV]	= &riscv_clk.common.hw,
+	[CLK_R_CPUCFG]	= &r_cpucfg_clk.common.hw,
+	[CLK_VDD_USB2CPUS]	= &vdd_usb2cpus_clk.common.hw,
+	[CLK_VDD_SYS2USB]	= &vdd_sys2usb_clk.common.hw,
+	[CLK_VDD_SYS2CPUS]	= &vdd_sys2cpus_clk.common.hw,
+	[CLK_VDD_DDR]	= &vdd_ddr_clk.common.hw,
+	[CLK_TT_AUTO]	= &tt_auto_clk.common.hw,
+	[CLK_CPU_ICACHE_AUTO]	= &cpu_icache_auto_clk.common.hw,
+	[CLK_AHBS_AUTO_CLK]	= &ahbs_auto_clk_clk.common.hw,
 	},
+};
+
+static struct ccu_reset_map sun60i_a733_r_ccu_resets[] = {
+	[RST_BUS_R_TIME]	= { 0x11c, BIT(16) },
+	[RST_BUS_R_PWM]	= { 0x13c, BIT(16) },
+	[RST_BUS_R_SPI]	= { 0x15c, BIT(16) },
+	[RST_BUS_R_MBOX]	= { 0x17c, BIT(16) },
+	[RST_BUS_R_UART1]	= { 0x18c, BIT(17) },
+	[RST_BUS_R_UART0]	= { 0x18c, BIT(16) },
+	[RST_BUS_R_TWI2]	= { 0x19c, BIT(18) },
+	[RST_BUS_R_TWI1]	= { 0x19c, BIT(17) },
+	[RST_BUS_R_TWI0]	= { 0x19c, BIT(16) },
+	[RST_BUS_R_IRRX]	= { 0x1cc, BIT(16) },
+	[RST_BUS_RTC]	= { 0x20c, BIT(16) },
+	[RST_BUS_RISCV_CFG]	= { 0x21c, BIT(16) },
+	[RST_BUS_R_CPUCFG]	= { 0x22c, BIT(16) },
+	[RST_BUS_R_MODULE]	= { 0x260, BIT(0) },
 };
 
 static const struct sunxi_ccu_desc sun60i_a733_r_ccu_desc = {
@@ -205,8 +252,8 @@ static const struct sunxi_ccu_desc sun60i_a733_r_ccu_desc = {
 
 	.hw_clks	= &sun60i_a733_r_ccu_hw_clks,
 
-	.resets		= NULL,
-	.num_resets	= 0,
+	.resets		= sun60i_a733_r_ccu_resets,
+	.num_resets	= ARRAY_SIZE(sun60i_a733_r_ccu_resets),
 };
 
 static int sun60i_a733_r_ccu_probe(struct platform_device *pdev)

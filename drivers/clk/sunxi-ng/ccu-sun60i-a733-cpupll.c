@@ -11,7 +11,6 @@
 #include <linux/io.h>
 #include <linux/module.h>
 #include <linux/platform_device.h>
-
 #include <dt-bindings/clock/sun60i-a733-cpupll-ccu.h>
 
 
@@ -26,10 +25,6 @@
 #include "ccu_nm.h"
 #include "ccu_nkmp.h"
 #include "ccu_mux.h"
-
-static const struct clk_parent_data osc24M[] = {
-	{ .fw_name = "hosc" },
-};
 
 static struct ccu_nm pll_cpu_back_clk = {
 	.enable		= BIT(27),
@@ -83,36 +78,36 @@ static struct ccu_nkmp pll_cpu_dsu_clk = {
 };
 
 static const struct clk_parent_data cpu_b_parents[] = {
-	{ .fw_name = "dcxo" },
-	{ .fw_name = "dcxo" },
-	{ .fw_name = "dcxo" },
+	{ .fw_name = "dcxo", .name = "dcxo" },
+	{ .fw_name = "dcxo", .name = "dcxo" },
+	{ .fw_name = "dcxo", .name = "dcxo" },
 	{ .hw = &pll_cpu_b_clk.common.hw },
-	{ .fw_name = "pll-peri0-2x" },
+	{ .fw_name = "pll-peri0-2x", .name = "pll-peri0-2x" },
 	{ .hw = &pll_cpu_back_clk.common.hw },
 };
 
 static const struct clk_parent_data cpu_dsu_parents[] = {
-	{ .fw_name = "dcxo" },
-	{ .fw_name = "dcxo" },
-	{ .fw_name = "dcxo" },
+	{ .fw_name = "dcxo", .name = "dcxo" },
+	{ .fw_name = "dcxo", .name = "dcxo" },
+	{ .fw_name = "dcxo", .name = "dcxo" },
 	{ .hw = &pll_cpu_dsu_clk.common.hw },
-	{ .fw_name = "pll-peri0-2x" },
+	{ .fw_name = "pll-peri0-2x", .name = "pll-peri0-2x" },
 	{ .hw = &pll_cpu_back_clk.common.hw },
 };
 
 static const struct clk_parent_data cpu_l_parents[] = {
-	{ .fw_name = "dcxo" },
-	{ .fw_name = "dcxo" },
-	{ .fw_name = "dcxo" },
+	{ .fw_name = "dcxo", .name = "dcxo" },
+	{ .fw_name = "dcxo", .name = "dcxo" },
+	{ .fw_name = "dcxo", .name = "dcxo" },
 	{ .hw = &pll_cpu_l_clk.common.hw },
-	{ .fw_name = "pll-peri0-2x" },
+	{ .fw_name = "pll-peri0-2x", .name = "pll-peri0-2x" },
 	{ .hw = &pll_cpu_back_clk.common.hw },
 };
-static SUNXI_CCU_MUX_DATA(cpu_l_clk, "cpu_l", cpu_l_parents, 0x101c, 24, 3, 0);
+static SUNXI_CCU_MUX_DATA(cpu_l_clk, "cpu_l", cpu_l_parents, 0x101c, 24, 3, CLK_SET_RATE_PARENT | CLK_IS_CRITICAL);
 
-static SUNXI_CCU_MUX_DATA(cpu_b_clk, "cpu_b", cpu_b_parents, 0x201c, 24, 3, 0);
+static SUNXI_CCU_MUX_DATA(cpu_b_clk, "cpu_b", cpu_b_parents, 0x201c, 24, 3, CLK_SET_RATE_PARENT | CLK_IS_CRITICAL);
 
-static SUNXI_CCU_MUX_DATA(cpu_dsu_clk, "cpu_dsu", cpu_dsu_parents, 0x301c, 24, 3, 0);
+static SUNXI_CCU_MUX_DATA(cpu_dsu_clk, "cpu_dsu", cpu_dsu_parents, 0x301c, 24, 3, CLK_SET_RATE_PARENT | CLK_IS_CRITICAL);
 
 static struct ccu_common *sun60i_a733_cpupll_ccu_clks[] = {
 	&pll_cpu_back_clk.common,
@@ -127,7 +122,13 @@ static struct ccu_common *sun60i_a733_cpupll_ccu_clks[] = {
 static struct clk_hw_onecell_data sun60i_a733_cpupll_ccu_hw_clks = {
 	.num	= CLK_CPUPLL_NUMBER,
 	.hws	= {
-
+	[CLK_PLL_CPU_BACK]	= &pll_cpu_back_clk.common.hw,
+	[CLK_PLL_CPU_L]	= &pll_cpu_l_clk.common.hw,
+	[CLK_PLL_CPU_B]	= &pll_cpu_b_clk.common.hw,
+	[CLK_PLL_CPU_DSU]	= &pll_cpu_dsu_clk.common.hw,
+	[CLK_CPU_L]	= &cpu_l_clk.common.hw,
+	[CLK_CPU_B]	= &cpu_b_clk.common.hw,
+	[CLK_CPU_DSU]	= &cpu_dsu_clk.common.hw,
 	},
 };
 

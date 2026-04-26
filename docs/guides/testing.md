@@ -9,7 +9,7 @@ cd sun60iw2-upstream
 python3 scripts/validate-factory.py
 ```
 
-**Expected output:** `ALL 24 CHECKS PASSED`
+**Expected output:** `ALL 51 CHECKS PASSED`
 
 This verifies:
 - All JSON data is valid
@@ -112,14 +112,13 @@ Starting kernel...
 [    0.000000] Linux version 7.0.0-sun60iw2+ (...)
 [    0.000000] Machine model: Orange Pi 4 Pro
 ...
+BusyBox v1.37.0 ...
+#
 ```
 
 ### Current Status
 
-**We are not here yet.** Current expected output is either:
-- Nothing (kernel doesn't boot at all)
-- Garbled text (wrong UART config)
-- Hang after "Starting kernel..."
+**We are here now.** Current expected output is kernel messages followed by a BusyBox root shell prompt (`#`).
 
 ---
 
@@ -144,6 +143,11 @@ Starting kernel...
 - [ ] Rootfs mounts from SD/eMMC
 - [ ] Init/systemd starts
 - [ ] Get shell prompt
+
+### Boot Helpers
+
+- `scripts/update-sd-boot.sh` refreshes the boot partition from a built `Image` and DTB.
+- `tools/pico_uart_bridge.py` is a MicroPython UART bridge that mirrors boot logs and can detect when a shell comes up.
 
 ### Phase 3: Connectivity
 

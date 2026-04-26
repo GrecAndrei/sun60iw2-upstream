@@ -4,25 +4,29 @@
       "name": "pll-cpu-back",
       "type": "nm",
       "reg": "0x0000",
-      "parent": "dcxo"
+      "parent": "dcxo",
+      "id": "PLL_CPU_BACK"
     },
     {
       "name": "pll-cpu-l",
       "type": "nkmp",
       "reg": "0x1000",
-      "parent": "dcxo"
+      "parent": "dcxo",
+      "id": "PLL_CPU_L"
     },
     {
       "name": "pll-cpu-b",
       "type": "nkmp",
       "reg": "0x2000",
-      "parent": "dcxo"
+      "parent": "dcxo",
+      "id": "PLL_CPU_B"
     },
     {
       "name": "pll-cpu-dsu",
       "type": "nkmp",
       "reg": "0x3000",
-      "parent": "dcxo"
+      "parent": "dcxo",
+      "id": "PLL_CPU_DSU"
     },
     {
       "name": "cpu_l_parents",
@@ -51,7 +55,8 @@
         "pll-cpu-l",
         "pll-peri0-2x",
         "pll-cpu-back"
-      ]
+      ],
+      "id": "CPU_L"
     },
     {
       "name": "cpu_b_parents",
@@ -80,7 +85,8 @@
         "pll-cpu-b",
         "pll-peri0-2x",
         "pll-cpu-back"
-      ]
+      ],
+      "id": "CPU_B"
     },
     {
       "name": "cpu_dsu_parents",
@@ -109,7 +115,8 @@
         "pll-cpu-dsu",
         "pll-peri0-2x",
         "pll-cpu-back"
-      ]
+      ],
+      "id": "CPU_DSU"
     }
   ],
   "errors": []

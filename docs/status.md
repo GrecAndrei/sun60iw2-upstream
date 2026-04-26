@@ -42,12 +42,12 @@ Current CCU pipeline metrics (`python3 generators/generate_ccu.py --report --no-
 | Pinctrl (main) | :white_check_mark: | 181 pins, 876 functions; C-array and DT modes both compile | - |
 | Pinctrl (R-domain) | :x: | Not started | - |
 | dt-bindings headers | :white_check_mark: | All clock/reset/power IDs defined; RTC header re-synced to current generated outputs | - |
-| UART earlyprintk | :construction: | Main CCU now exports UART reset lines; need hardware retest to confirm `dw-apb-uart ... -22` is gone and to separate any remaining clock/pinctrl issues | - |
+| UART earlyprintk | :white_check_mark: | Main CCU now exports UART reset lines; boot logs and shell prompt are visible on hardware | - |
 | Timer | :white_check_mark: | Node fixed: uses `sun8i-a23-timer` fallback, `0xa0` reg, `osc24M` clock — matches mainline H6/A64 convention | - |
 | WDT | :white_check_mark: | Node fixed: uses `sun55i-a523-wdt` fallback (register-identical to vendor `wdt-v103`), added `hosc`/`losc` clocks — matches A523 binding | - |
 | DMA engine | :white_check_mark: | Node + UART dmas in DTSI; new `sun60i-a733-dma` cfg in `sun6i-dma.c` with A100 fallback; compiled successfully | - |
 | GICv3 + ITS | :white_check_mark: | Generic ARM - should work | - |
-| **Phase 1 Goal** | :construction: | UART boot messages | - |
+| **Phase 1 Goal** | :white_check_mark: | UART boot messages | - |
 
 ---
 
@@ -62,7 +62,7 @@ Current CCU pipeline metrics (`python3 generators/generate_ccu.py --report --no-
 | Power domains (PCK600) | :x: | Extend sun55i-pck600.c | - |
 | AXP515 PMIC | :x: | New PMIC, needs driver | - |
 | AXP8191 PMIC | :x: | 35+ regulators, major work | - |
-| **Phase 2 Goal** | :construction: | Boots to userspace shell; SD boot args restore `rootwait` and the rootfs now has a BusyBox init entry, pending reboot validation | - |
+| **Phase 2 Goal** | :white_check_mark: | Boots to userspace shell; SD boot args restore `rootwait` and the rootfs now has a BusyBox init entry | - |
 
 ---
 
@@ -138,7 +138,7 @@ Run `python3 scripts/validate-factory.py` after any generator or data change.
 
 1. **No mainline U-Boot support.** We rely on vendor bootloader for now.
 2. **Main CCU runtime bringup still needs hardware re-verification.** The defconfig mismatch that left `CONFIG_SUN60I_A733_CCU` disabled was fixed, and the generated main/R CCU drivers now export reset maps instead of empty reset controllers, but the newly built Image still needs boot testing.
-3. **Rootfs boot path was temporarily unstable during MMC bringup.** `rootwait` is restored in the SD boot environment and BusyBox init has been wired up; next step is a clean reboot to confirm userspace stays up.
+3. **SD boot path has been validated to userspace.** `rootwait` is restored in the SD boot environment and BusyBox init is wired up; remaining work is validation across other media and services.
 4. **PCIe controller driver does not exist in mainline.** Must be written from scratch using Synopsys DWC framework.
 5. **Cadence Combophy driver does not exist in mainline.** Shared USB3/PCIe PHY.
 6. **AXP8191 PMIC is brand new.** No mainline driver exists.
@@ -151,8 +151,8 @@ Run `python3 scripts/validate-factory.py` after any generator or data change.
 
 | Test | Orange Pi 4 Pro (8GB) | Orange Pi 4 Pro (4GB) | Orange Pi 4 Pro (2GB) |
 |------|:---------------------:|:---------------------:|:---------------------:|
-| UART boot | :x: | :x: | :x: |
-| SD card boot | :x: | :x: | :x: |
+| UART boot | :white_check_mark: | :x: | :x: |
+| SD card boot | :white_check_mark: | :x: | :x: |
 | eMMC boot | :x: | :x: | :x: |
 | Ethernet | :x: | :x: | :x: |
 | USB host | :x: | :x: | :x: |

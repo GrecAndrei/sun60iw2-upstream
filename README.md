@@ -6,20 +6,20 @@ Mainline Linux upstream port for the **Allwinner A733 (sun60iw2p1)** SoC and the
 
 ## Status: WIP / PRE-ALPHA
 
-This repository now contains a real early-bringup port. It is **not usable yet**, but it is no longer just scaffolding.
+This repository now contains a real early-bringup port. It is **not production-ready yet**, but it now boots to a BusyBox userspace shell on SD media.
 
 ### Verified So Far
 - Kernel boots on Orange Pi 4 Pro hardware
 - All 8 CPUs come online
 - GICv3, timer, PSCI, and serial console basics are working
+- SD card boot reaches a BusyBox root shell prompt
 - Generated CCU, R-CCU, RTC CCU, CPUPLL, and pinctrl drivers build in the Linux tree
 - DTS/DTSI, generator pipeline, and factory validation are in active use
 
 ### Still Not Working Reliably
-- Storage bringup is incomplete at runtime
-- Main CCU runtime behavior needs re-verification after recent config and clock-tree fixes
+- eMMC, SDIO, Ethernet, USB, and display still need verification
+- Main CCU runtime behavior needs continued hardware soak testing
 - RTC/root clock interactions still need cleanup
-- No userspace boot yet
 
 If you need a working system today, use the [vendor kernel](https://github.com/orangepi-xunlong/linux-orangepi) or [Armbian](https://github.com/jonas5/orangepi-4pro-armbian) instead.
 
@@ -39,6 +39,10 @@ If you need a working system today, use the [vendor kernel](https://github.com/o
 - [ ] GPU (Imagination BXM-4-64)
 - [ ] NPU (3 TOPS)
 - [ ] VIN/ISP/Camera
+
+### Boot Helpers
+- `scripts/update-sd-boot.sh` refreshes a mounted SD boot partition with a built `Image` and DTB while keeping timestamped backups.
+- `tools/pico_uart_bridge.py` mirrors UART output from a MicroPython bridge and watches for shell readiness.
 
 ---
 

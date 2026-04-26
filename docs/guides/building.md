@@ -160,6 +160,17 @@ label sun60iw2
     append console=ttyS0,115200n8 root=/dev/mmcblk0p2 rw rootwait earlyprintk
 ```
 
+### Current SD Workflow
+
+The current board flow uses `boot.cmd` plus `orangepiEnv.txt` on the SD boot partition, not extlinux. Keep `rootwait` in `extraargs` so the rootfs can settle before PID 1 starts.
+
+For fast updates, run:
+
+```bash
+./scripts/update-sd-boot.sh --image /path/to/linux/arch/arm64/boot/Image \
+    --dtb /path/to/linux/arch/arm64/boot/dts/allwinner/sun60i-a733-orangepi-4-pro.dtb -y
+```
+
 ---
 
 ## Troubleshooting

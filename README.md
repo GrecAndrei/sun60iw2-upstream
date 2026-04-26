@@ -6,7 +6,7 @@ Mainline Linux upstream port for the **Allwinner A733 (sun60iw2p1)** SoC and the
 
 ## Status: WIP / PRE-ALPHA
 
-This repository now contains a real early-bringup port. It is **not production-ready yet**, but it now boots to a BusyBox userspace shell on SD media.
+This repository now contains a real early-bringup port. It is **not production-ready yet**, but it now boots SD media to a BusyBox userspace shell.
 
 ### Verified So Far
 - Kernel boots on Orange Pi 4 Pro hardware
@@ -95,7 +95,7 @@ Allwinner/Xunlong provides a vendor kernel (`orange-pi-6.6-sun60iw2`) with a mas
 - CPUFreq / DVFS
 - Power domains (PCK600)
 - PMIC drivers (AXP515, AXP8191)
-- **Goal:** Boots from SD/eMMC to userspace shell
+- **Goal:** SD boot reaches a BusyBox shell; eMMC validation is still pending
 
 ### Phase 3: Connectivity (~2,600 LoC)
 - Ethernet (GMAC200)
@@ -157,10 +157,10 @@ make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- sun60iw2_defconfig
 make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- -j$(nproc)
 ```
 
-### Flashing (when we have a bootloader)
+### Flashing (vendor bootloader path)
 ```bash
-# TODO: U-Boot support does not exist yet
-# For now, this project assumes you have a working vendor bootloader
+# Update the SD boot partition with scripts/update-sd-boot.sh
+# or copy Image + DTB manually when using the vendor bootloader.
 ```
 
 ---
@@ -198,7 +198,7 @@ All code in this repository is licensed under the [GPL-2.0+](LICENSE) to match t
 
 This project is **not affiliated with** Orange Pi, Xunlong, or Allwinner. We are reverse-engineering and documenting a proprietary SoC using publicly available information, vendor source code (used as reference only), and hardware testing.
 
-**Do not expect a usable system yet.** This is still an early-stage upstreaming effort. If you need a working system today, use the vendor kernel.
+**Do not expect a production-ready system yet.** SD boot now reaches a BusyBox shell, but eMMC, SDIO, Ethernet, USB, and display still need validation. If you need a fully working system today, use the vendor kernel or Armbian.
 
 ---
 

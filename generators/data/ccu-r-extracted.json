@@ -468,5 +468,77 @@
       "id": "AHBS_AUTO_CLK"
     }
   ],
+  "resets": [
+    {
+      "id": "BUS_R_TIME",
+      "reg": "0x011c",
+      "bit": 16
+    },
+    {
+      "id": "BUS_R_PWM",
+      "reg": "0x013c",
+      "bit": 16
+    },
+    {
+      "id": "BUS_R_SPI",
+      "reg": "0x015c",
+      "bit": 16
+    },
+    {
+      "id": "BUS_R_MBOX",
+      "reg": "0x017c",
+      "bit": 16
+    },
+    {
+      "id": "BUS_R_UART1",
+      "reg": "0x018c",
+      "bit": 17
+    },
+    {
+      "id": "BUS_R_UART0",
+      "reg": "0x018c",
+      "bit": 16
+    },
+    {
+      "id": "BUS_R_TWI2",
+      "reg": "0x019c",
+      "bit": 18
+    },
+    {
+      "id": "BUS_R_TWI1",
+      "reg": "0x019c",
+      "bit": 17
+    },
+    {
+      "id": "BUS_R_TWI0",
+      "reg": "0x019c",
+      "bit": 16
+    },
+    {
+      "id": "BUS_R_IRRX",
+      "reg": "0x01cc",
+      "bit": 16
+    },
+    {
+      "id": "BUS_RTC",
+      "reg": "0x020c",
+      "bit": 16
+    },
+    {
+      "id": "BUS_RISCV_CFG",
+      "reg": "0x021c",
+      "bit": 16
+    },
+    {
+      "id": "BUS_R_CPUCFG",
+      "reg": "0x022c",
+      "bit": 16
+    },
+    {
+      "id": "BUS_R_MODULE",
+      "reg": "0x0260",
+      "bit": 0
+    }
+  ],
   "errors": []
 }

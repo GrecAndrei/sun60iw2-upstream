@@ -206,7 +206,8 @@
       "type": "gate",
       "parent": "dcxo",
       "reg": "0x0574",
-      "bit": 1
+      "bit": 1,
+      "id": "ITS_PCIE0_ACLK"
     },
     {
       "name": "nsi-cfg",
@@ -225,11 +226,52 @@
       "id": "MSI_LITE2"
     },
     {
+      "name": "iommu0-sys-hclk",
+      "type": "gate",
+      "parent": "dcxo",
+      "reg": "0x058c",
+      "bit": 2,
+      "id": "IOMMU0_SYS_H"
+    },
+    {
+      "name": "iommu0-sys-pclk",
+      "type": "gate",
+      "parent": "dcxo",
+      "reg": "0x058c",
+      "bit": 1,
+      "id": "IOMMU0_SYS_P"
+    },
+    {
+      "name": "iommu0-sys-mclk",
+      "type": "gate",
+      "parent": "dcxo",
+      "reg": "0x058c",
+      "bit": 0,
+      "id": "IOMMU0_SYS_MBUS"
+    },
+    {
+      "name": "iommu1-sys-hclk",
+      "type": "gate",
+      "parent": "dcxo",
+      "reg": "0x05b4",
+      "bit": 2,
+      "id": "IOMMU1_SYS_H"
+    },
+    {
+      "name": "iommu1-sys-pclk",
+      "type": "gate",
+      "parent": "dcxo",
+      "reg": "0x05b4",
+      "bit": 1,
+      "id": "IOMMU1_SYS_P"
+    },
+    {
       "name": "iommu1-sys-mclk",
       "type": "gate",
       "parent": "dcxo",
       "reg": "0x05B4",
-      "bit": 0
+      "bit": 0,
+      "id": "IOMMU1_SYS_MBUS"
     },
     {
       "name": "dma0",
@@ -308,6 +350,15 @@
       "parent": "dcxo",
       "reg": "0x0A8C",
       "bit": 2
+    },
+    {
+      "name": "ve-dec-mbus-gate",
+      "type": "gate_with_key",
+      "parent": "dcxo",
+      "reg": "0x05e0",
+      "bit": 14,
+      "key_value": "MBUS_MASTER_KEY_VALUE",
+      "id": "DEC_MBUS_GATE"
     },
     {
       "name": "ve-enc0-bus",
@@ -1181,5 +1232,606 @@
       "parent": "osc24M"
     }
   ],
-  "resets": []
+  "resets": [
+    {
+      "id": "BUS_ITS_PCIE0",
+      "reg": "0x0574",
+      "bit": 16
+    },
+    {
+      "id": "BUS_NSI",
+      "reg": "0x0580",
+      "bit": 30
+    },
+    {
+      "id": "BUS_NSI_CFG",
+      "reg": "0x0584",
+      "bit": 16
+    },
+    {
+      "id": "BUS_IOMMU0_SY",
+      "reg": "0x058c",
+      "bit": 16
+    },
+    {
+      "id": "BUS_MSI_LITE0_MBU",
+      "reg": "0x0594",
+      "bit": 17
+    },
+    {
+      "id": "BUS_MSI_LITE0_AHB",
+      "reg": "0x0594",
+      "bit": 16
+    },
+    {
+      "id": "BUS_MSI_LITE1_MBU",
+      "reg": "0x059c",
+      "bit": 17
+    },
+    {
+      "id": "BUS_MSI_LITE1_AHB",
+      "reg": "0x059c",
+      "bit": 16
+    },
+    {
+      "id": "BUS_MSI_LITE2_MBU",
+      "reg": "0x05a4",
+      "bit": 17
+    },
+    {
+      "id": "BUS_MSI_LITE2_AHB",
+      "reg": "0x05a4",
+      "bit": 16
+    },
+    {
+      "id": "BUS_IOMMU1_SY",
+      "reg": "0x05b4",
+      "bit": 16
+    },
+    {
+      "id": "BUS_DMA0",
+      "reg": "0x0704",
+      "bit": 16
+    },
+    {
+      "id": "BUS_DMA1",
+      "reg": "0x070c",
+      "bit": 16
+    },
+    {
+      "id": "BUS_SPINLOCK",
+      "reg": "0x0724",
+      "bit": 16
+    },
+    {
+      "id": "BUS_MSGBOX0",
+      "reg": "0x0744",
+      "bit": 16
+    },
+    {
+      "id": "BUS_PWM0",
+      "reg": "0x0784",
+      "bit": 16
+    },
+    {
+      "id": "BUS_PWM1",
+      "reg": "0x078c",
+      "bit": 16
+    },
+    {
+      "id": "BUS_DBGSY",
+      "reg": "0x07a4",
+      "bit": 16
+    },
+    {
+      "id": "BUS_SYSDAP",
+      "reg": "0x07ac",
+      "bit": 16
+    },
+    {
+      "id": "BUS_TIMER0",
+      "reg": "0x0850",
+      "bit": 16
+    },
+    {
+      "id": "BUS_DE0",
+      "reg": "0x0a04",
+      "bit": 16
+    },
+    {
+      "id": "BUS_DI",
+      "reg": "0x0a24",
+      "bit": 16
+    },
+    {
+      "id": "BUS_G2D",
+      "reg": "0x0a44",
+      "bit": 16
+    },
+    {
+      "id": "BUS_EINK",
+      "reg": "0x0a6c",
+      "bit": 16
+    },
+    {
+      "id": "BUS_DE_SY",
+      "reg": "0x0a74",
+      "bit": 16
+    },
+    {
+      "id": "BUS_VE_DEC",
+      "reg": "0x0a8c",
+      "bit": 18
+    },
+    {
+      "id": "BUS_VE_ENC0",
+      "reg": "0x0a8c",
+      "bit": 16
+    },
+    {
+      "id": "BUS_CE_SY",
+      "reg": "0x0ac4",
+      "bit": 17
+    },
+    {
+      "id": "BUS_CE",
+      "reg": "0x0ac4",
+      "bit": 16
+    },
+    {
+      "id": "BUS_NPU_AHB",
+      "reg": "0x0b04",
+      "bit": 18
+    },
+    {
+      "id": "BUS_NPU_AXI",
+      "reg": "0x0b04",
+      "bit": 17
+    },
+    {
+      "id": "BUS_NPU_CORE",
+      "reg": "0x0b04",
+      "bit": 16
+    },
+    {
+      "id": "BUS_GPU0",
+      "reg": "0x0b24",
+      "bit": 16
+    },
+    {
+      "id": "BUS_DRAM0",
+      "reg": "0x0c0c",
+      "bit": 16
+    },
+    {
+      "id": "BUS_NAND0",
+      "reg": "0x0c8c",
+      "bit": 16
+    },
+    {
+      "id": "BUS_SMHC0",
+      "reg": "0x0d0c",
+      "bit": 16
+    },
+    {
+      "id": "BUS_SMHC1",
+      "reg": "0x0d1c",
+      "bit": 16
+    },
+    {
+      "id": "BUS_SMHC2",
+      "reg": "0x0d2c",
+      "bit": 16
+    },
+    {
+      "id": "BUS_SMHC3",
+      "reg": "0x0d3c",
+      "bit": 16
+    },
+    {
+      "id": "BUS_UFS_AXI",
+      "reg": "0x0d8c",
+      "bit": 17
+    },
+    {
+      "id": "BUS_UFS_AHB",
+      "reg": "0x0d8c",
+      "bit": 16
+    },
+    {
+      "id": "BUS_UART0",
+      "reg": "0x0e00",
+      "bit": 16
+    },
+    {
+      "id": "BUS_UART1",
+      "reg": "0x0e04",
+      "bit": 16
+    },
+    {
+      "id": "BUS_UART2",
+      "reg": "0x0e08",
+      "bit": 16
+    },
+    {
+      "id": "BUS_UART3",
+      "reg": "0x0e0c",
+      "bit": 16
+    },
+    {
+      "id": "BUS_UART4",
+      "reg": "0x0e10",
+      "bit": 16
+    },
+    {
+      "id": "BUS_UART5",
+      "reg": "0x0e14",
+      "bit": 16
+    },
+    {
+      "id": "BUS_UART6",
+      "reg": "0x0e18",
+      "bit": 16
+    },
+    {
+      "id": "BUS_TWI0",
+      "reg": "0x0e80",
+      "bit": 16
+    },
+    {
+      "id": "BUS_TWI1",
+      "reg": "0x0e84",
+      "bit": 16
+    },
+    {
+      "id": "BUS_TWI2",
+      "reg": "0x0e88",
+      "bit": 16
+    },
+    {
+      "id": "BUS_TWI3",
+      "reg": "0x0e8c",
+      "bit": 16
+    },
+    {
+      "id": "BUS_TWI4",
+      "reg": "0x0e90",
+      "bit": 16
+    },
+    {
+      "id": "BUS_TWI5",
+      "reg": "0x0e94",
+      "bit": 16
+    },
+    {
+      "id": "BUS_TWI6",
+      "reg": "0x0e98",
+      "bit": 16
+    },
+    {
+      "id": "BUS_TWI7",
+      "reg": "0x0e9c",
+      "bit": 16
+    },
+    {
+      "id": "BUS_TWI8",
+      "reg": "0x0ea0",
+      "bit": 16
+    },
+    {
+      "id": "BUS_TWI9",
+      "reg": "0x0ea4",
+      "bit": 16
+    },
+    {
+      "id": "BUS_TWI10",
+      "reg": "0x0ea8",
+      "bit": 16
+    },
+    {
+      "id": "BUS_TWI11",
+      "reg": "0x0eac",
+      "bit": 16
+    },
+    {
+      "id": "BUS_TWI12",
+      "reg": "0x0eb0",
+      "bit": 16
+    },
+    {
+      "id": "BUS_SPI0",
+      "reg": "0x0f04",
+      "bit": 16
+    },
+    {
+      "id": "BUS_SPI1",
+      "reg": "0x0f0c",
+      "bit": 16
+    },
+    {
+      "id": "BUS_SPI2",
+      "reg": "0x0f14",
+      "bit": 16
+    },
+    {
+      "id": "BUS_SPIF",
+      "reg": "0x0f1c",
+      "bit": 16
+    },
+    {
+      "id": "BUS_SPI3",
+      "reg": "0x0f24",
+      "bit": 16
+    },
+    {
+      "id": "BUS_SPI4",
+      "reg": "0x0f2c",
+      "bit": 16
+    },
+    {
+      "id": "BUS_GPADC0",
+      "reg": "0x0fc4",
+      "bit": 16
+    },
+    {
+      "id": "BUS_THS0",
+      "reg": "0x0fe4",
+      "bit": 16
+    },
+    {
+      "id": "BUS_IRRX",
+      "reg": "0x1004",
+      "bit": 16
+    },
+    {
+      "id": "BUS_IRTX",
+      "reg": "0x100c",
+      "bit": 16
+    },
+    {
+      "id": "BUS_LRADC",
+      "reg": "0x1024",
+      "bit": 16
+    },
+    {
+      "id": "BUS_SGPIO",
+      "reg": "0x1064",
+      "bit": 16
+    },
+    {
+      "id": "BUS_LPC",
+      "reg": "0x1084",
+      "bit": 16
+    },
+    {
+      "id": "BUS_I2SPCM0",
+      "reg": "0x120c",
+      "bit": 16
+    },
+    {
+      "id": "BUS_I2SPCM1",
+      "reg": "0x121c",
+      "bit": 16
+    },
+    {
+      "id": "BUS_I2SPCM2",
+      "reg": "0x122c",
+      "bit": 16
+    },
+    {
+      "id": "BUS_I2SPCM3",
+      "reg": "0x123c",
+      "bit": 16
+    },
+    {
+      "id": "BUS_I2SPCM4",
+      "reg": "0x124c",
+      "bit": 16
+    },
+    {
+      "id": "BUS_OWA",
+      "reg": "0x128c",
+      "bit": 16
+    },
+    {
+      "id": "BUS_DMIC",
+      "reg": "0x12cc",
+      "bit": 16
+    },
+    {
+      "id": "USB_0_PHY_RSTN",
+      "reg": "0x1300",
+      "bit": 30
+    },
+    {
+      "id": "USB_0_DEVICE",
+      "reg": "0x1304",
+      "bit": 24
+    },
+    {
+      "id": "USB_0_EHCI",
+      "reg": "0x1304",
+      "bit": 20
+    },
+    {
+      "id": "USB_0_OHCI",
+      "reg": "0x1304",
+      "bit": 16
+    },
+    {
+      "id": "USB_1_PHY_RSTN",
+      "reg": "0x1308",
+      "bit": 30
+    },
+    {
+      "id": "USB_1_EHCI",
+      "reg": "0x130c",
+      "bit": 20
+    },
+    {
+      "id": "USB_1_OHCI",
+      "reg": "0x130c",
+      "bit": 16
+    },
+    {
+      "id": "USB_2",
+      "reg": "0x135c",
+      "bit": 16
+    },
+    {
+      "id": "BUS_PCIE0",
+      "reg": "0x138c",
+      "bit": 17
+    },
+    {
+      "id": "BUS_PCIE0_PWRUP",
+      "reg": "0x138c",
+      "bit": 16
+    },
+    {
+      "id": "BUS_SERDES",
+      "reg": "0x13c4",
+      "bit": 16
+    },
+    {
+      "id": "BUS_GMAC0_AXI",
+      "reg": "0x141c",
+      "bit": 17
+    },
+    {
+      "id": "BUS_GMAC0",
+      "reg": "0x141c",
+      "bit": 16
+    },
+    {
+      "id": "BUS_GMAC1_AXI",
+      "reg": "0x142c",
+      "bit": 17
+    },
+    {
+      "id": "BUS_GMAC1",
+      "reg": "0x142c",
+      "bit": 16
+    },
+    {
+      "id": "BUS_VO0_TCONLCD0",
+      "reg": "0x1504",
+      "bit": 16
+    },
+    {
+      "id": "BUS_VO0_TCONLCD1",
+      "reg": "0x150c",
+      "bit": 16
+    },
+    {
+      "id": "BUS_VO0_TCONLCD2",
+      "reg": "0x1514",
+      "bit": 16
+    },
+    {
+      "id": "BUS_LVDS0",
+      "reg": "0x1544",
+      "bit": 16
+    },
+    {
+      "id": "BUS_LVDS1",
+      "reg": "0x154c",
+      "bit": 16
+    },
+    {
+      "id": "BUS_DSI0",
+      "reg": "0x1584",
+      "bit": 16
+    },
+    {
+      "id": "BUS_DSI1",
+      "reg": "0x158c",
+      "bit": 16
+    },
+    {
+      "id": "BUS_TCONTV0",
+      "reg": "0x1604",
+      "bit": 16
+    },
+    {
+      "id": "BUS_TCONTV1",
+      "reg": "0x160c",
+      "bit": 16
+    },
+    {
+      "id": "BUS_EDP",
+      "reg": "0x164c",
+      "bit": 16
+    },
+    {
+      "id": "BUS_HDMI_HDCP",
+      "reg": "0x168c",
+      "bit": 18
+    },
+    {
+      "id": "BUS_HDMI_SUB",
+      "reg": "0x168c",
+      "bit": 17
+    },
+    {
+      "id": "BUS_HDMI_MAIN",
+      "reg": "0x168c",
+      "bit": 16
+    },
+    {
+      "id": "BUS_DPSS_TOP0",
+      "reg": "0x16c4",
+      "bit": 16
+    },
+    {
+      "id": "BUS_DPSS_TOP1",
+      "reg": "0x16cc",
+      "bit": 16
+    },
+    {
+      "id": "BUS_VIDEO_OUT0",
+      "reg": "0x16e4",
+      "bit": 16
+    },
+    {
+      "id": "BUS_VIDEO_OUT1",
+      "reg": "0x16ec",
+      "bit": 16
+    },
+    {
+      "id": "BUS_LEDC",
+      "reg": "0x1704",
+      "bit": 16
+    },
+    {
+      "id": "BUS_DSC",
+      "reg": "0x1744",
+      "bit": 16
+    },
+    {
+      "id": "BUS_CSI",
+      "reg": "0x1844",
+      "bit": 16
+    },
+    {
+      "id": "BUS_VIDEO_IN",
+      "reg": "0x1884",
+      "bit": 16
+    },
+    {
+      "id": "BUS_APB2JTAG",
+      "reg": "0x1c04",
+      "bit": 16
+    },
+    {
+      "id": "BUS_UFS_PHY",
+      "reg": "0x0d8c",
+      "bit": 18
+    },
+    {
+      "id": "BUS_UFS_CORE",
+      "reg": "0x0d8c",
+      "bit": 19
+    }
+  ]
 }

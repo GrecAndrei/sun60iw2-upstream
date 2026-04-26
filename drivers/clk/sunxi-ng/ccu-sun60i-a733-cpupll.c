@@ -11,7 +11,6 @@
 #include <linux/io.h>
 #include <linux/module.h>
 #include <linux/platform_device.h>
-
 #include <dt-bindings/clock/sun60i-a733-cpupll-ccu.h>
 
 
@@ -26,10 +25,6 @@
 #include "ccu_nm.h"
 #include "ccu_nkmp.h"
 #include "ccu_mux.h"
-
-static const struct clk_parent_data osc24M[] = {
-	{ .fw_name = "hosc" },
-};
 
 static struct ccu_nm pll_cpu_back_clk = {
 	.enable		= BIT(27),
@@ -83,29 +78,29 @@ static struct ccu_nkmp pll_cpu_dsu_clk = {
 };
 
 static const struct clk_parent_data cpu_b_parents[] = {
-	{ .fw_name = "dcxo" },
-	{ .fw_name = "dcxo" },
-	{ .fw_name = "dcxo" },
+	{ .fw_name = "dcxo", .name = "dcxo" },
+	{ .fw_name = "dcxo", .name = "dcxo" },
+	{ .fw_name = "dcxo", .name = "dcxo" },
 	{ .hw = &pll_cpu_b_clk.common.hw },
-	{ .fw_name = "pll-peri0-2x" },
+	{ .fw_name = "pll-peri0-2x", .name = "pll-peri0-2x" },
 	{ .hw = &pll_cpu_back_clk.common.hw },
 };
 
 static const struct clk_parent_data cpu_dsu_parents[] = {
-	{ .fw_name = "dcxo" },
-	{ .fw_name = "dcxo" },
-	{ .fw_name = "dcxo" },
+	{ .fw_name = "dcxo", .name = "dcxo" },
+	{ .fw_name = "dcxo", .name = "dcxo" },
+	{ .fw_name = "dcxo", .name = "dcxo" },
 	{ .hw = &pll_cpu_dsu_clk.common.hw },
-	{ .fw_name = "pll-peri0-2x" },
+	{ .fw_name = "pll-peri0-2x", .name = "pll-peri0-2x" },
 	{ .hw = &pll_cpu_back_clk.common.hw },
 };
 
 static const struct clk_parent_data cpu_l_parents[] = {
-	{ .fw_name = "dcxo" },
-	{ .fw_name = "dcxo" },
-	{ .fw_name = "dcxo" },
+	{ .fw_name = "dcxo", .name = "dcxo" },
+	{ .fw_name = "dcxo", .name = "dcxo" },
+	{ .fw_name = "dcxo", .name = "dcxo" },
 	{ .hw = &pll_cpu_l_clk.common.hw },
-	{ .fw_name = "pll-peri0-2x" },
+	{ .fw_name = "pll-peri0-2x", .name = "pll-peri0-2x" },
 	{ .hw = &pll_cpu_back_clk.common.hw },
 };
 static SUNXI_CCU_MUX_DATA(cpu_l_clk, "cpu_l", cpu_l_parents, 0x101c, 24, 3, CLK_SET_RATE_PARENT | CLK_IS_CRITICAL);

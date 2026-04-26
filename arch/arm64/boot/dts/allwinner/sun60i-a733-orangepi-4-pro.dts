@@ -27,6 +27,14 @@
 		device_type = "memory";
 		reg = <0x00000000 0x40000000 0x00000002 0x00000000>;
 	};
+
+	reg_vcc3v3_sd: regulator-vcc3v3-sd {
+		compatible = "regulator-fixed";
+		regulator-name = "vcc3v3-sd";
+		regulator-min-microvolt = <3300000>;
+		regulator-max-microvolt = <3300000>;
+		regulator-always-on;
+	};
 };
 
 &uart0 {
@@ -40,8 +48,11 @@
 	cd-gpios = <&pio 5 6 GPIO_ACTIVE_LOW>;
 	bus-width = <4>;
 	cap-sd-highspeed;
+	no-1-8-v;
 	no-sdio;
 	no-mmc;
+	vmmc-supply = <&reg_vcc3v3_sd>;
+	vqmmc-supply = <&reg_vcc3v3_sd>;
 };
 
 &mmc1 {
@@ -57,7 +68,7 @@
 };
 
 &mmc2 {
-	status = "okay";
+	status = "disabled";
 	pinctrl-0 = <&mmc2_pins>;
 	pinctrl-names = "default";
 	bus-width = <8>;

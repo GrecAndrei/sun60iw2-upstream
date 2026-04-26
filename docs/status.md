@@ -1,6 +1,6 @@
 # Development Status
 
-Last updated: 2026-04-23
+Last updated: 2026-04-26
 
 ## Legend
 
@@ -19,7 +19,7 @@ Last updated: 2026-04-23
 |-----------|--------|-------|----------|
 | Base DTSI (`sun60i-a733.dtsi`) | :white_check_mark: | Timer, WDT, DMA, UART, MMC, thermal, SID nodes added | - |
 | Board DTS (`sun60i-a733-orangepi-4-pro.dts`) | :white_check_mark: | SD card, eMMC, SDIO WiFi enabled | - |
-| Main CCU driver | :white_check_mark: | 319 clocks, 63 parent arrays; generated output compiles in linux tree; runtime probe still needs re-verification on hardware after config/debug updates | - |
+| Main CCU driver | :white_check_mark: | 319 clocks, 63 parent arrays, 120 reset lines; generator bug fixed: all 9 previously-missing clocks (including `apb-uart`, `iommu*`, `ve-dec-mbus-gate`) now have explicit IDs in `ccu-main.json` and regenerate identically to committed output; runtime probe still needs hardware re-verification | - |
 
 Current CCU pipeline metrics (`python3 generators/generate_ccu.py --report --no-output`):
 - Extractable clocks: 319
@@ -34,15 +34,15 @@ Current CCU pipeline metrics (`python3 generators/generate_ccu.py --report --no-
 **All 4 CCU domains generate cleanly:**
 - Main CCU: 319 clocks + 63 parent arrays
 - R-CCU: 36 clocks + 7 parent arrays
-- RTC CCU: 13 clocks + 4 parent arrays
+- RTC CCU: 10 clocks + 4 parent arrays
 - CPUPLL: 7 clocks + 3 parent arrays
-| R-CCU driver | :white_check_mark: | Generated, compiles in linux tree | - |
-| RTC CCU driver | :white_check_mark: | Generated, compiles in linux tree | - |
+| R-CCU driver | :white_check_mark: | Generated with 14 reset lines, compiles in linux tree | - |
+| RTC CCU driver | :construction: | Generated; now does pre-provider clock-source init, built-in early registration, vendor-style non-exclusive RTC mapping, and special `dcxo-wakeup` reverse/key gate emission; uses DTS-provided `rc-16m`/`ext-32k`/`dcxo19_2M`/`dcxo26M` roots; object + DTB compile in linux tree, hardware retest pending | - |
 | CPUPLL driver | :white_check_mark: | Generated, compiles in linux tree | - |
 | Pinctrl (main) | :white_check_mark: | 181 pins, 876 functions; C-array and DT modes both compile | - |
 | Pinctrl (R-domain) | :x: | Not started | - |
-| dt-bindings headers | :white_check_mark: | All clock/reset/power IDs defined | - |
-| UART earlyprintk | :x: | Blocked on clocks + pinctrl | - |
+| dt-bindings headers | :white_check_mark: | All clock/reset/power IDs defined; RTC header re-synced to current generated outputs | - |
+| UART earlyprintk | :construction: | Main CCU now exports UART reset lines; need hardware retest to confirm `dw-apb-uart ... -22` is gone and to separate any remaining clock/pinctrl issues | - |
 | Timer | :white_check_mark: | Node fixed: uses `sun8i-a23-timer` fallback, `0xa0` reg, `osc24M` clock — matches mainline H6/A64 convention | - |
 | WDT | :white_check_mark: | Node fixed: uses `sun55i-a523-wdt` fallback (register-identical to vendor `wdt-v103`), added `hosc`/`losc` clocks — matches A523 binding | - |
 | DMA engine | :white_check_mark: | Node + UART dmas in DTSI; new `sun60i-a733-dma` cfg in `sun6i-dma.c` with A100 fallback; compiled successfully | - |
@@ -62,7 +62,7 @@ Current CCU pipeline metrics (`python3 generators/generate_ccu.py --report --no-
 | Power domains (PCK600) | :x: | Extend sun55i-pck600.c | - |
 | AXP515 PMIC | :x: | New PMIC, needs driver | - |
 | AXP8191 PMIC | :x: | 35+ regulators, major work | - |
-| **Phase 2 Goal** | :x: | Boots to userspace shell | - |
+| **Phase 2 Goal** | :construction: | Boots to userspace shell; SD boot args restore `rootwait` and the rootfs now has a BusyBox init entry, pending reboot validation | - |
 
 ---
 
@@ -102,7 +102,7 @@ Current CCU pipeline metrics (`python3 generators/generate_ccu.py --report --no-
 
 Run `python3 scripts/validate-factory.py` after any generator or data change.
 
-**Latest run: ALL 36 CHECKS PASSED**
+**Latest run: ALL 51 CHECKS PASSED**
 
 | Check | Result |
 |-------|--------|
@@ -114,6 +114,7 @@ Run `python3 scripts/validate-factory.py` after any generator or data change.
 | Generator Python syntax (6 scripts) | PASS |
 | Extractor plugin syntax (3 plugins) | PASS |
 | No unsupported clock entries (all 4 CCU domains) | PASS |
+| Reset binding coverage (main + R CCU) | PASS |
 | Key-gate native emission (35/35, main CCU) | PASS |
 | ID coverage | PASS (251/319 = 78.68%) |
 | Pinctrl structure + mainline pattern checks | PASS |
@@ -136,12 +137,13 @@ Run `python3 scripts/validate-factory.py` after any generator or data change.
 ## Known Issues / Blockers
 
 1. **No mainline U-Boot support.** We rely on vendor bootloader for now.
-2. **Main CCU runtime bringup still needs hardware re-verification.** The defconfig mismatch that left `CONFIG_SUN60I_A733_CCU` disabled was fixed, but the newly built Image still needs boot testing.
-3. **PCIe controller driver does not exist in mainline.** Must be written from scratch using Synopsys DWC framework.
-4. **Cadence Combophy driver does not exist in mainline.** Shared USB3/PCIe PHY.
-5. **AXP8191 PMIC is brand new.** No mainline driver exists.
-6. **Display stack is entirely vendor-specific.** No upstream DE v352 or HDMI 2.0 support.
-7. **NPU and GPU have no upstream drivers.** These will likely remain out-of-tree modules.
+2. **Main CCU runtime bringup still needs hardware re-verification.** The defconfig mismatch that left `CONFIG_SUN60I_A733_CCU` disabled was fixed, and the generated main/R CCU drivers now export reset maps instead of empty reset controllers, but the newly built Image still needs boot testing.
+3. **Rootfs boot path was temporarily unstable during MMC bringup.** `rootwait` is restored in the SD boot environment and BusyBox init has been wired up; next step is a clean reboot to confirm userspace stays up.
+4. **PCIe controller driver does not exist in mainline.** Must be written from scratch using Synopsys DWC framework.
+5. **Cadence Combophy driver does not exist in mainline.** Shared USB3/PCIe PHY.
+6. **AXP8191 PMIC is brand new.** No mainline driver exists.
+7. **Display stack is entirely vendor-specific.** No upstream DE v352 or HDMI 2.0 support.
+8. **NPU and GPU have no upstream drivers.** These will likely remain out-of-tree modules.
 
 ---
 

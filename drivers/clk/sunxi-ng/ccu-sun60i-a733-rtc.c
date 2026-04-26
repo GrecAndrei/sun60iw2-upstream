@@ -11,7 +11,7 @@
 #include <linux/io.h>
 #include <linux/module.h>
 #include <linux/platform_device.h>
-
+#include <linux/delay.h>
 #include <dt-bindings/clock/sun60i-a733-rtc.h>
 
 
@@ -26,10 +26,6 @@
 #include "ccu_nm.h"
 #include "ccu_nkmp.h"
 #include "ccu_mux.h"
-
-static const struct clk_parent_data osc24M[] = {
-	{ .fw_name = "hosc" },
-};
 
 struct sun60i_key_gate {
 	struct ccu_gate gate;
@@ -117,6 +113,120 @@ static const struct clk_ops sun60i_key_gate_ops = {
 	.recalc_rate	= sun60i_key_gate_recalc_rate,
 };
 
+struct sun60i_special_gate {
+	struct ccu_gate gate;
+	u16 key_reg;
+	u32 key_value;
+	bool reverse;
+};
+
+static inline struct sun60i_special_gate *hw_to_sun60i_special_gate(struct clk_hw *hw)
+{
+	struct ccu_gate *cg = hw_to_ccu_gate(hw);
+
+	return container_of(cg, struct sun60i_special_gate, gate);
+}
+
+static int sun60i_special_gate_enable(struct clk_hw *hw)
+{
+	struct sun60i_special_gate *sg = hw_to_sun60i_special_gate(hw);
+	struct ccu_common *common = &sg->gate.common;
+	unsigned long flags;
+	u32 reg;
+	u32 key_reg;
+
+	spin_lock_irqsave(common->lock, flags);
+	reg = readl(common->base + common->reg);
+	if (sg->key_value) {
+		if (common->reg == sg->key_reg) {
+			reg |= sg->key_value;
+		} else {
+			key_reg = readl(common->base + sg->key_reg);
+			key_reg |= sg->key_value;
+			writel(key_reg, common->base + sg->key_reg);
+		}
+	}
+	if (sg->reverse)
+		reg &= ~sg->gate.enable;
+	else
+		reg |= sg->gate.enable;
+	if (common->features & CCU_FEATURE_UPDATE_BIT)
+		reg |= CCU_SUNXI_UPDATE_BIT;
+	writel(reg, common->base + common->reg);
+	spin_unlock_irqrestore(common->lock, flags);
+
+	return 0;
+}
+
+static void sun60i_special_gate_disable(struct clk_hw *hw)
+{
+	struct sun60i_special_gate *sg = hw_to_sun60i_special_gate(hw);
+	struct ccu_common *common = &sg->gate.common;
+	unsigned long flags;
+	u32 reg;
+	u32 key_reg;
+
+	spin_lock_irqsave(common->lock, flags);
+	reg = readl(common->base + common->reg);
+	if (sg->key_value) {
+		if (common->reg == sg->key_reg) {
+			reg |= sg->key_value;
+		} else {
+			key_reg = readl(common->base + sg->key_reg);
+			key_reg |= sg->key_value;
+			writel(key_reg, common->base + sg->key_reg);
+		}
+	}
+	if (sg->reverse)
+		reg |= sg->gate.enable;
+	else
+		reg &= ~sg->gate.enable;
+	if (common->features & CCU_FEATURE_UPDATE_BIT)
+		reg |= CCU_SUNXI_UPDATE_BIT;
+	writel(reg, common->base + common->reg);
+	spin_unlock_irqrestore(common->lock, flags);
+}
+
+static int sun60i_special_gate_is_enabled(struct clk_hw *hw)
+{
+	struct sun60i_special_gate *sg = hw_to_sun60i_special_gate(hw);
+	struct ccu_common *common = &sg->gate.common;
+	u32 val = readl(common->base + common->reg) & sg->gate.enable;
+
+	return sg->reverse ? !val : !!val;
+}
+
+static unsigned long sun60i_special_gate_recalc_rate(struct clk_hw *hw,
+						     unsigned long parent_rate)
+{
+	return parent_rate;
+}
+
+static int sun60i_special_gate_determine_rate(struct clk_hw *hw,
+					      struct clk_rate_request *req)
+{
+	if (clk_hw_get_flags(hw) & CLK_SET_RATE_PARENT)
+		req->best_parent_rate = clk_hw_round_rate(clk_hw_get_parent(hw), req->rate);
+
+	req->rate = req->best_parent_rate;
+	return 0;
+}
+
+static int sun60i_special_gate_set_rate(struct clk_hw *hw, unsigned long rate,
+					unsigned long parent_rate)
+{
+	return 0;
+}
+
+static const struct clk_ops sun60i_special_gate_ops = {
+	.disable	= sun60i_special_gate_disable,
+	.enable		= sun60i_special_gate_enable,
+	.is_enabled	= sun60i_special_gate_is_enabled,
+	.determine_rate	= sun60i_special_gate_determine_rate,
+	.set_rate	= sun60i_special_gate_set_rate,
+	.recalc_rate	= sun60i_special_gate_recalc_rate,
+};
+
 struct sun60i_fixed_rate_gate {
 	struct ccu_gate gate;
 	unsigned long fixed_rate;
@@ -182,6 +292,92 @@ static const struct clk_ops sun60i_fixed_rate_gate_ops = {
 	.recalc_rate	= sun60i_fixed_rate_gate_recalc_rate,
 };
 
+
+#define SUN60I_A733_RTC_KEY_FIELD_MAGIC_NUM	0x16AA0000
+#define SUN60I_A733_RTC_LOSC_CTRL_REG		0x000
+#define SUN60I_A733_RTC_LOSC_AUTO_SWT_STA_REG	0x004
+#define SUN60I_A733_RTC_LOSC_OUT_GATING_REG	0x060
+#define SUN60I_A733_RTC_XO_CTRL_REG		0x160
+
+#define SUN60I_A733_RTC_LOSC_OSC32K_SEL		BIT(0)
+#define SUN60I_A733_RTC_LOSC_EXT32K_ENABLE	BIT(4)
+#define SUN60I_A733_RTC_LOSC_EXT32K_STABLE	BIT(4)
+#define SUN60I_A733_RTC_LOSC_AUTO_SWITCH_ENABLE	BIT(14)
+#define SUN60I_A733_RTC_LOSC_AUTO_SWITCH_MASK	(BIT(15) | BIT(14))
+#define SUN60I_A733_RTC_LOSC_OUT_SRC_SEL_MASK	(0x3 << 1)
+#define SUN60I_A733_RTC_DCXO_ENABLE		BIT(1)
+
+static void sun60i_a733_rtc_ccu_update_bits(void __iomem *reg, u32 mask, u32 val)
+{
+	u32 regval = readl(reg);
+
+	regval &= ~mask;
+	regval |= val;
+	writel(regval, reg);
+}
+
+static void sun60i_a733_rtc_ccu_update_key_bits(void __iomem *reg, u32 mask,
+						 u32 val)
+{
+	u32 regval = readl(reg);
+
+	regval &= ~mask;
+	regval |= val;
+	regval |= SUN60I_A733_RTC_KEY_FIELD_MAGIC_NUM;
+	writel(regval, reg);
+}
+
+static bool sun60i_a733_rtc_ccu_ext32k_is_stable(void __iomem *reg)
+{
+	int tries;
+	int stable_reads = 0;
+	u32 val;
+
+	for (tries = 0; tries < 100 && stable_reads < 4; tries++) {
+		val = readl(reg);
+		if (val & SUN60I_A733_RTC_LOSC_EXT32K_STABLE)
+			stable_reads = 0;
+		else
+			stable_reads++;
+
+		udelay(3);
+	}
+
+	return stable_reads == 4;
+}
+
+static void sun60i_a733_rtc_ccu_clock_source_init(struct device *dev,
+						  void __iomem *reg)
+{
+	u32 val;
+
+	sun60i_a733_rtc_ccu_update_bits(reg + SUN60I_A733_RTC_XO_CTRL_REG,
+					 SUN60I_A733_RTC_DCXO_ENABLE,
+					 SUN60I_A733_RTC_DCXO_ENABLE);
+
+	sun60i_a733_rtc_ccu_update_key_bits(reg + SUN60I_A733_RTC_LOSC_CTRL_REG,
+					     SUN60I_A733_RTC_LOSC_AUTO_SWITCH_MASK,
+					     SUN60I_A733_RTC_LOSC_AUTO_SWITCH_ENABLE);
+
+	val = readl(reg + SUN60I_A733_RTC_LOSC_CTRL_REG);
+	if (!(val & SUN60I_A733_RTC_LOSC_EXT32K_ENABLE)) {
+		sun60i_a733_rtc_ccu_update_key_bits(reg + SUN60I_A733_RTC_LOSC_CTRL_REG,
+						     SUN60I_A733_RTC_LOSC_EXT32K_ENABLE,
+						     SUN60I_A733_RTC_LOSC_EXT32K_ENABLE);
+
+		if (!sun60i_a733_rtc_ccu_ext32k_is_stable(
+			    reg + SUN60I_A733_RTC_LOSC_AUTO_SWT_STA_REG))
+			dev_warn(dev,
+				 "ext-32k not stable, osc32k will fall back to iosc-div32k\n");
+	}
+
+	sun60i_a733_rtc_ccu_update_key_bits(reg + SUN60I_A733_RTC_LOSC_CTRL_REG,
+					     SUN60I_A733_RTC_LOSC_OSC32K_SEL,
+					     SUN60I_A733_RTC_LOSC_OSC32K_SEL);
+
+	sun60i_a733_rtc_ccu_update_bits(reg + SUN60I_A733_RTC_LOSC_OUT_GATING_REG,
+					 SUN60I_A733_RTC_LOSC_OUT_SRC_SEL_MASK, 0);
+}
 static SUNXI_CCU_GATE(iosc_clk, "iosc", "rc-16m", 0x160, BIT(0), 0);
 
 static struct sun60i_key_gate ext32k_gate_clk = {
@@ -214,19 +410,26 @@ static struct sun60i_fixed_rate_gate dcxo24M_div32k_clk = {
 
 static CLK_FIXED_FACTOR(rtc_1k_clk, "rtc-1k", "rtc32k", 32, 1, 0);
 
-static SUNXI_CCU_GATE(dcxo_wakeup_clk, "dcxo-wakeup", "dcxo", 0x160, BIT(31), 0);
-
-static SUNXI_CCU_GATE(dcxo_serdes1_clk, "dcxo-serdes1", "r-ahb", 0x16c, BIT(5), 0);
-
-static SUNXI_CCU_GATE(dcxo_serdes0_clk, "dcxo-serdes0", "r-ahb", 0x16c, BIT(4), 0);
-
-static SUNXI_CCU_GATE(rtc_spi_clk, "rtc-spi", "r-ahb", 0x310, BIT(31), 0);
+static struct sun60i_special_gate dcxo_wakeup_clk = {
+	.gate		= {
+		.enable	= BIT(31),
+		.common	= {
+			.reg		= 0x160,
+			.hw.init	= CLK_HW_INIT("dcxo-wakeup", "dcxo",
+					      &sun60i_special_gate_ops,
+					      0),
+		},
+	},
+	.key_reg	= 0x15c,
+	.key_value	= 0x16AA,
+	.reverse	= true,
+};
 
 static const struct clk_parent_data dcxo_parents[] = {
-	{ .fw_name = "dcxo24M" },
-	{ .fw_name = "dcxo19_2M" },
-	{ .fw_name = "dcxo26M" },
-	{ .fw_name = "dcxo24M" },
+	{ .fw_name = "dcxo24M", .name = "dcxo24M" },
+	{ .fw_name = "dcxo19_2M", .name = "dcxo19_2M" },
+	{ .fw_name = "dcxo26M", .name = "dcxo26M" },
+	{ .fw_name = "dcxo24M", .name = "dcxo24M" },
 };
 
 static const struct clk_parent_data osc32k_parents[] = {
@@ -235,13 +438,13 @@ static const struct clk_parent_data osc32k_parents[] = {
 };
 
 static const struct clk_parent_data rtc32k_clk_parents[] = {
-	{ .fw_name = "osc32k" },
+	{ .fw_name = "osc32k", .name = "osc32k" },
 	{ .hw = &dcxo24M_div32k_clk.gate.common.hw },
 };
 
 static const struct clk_parent_data rtc_32k_fanout_clk_parents[] = {
-	{ .fw_name = "rtc32k" },
-	{ .fw_name = "osc32k" },
+	{ .fw_name = "rtc32k", .name = "rtc32k" },
+	{ .fw_name = "osc32k", .name = "osc32k" },
 	{ .hw = &dcxo24M_div32k_clk.gate.common.hw },
 };
 static struct ccu_mux osc32k_clk = {
@@ -282,10 +485,7 @@ static struct ccu_common *sun60i_a733_rtc_ccu_clks[] = {
 	&rtc32k_clk.common,
 	&rtc_32k_fanout_clk.common,
 	&dcxo_clk.common,
-	&dcxo_wakeup_clk.common,
-	&dcxo_serdes1_clk.common,
-	&dcxo_serdes0_clk.common,
-	&rtc_spi_clk.common,
+	&dcxo_wakeup_clk.gate.common,
 };
 
 static struct clk_hw_onecell_data sun60i_a733_rtc_ccu_hw_clks = {
@@ -300,10 +500,7 @@ static struct clk_hw_onecell_data sun60i_a733_rtc_ccu_hw_clks = {
 	[CLK_RTC_1K]	= &rtc_1k_clk.hw,
 	[CLK_RTC_32K_FANOUT]	= &rtc_32k_fanout_clk.common.hw,
 	[CLK_DCXO]	= &dcxo_clk.common.hw,
-	[CLK_RTC_DCXO_WAKEUP]	= &dcxo_wakeup_clk.common.hw,
-	[CLK_RTC_DCXO_SERDES1]	= &dcxo_serdes1_clk.common.hw,
-	[CLK_RTC_DCXO_SERDES0]	= &dcxo_serdes0_clk.common.hw,
-	[CLK_RTC_SPI]	= &rtc_spi_clk.common.hw,
+	[CLK_RTC_DCXO_WAKEUP]	= &dcxo_wakeup_clk.gate.common.hw,
 	},
 };
 
@@ -322,10 +519,17 @@ static int sun60i_a733_rtc_ccu_probe(struct platform_device *pdev)
 	void __iomem *reg;
 	int ret;
 
-	reg = devm_platform_ioremap_resource(pdev, 0);
-	if (IS_ERR(reg))
-		return PTR_ERR(reg);
+	struct resource *res;
 
+	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+	if (!res)
+		return -EINVAL;
+
+	reg = devm_ioremap(&pdev->dev, res->start, resource_size(res));
+	if (!reg)
+		return -ENOMEM;
+
+	sun60i_a733_rtc_ccu_clock_source_init(&pdev->dev, reg);
 	ret = devm_sunxi_ccu_probe(&pdev->dev, reg, &sun60i_a733_rtc_ccu_desc);
 	if (ret)
 		return ret;
@@ -347,7 +551,15 @@ static struct platform_driver sun60i_a733_rtc_ccu_driver = {
 		.of_match_table		= sun60i_a733_rtc_ccu_ids,
 	},
 };
+#ifdef MODULE
 module_platform_driver(sun60i_a733_rtc_ccu_driver);
+#else
+static int __init sun60i_a733_rtc_ccu_driver_init(void)
+{
+	return platform_driver_register(&sun60i_a733_rtc_ccu_driver);
+}
+core_initcall(sun60i_a733_rtc_ccu_driver_init);
+#endif
 
 MODULE_IMPORT_NS("SUNXI_CCU");
 MODULE_DESCRIPTION("Support for the Allwinner A733 RTC_CCU CCU");

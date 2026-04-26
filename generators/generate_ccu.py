@@ -79,7 +79,51 @@ def norm_id_token(name: str) -> str:
     return re.sub(r"_+", "_", token).strip("_")
 
 
-def id_candidates(name: str) -> List[str]:
+def strip_instance_suffix(token: str) -> str:
+    return re.sub(r"\d+$", "", token)
+
+
+def bus_id_candidates(root: str) -> List[str]:
+    cands: List[str] = []
+
+    def add(value: str):
+        if value and value not in cands:
+            cands.append(value)
+
+    add(f"BUS_{root}")
+    stripped = strip_instance_suffix(root)
+    if stripped != root:
+        add(f"BUS_{stripped}")
+
+    return cands
+
+
+def mbus_id_candidates(root: str) -> List[str]:
+    cands: List[str] = []
+
+    def add(value: str):
+        if value and value not in cands:
+            cands.append(value)
+
+    add(f"{root}_MBUS")
+    add(f"MBUS_{root}")
+
+    return cands
+
+
+def mbus_gate_id_candidates(root: str) -> List[str]:
+    cands: List[str] = []
+
+    def add(value: str):
+        if value and value not in cands:
+            cands.append(value)
+
+    add(f"MBUS_{root}_GATE")
+
+    return cands
+
+
+def id_candidates(name: str, known_clock_names: Set[str] | None = None) -> List[str]:
     base = norm_id_token(name)
     cands: List[str] = []
 
@@ -88,23 +132,39 @@ def id_candidates(name: str) -> List[str]:
             cands.append(value)
 
     add(base)
-    add(f"BUS_{base}")
-    add(f"{base}_GATE")
-
     if base.endswith("_BUS"):
         root = base[:-4]
+        for cand in bus_id_candidates(root):
+            add(cand)
         add(root)
-        add(f"BUS_{root}")
-
-    if base.endswith("_GATE"):
+        add(f"{root}_GATE")
+    elif base.endswith("_MCLK"):
         root = base[:-5]
+        for cand in mbus_id_candidates(root):
+            add(cand)
         add(root)
-        add(f"BUS_{root}")
-
-    if base.startswith("BUS_"):
+    elif base.endswith("_GATE"):
+        root = base[:-5]
+        if root.endswith("_MBUS"):
+            for cand in mbus_gate_id_candidates(root[:-5]):
+                add(cand)
+        else:
+            root_exists = bool(known_clock_names and root in known_clock_names)
+            if root_exists:
+                for cand in bus_id_candidates(root):
+                    add(cand)
+                add(root)
+            else:
+                add(root)
+                for cand in bus_id_candidates(root):
+                    add(cand)
+    elif base.startswith("BUS_"):
         root = base[4:]
         add(root)
         add(f"{root}_GATE")
+    else:
+        add(f"BUS_{base}")
+        add(f"{base}_GATE")
 
     return cands
 
@@ -119,8 +179,10 @@ def flag_expr(value) -> str:
     return str(value)
 
 
-def infer_clock_id(name: str, binding_ids: Set[str]) -> str | None:
-    for cand in id_candidates(name):
+def infer_clock_id(
+    name: str, binding_ids: Set[str], known_clock_names: Set[str] | None = None
+) -> str | None:
+    for cand in id_candidates(name, known_clock_names):
         if cand in binding_ids:
             return cand
     return None
@@ -129,6 +191,11 @@ def infer_clock_id(name: str, binding_ids: Set[str]) -> str | None:
 def merge_data(primary: Dict, extracted: Dict, binding_ids: Set[str]) -> Dict:
     primary_clocks = primary.get("clocks", [])
     extracted_clocks = extracted.get("clocks", [])
+    known_clock_names = {
+        norm_id_token(item.get("name"))
+        for item in primary_clocks + extracted_clocks
+        if item.get("name")
+    }
 
     primary_by_name = {
         item.get("name"): item for item in primary_clocks if item.get("name")
@@ -147,10 +214,15 @@ def merge_data(primary: Dict, extracted: Dict, binding_ids: Set[str]) -> Dict:
             if "id" in canon:
                 out["id"] = canon["id"]
                 out["_id_source"] = "canonical"
+            elif out.get("type") != "parent_array":
+                inferred = infer_clock_id(name, binding_ids, known_clock_names)
+                if inferred:
+                    out["id"] = inferred
+                    out["_id_source"] = "inferred"
             if "flags" in canon and "flags" not in out:
                 out["flags"] = canon["flags"]
         elif out.get("type") != "parent_array":
-            inferred = infer_clock_id(name, binding_ids)
+            inferred = infer_clock_id(name, binding_ids, known_clock_names)
             if inferred:
                 out["id"] = inferred
                 out["_id_source"] = "inferred"
@@ -164,12 +236,37 @@ def merge_data(primary: Dict, extracted: Dict, binding_ids: Set[str]) -> Dict:
         extra = dict(item)
         if "id" in extra:
             extra["_id_source"] = "canonical"
+        elif extra.get("type") != "parent_array":
+            inferred = infer_clock_id(name, binding_ids, known_clock_names)
+            if inferred:
+                extra["id"] = inferred
+                extra["_id_source"] = "inferred"
         merged.append(extra)
+
+    extracted_resets = extracted.get("resets", [])
+    primary_resets = primary.get("resets", [])
+    reset_order: List[str] = []
+    reset_by_id: Dict[str, Dict] = {}
+    for item in extracted_resets:
+        reset_id = item.get("id")
+        if not reset_id:
+            continue
+        if reset_id not in reset_by_id:
+            reset_order.append(reset_id)
+        reset_by_id[reset_id] = dict(item)
+    for item in primary_resets:
+        reset_id = item.get("id")
+        if not reset_id:
+            continue
+        merged_item = {**reset_by_id.get(reset_id, {}), **item}
+        if reset_id not in reset_by_id:
+            reset_order.append(reset_id)
+        reset_by_id[reset_id] = merged_item
 
     return {
         **primary,
         "clocks": merged,
-        "resets": primary.get("resets", []),
+        "resets": [reset_by_id[reset_id] for reset_id in reset_order],
     }
 
 
@@ -258,6 +355,20 @@ class Generator:
         self.key_gate_emitted: List[str] = []
         self.defined_names: set[str] = set()
 
+    @staticmethod
+    def is_special_gate(node: Dict | None) -> bool:
+        return bool(
+            node
+            and node.get("type") == "gate"
+            and (node.get("key_reg") or node.get("key_value") or node.get("features"))
+        )
+
+    def key_literal(self, token) -> str:
+        if token is None:
+            return "0"
+        key_literals = {**DEFAULT_KEY_LITERALS, **self.domain.get("key_literals", {})}
+        return key_literals.get(token, token)
+
     def hw_ref(self, parent_name: str) -> str:
         if parent_name not in self.defined_names:
             return ""
@@ -267,7 +378,7 @@ class Generator:
         t = node.get("type")
         if t == "fixed_factor":
             return f"&{c_name(parent_name)}_clk.hw"
-        if t == "gate_with_key":
+        if t == "gate_with_key" or self.is_special_gate(node):
             return f"&{c_name(parent_name)}_clk.gate.common.hw"
         if t == "gate_with_fixed_rate":
             return f"&{c_name(parent_name)}_clk.gate.common.hw"
@@ -279,6 +390,10 @@ class Generator:
             ref = self.hw_ref(parent)
             if ref:
                 entries.append(f"\t{{ .hw = {ref} }},")
+            elif parent in self.by_name or self.domain.get("cross_domain_parents"):
+                entries.append(
+                    f'\t{{ .fw_name = "{parent}", .name = "{parent}" }},'
+                )
             else:
                 entries.append(f'\t{{ .fw_name = "{parent}" }},')
         return entries
@@ -290,9 +405,21 @@ class Generator:
         binding = d["binding_header"]
         has_resets = d.get("has_resets", True)
         has_key_gates = d.get("has_key_gates", True)
+        has_special_gates = any(self.is_special_gate(c) for c in self.clocks)
         has_fixed_rate_gates = any(
             c.get("type") == "gate_with_fixed_rate" for c in self.clocks
         )
+        include_block = """#include <linux/clk-provider.h>
+#include <linux/io.h>
+#include <linux/module.h>
+#include <linux/platform_device.h>
+"""
+        extra_includes = d.get("extra_includes", [])
+        if extra_includes:
+            include_block += "\n".join(extra_includes) + "\n"
+        extra_header_code = d.get("extra_header_code", "")
+        if extra_header_code and not extra_header_code.endswith("\n"):
+            extra_header_code += "\n"
 
         reset_include = f"#include <dt-bindings/reset/{binding}>" if has_resets else ""
 
@@ -388,6 +515,126 @@ static const struct clk_ops sun60i_key_gate_ops = {
             else ""
         )
 
+        special_gate_struct = (
+            """struct sun60i_special_gate {
+	struct ccu_gate gate;
+	u16 key_reg;
+	u32 key_value;
+	bool reverse;
+};
+
+static inline struct sun60i_special_gate *hw_to_sun60i_special_gate(struct clk_hw *hw)
+{
+	struct ccu_gate *cg = hw_to_ccu_gate(hw);
+
+	return container_of(cg, struct sun60i_special_gate, gate);
+}
+
+static int sun60i_special_gate_enable(struct clk_hw *hw)
+{
+	struct sun60i_special_gate *sg = hw_to_sun60i_special_gate(hw);
+	struct ccu_common *common = &sg->gate.common;
+	unsigned long flags;
+	u32 reg;
+	u32 key_reg;
+
+	spin_lock_irqsave(common->lock, flags);
+	reg = readl(common->base + common->reg);
+	if (sg->key_value) {
+		if (common->reg == sg->key_reg) {
+			reg |= sg->key_value;
+		} else {
+			key_reg = readl(common->base + sg->key_reg);
+			key_reg |= sg->key_value;
+			writel(key_reg, common->base + sg->key_reg);
+		}
+	}
+	if (sg->reverse)
+		reg &= ~sg->gate.enable;
+	else
+		reg |= sg->gate.enable;
+	if (common->features & CCU_FEATURE_UPDATE_BIT)
+		reg |= CCU_SUNXI_UPDATE_BIT;
+	writel(reg, common->base + common->reg);
+	spin_unlock_irqrestore(common->lock, flags);
+
+	return 0;
+}
+
+static void sun60i_special_gate_disable(struct clk_hw *hw)
+{
+	struct sun60i_special_gate *sg = hw_to_sun60i_special_gate(hw);
+	struct ccu_common *common = &sg->gate.common;
+	unsigned long flags;
+	u32 reg;
+	u32 key_reg;
+
+	spin_lock_irqsave(common->lock, flags);
+	reg = readl(common->base + common->reg);
+	if (sg->key_value) {
+		if (common->reg == sg->key_reg) {
+			reg |= sg->key_value;
+		} else {
+			key_reg = readl(common->base + sg->key_reg);
+			key_reg |= sg->key_value;
+			writel(key_reg, common->base + sg->key_reg);
+		}
+	}
+	if (sg->reverse)
+		reg |= sg->gate.enable;
+	else
+		reg &= ~sg->gate.enable;
+	if (common->features & CCU_FEATURE_UPDATE_BIT)
+		reg |= CCU_SUNXI_UPDATE_BIT;
+	writel(reg, common->base + common->reg);
+	spin_unlock_irqrestore(common->lock, flags);
+}
+
+static int sun60i_special_gate_is_enabled(struct clk_hw *hw)
+{
+	struct sun60i_special_gate *sg = hw_to_sun60i_special_gate(hw);
+	struct ccu_common *common = &sg->gate.common;
+	u32 val = readl(common->base + common->reg) & sg->gate.enable;
+
+	return sg->reverse ? !val : !!val;
+}
+
+static unsigned long sun60i_special_gate_recalc_rate(struct clk_hw *hw,
+						     unsigned long parent_rate)
+{
+	return parent_rate;
+}
+
+static int sun60i_special_gate_determine_rate(struct clk_hw *hw,
+					      struct clk_rate_request *req)
+{
+	if (clk_hw_get_flags(hw) & CLK_SET_RATE_PARENT)
+		req->best_parent_rate = clk_hw_round_rate(clk_hw_get_parent(hw), req->rate);
+
+	req->rate = req->best_parent_rate;
+	return 0;
+}
+
+static int sun60i_special_gate_set_rate(struct clk_hw *hw, unsigned long rate,
+					unsigned long parent_rate)
+{
+	return 0;
+}
+
+static const struct clk_ops sun60i_special_gate_ops = {
+	.disable	= sun60i_special_gate_disable,
+	.enable		= sun60i_special_gate_enable,
+	.is_enabled	= sun60i_special_gate_is_enabled,
+	.determine_rate	= sun60i_special_gate_determine_rate,
+	.set_rate	= sun60i_special_gate_set_rate,
+	.recalc_rate	= sun60i_special_gate_recalc_rate,
+};
+
+"""
+            if has_special_gates
+            else ""
+        )
+
         fixed_rate_gate_struct = (
             """struct sun60i_fixed_rate_gate {
 	struct ccu_gate gate;
@@ -468,11 +715,7 @@ static const struct clk_ops sun60i_fixed_rate_gate_ops = {
  * Source data:  {d.get("data_file", "unknown")}
  */
 
-#include <linux/clk-provider.h>
-#include <linux/io.h>
-#include <linux/module.h>
-#include <linux/platform_device.h>
-
+{include_block}\
 #include <dt-bindings/clock/{binding}>
 {reset_include}
 
@@ -488,11 +731,7 @@ static const struct clk_ops sun60i_fixed_rate_gate_ops = {
 #include "ccu_nkmp.h"
 #include "ccu_mux.h"
 
-static const struct clk_parent_data osc24M[] = {{
-	{{ .fw_name = "hosc" }},
-}};
-
-{key_gate_struct}{fixed_rate_gate_struct}"""
+{key_gate_struct}{special_gate_struct}{fixed_rate_gate_struct}{extra_header_code}"""
 
     def emit_pll(self, c: Dict) -> str:
         name = c_name(c["name"])
@@ -556,6 +795,31 @@ static const struct clk_parent_data osc24M[] = {{
         self.emitted_common.append(c["name"])
         self.emitted_hw.append(c["name"])
         self.defined_names.add(c["name"])
+        if self.is_special_gate(c):
+            flags = flag_expr(c.get("flags"))
+            reverse = (
+                "true"
+                if "CCU_FEATURE_GATE_IS_REVERSE" in c.get("features", [])
+                else "false"
+            )
+            key_reg = reg_hex(c.get("key_reg", c["reg"]))
+            key_literal = self.key_literal(c.get("key_value"))
+            return f"""static struct sun60i_special_gate {name}_clk = {{
+	.gate		= {{
+		.enable	= BIT({c["bit"]}),
+		.common	= {{
+			.reg		= {reg_hex(c["reg"])},
+			.hw.init	= CLK_HW_INIT("{c["name"]}", "{c["parent"]}",
+					      &sun60i_special_gate_ops,
+					      {flags}),
+		}},
+	}},
+	.key_reg	= {key_reg},
+	.key_value	= {key_literal},
+	.reverse	= {reverse},
+}};
+
+"""
         return (
             f'static SUNXI_CCU_GATE({name}_clk, "{c["name"]}", "{c["parent"]}",'
             f" {reg_hex(c['reg'])}, BIT({c['bit']}), 0);\n\n"
@@ -568,9 +832,7 @@ static const struct clk_parent_data osc24M[] = {{
         self.key_gate_emitted.append(c["name"])
         self.defined_names.add(c["name"])
 
-        key_token = c.get("key_value", "0")
-        key_literals = {**DEFAULT_KEY_LITERALS, **self.domain.get("key_literals", {})}
-        key_literal = key_literals.get(key_token, key_token)
+        key_literal = self.key_literal(c.get("key_value", "0"))
         flags = flag_expr(c.get("flags"))
 
         return f"""static struct sun60i_key_gate {name}_clk = {{
@@ -725,7 +987,7 @@ static const struct clk_parent_data osc24M[] = {{
         lines = []
         for c in self.clocks:
             if c["name"] in self.emitted_common:
-                if c.get("type") in {"gate_with_key", "gate_with_fixed_rate"}:
+                if c.get("type") in {"gate_with_key", "gate_with_fixed_rate"} or self.is_special_gate(c):
                     lines.append(f"\t&{c_name(c['name'])}_clk.gate.common,")
                 else:
                     lines.append(f"\t&{c_name(c['name'])}_clk.common,")
@@ -744,7 +1006,7 @@ static const struct clk_parent_data osc24M[] = {{
                 continue
             if c.get("type") == "fixed_factor":
                 lines.append(f"\t[CLK_{clk_id}]\t= &{c_name(c['name'])}_clk.hw,")
-            elif c.get("type") in {"gate_with_key", "gate_with_fixed_rate"}:
+            elif c.get("type") in {"gate_with_key", "gate_with_fixed_rate"} or self.is_special_gate(c):
                 lines.append(
                     f"\t[CLK_{clk_id}]\t= &{c_name(c['name'])}_clk.gate.common.hw,"
                 )
@@ -767,13 +1029,15 @@ static const struct clk_parent_data osc24M[] = {{
     def emit_resets(self) -> str:
         if not self.resets:
             return ""
+        suffix = self.domain["module_name"].replace("sun60i-a733-", "").replace("-", "_")
+        resets_name = f"sun60i_a733_{suffix}_resets"
         lines = []
         for r in self.resets:
             lines.append(
                 f"\t[RST_{r['id']}]\t= {{ {reg_hex(r['reg'])}, BIT({r['bit']}) }},"
             )
         body = "\n".join(lines)
-        return f"static struct ccu_reset_map sun60i_a733_ccu_resets[] = {{\n{body}\n}};\n\n"
+        return f"static struct ccu_reset_map {resets_name}[] = {{\n{body}\n}};\n\n"
 
     def emit_desc(self) -> str:
         d = self.domain
@@ -804,15 +1068,42 @@ static const struct clk_parent_data osc24M[] = {{
         probe_name = f"sun60i_a733_{suffix}_probe"
         ids_name = f"sun60i_a733_{suffix}_ids"
         drv_name = f"sun60i_a733_{suffix}_driver"
+        init_name = f"{drv_name}_init"
+        probe_preamble = d.get("probe_preamble", "")
+        if probe_preamble and not probe_preamble.endswith("\n"):
+            probe_preamble += "\n"
+        probe_reg_setup = d.get("probe_reg_setup")
+        if probe_reg_setup is None:
+            probe_reg_setup = """	reg = devm_platform_ioremap_resource(pdev, 0);
+	if (IS_ERR(reg))
+		return PTR_ERR(reg);
+
+"""
+        elif probe_reg_setup and not probe_reg_setup.endswith("\n"):
+            probe_reg_setup += "\n"
+
+        registration_style = d.get("registration", "module")
+        if registration_style == "core_initcall_if_builtin":
+            driver_registration = f"""#ifdef MODULE
+module_platform_driver({drv_name});
+#else
+static int __init {init_name}(void)
+{{
+	return platform_driver_register(&{drv_name});
+}}
+core_initcall({init_name});
+#endif
+"""
+        else:
+            driver_registration = f"module_platform_driver({drv_name});\n"
+
         return f"""static int {probe_name}(struct platform_device *pdev)
 {{
 	void __iomem *reg;
 	int ret;
 
-	reg = devm_platform_ioremap_resource(pdev, 0);
-	if (IS_ERR(reg))
-		return PTR_ERR(reg);
-
+{probe_reg_setup}\
+{probe_preamble}\
 	ret = devm_sunxi_ccu_probe(&pdev->dev, reg, &{desc_name});
 	if (ret)
 		return ret;
@@ -834,7 +1125,7 @@ static struct platform_driver {drv_name} = {{
 		.of_match_table		= {ids_name},
 	}},
 }};
-module_platform_driver({drv_name});
+{driver_registration}\
 
 MODULE_IMPORT_NS("SUNXI_CCU");
 MODULE_DESCRIPTION("Support for the Allwinner A733 {suffix.upper()} CCU");

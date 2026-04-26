@@ -151,30 +151,6 @@
         "CCU_FEATURE_KEY_FIELD_MOD",
         "CCU_FEATURE_GATE_IS_REVERSE"
       ]
-    },
-    {
-      "name": "dcxo-serdes1",
-      "id": "RTC_DCXO_SERDES1",
-      "type": "gate",
-      "parent": "r-ahb",
-      "reg": "0x16c",
-      "bit": 5
-    },
-    {
-      "name": "dcxo-serdes0",
-      "id": "RTC_DCXO_SERDES0",
-      "type": "gate",
-      "parent": "r-ahb",
-      "reg": "0x16c",
-      "bit": 4
-    },
-    {
-      "name": "rtc-spi",
-      "id": "RTC_SPI",
-      "type": "gate",
-      "parent": "r-ahb",
-      "reg": "0x310",
-      "bit": 31
     }
   ],
   "errors": []

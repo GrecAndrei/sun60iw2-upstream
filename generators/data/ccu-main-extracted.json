@@ -288,6 +288,22 @@
       "parent": "pll-ref"
     },
     {
+      "name": "pll-de-4x",
+      "type": "divider",
+      "parent": "pll-de",
+      "reg": "0x02E0",
+      "shift": 20,
+      "width": 3
+    },
+    {
+      "name": "pll-de-3x",
+      "type": "divider",
+      "parent": "pll-de",
+      "reg": "0x02E0",
+      "shift": 16,
+      "width": 3
+    },
+    {
       "name": "apb0_parents",
       "type": "parent_array",
       "parents": [
@@ -1438,7 +1454,7 @@
       "name": "gpu0_parents",
       "type": "parent_array",
       "parents": [
-        "pll-gpu",
+        "pll-gpu0",
         "pll-peri0-800m",
         "pll-peri0-600m",
         "pll-peri0-400m",
@@ -1457,7 +1473,7 @@
       "div_width": 4,
       "key_value": "UPD_KEY_VALUE",
       "parents": [
-        "pll-gpu",
+        "pll-gpu0",
         "pll-peri0-800m",
         "pll-peri0-600m",
         "pll-peri0-400m",
@@ -3466,7 +3482,7 @@
         "pll-peri0-16m",
         "sys24M",
         "pll-peri0-25m",
-        "clk27m-fanout",
+        "clk27m_fanout",
         "clk-fanout"
       ]
     },
@@ -3484,7 +3500,7 @@
         "pll-peri0-16m",
         "sys24M",
         "pll-peri0-25m",
-        "clk27m-fanout",
+        "clk27m_fanout",
         "clk-fanout"
       ]
     },
@@ -3502,7 +3518,7 @@
         "pll-peri0-16m",
         "sys24M",
         "pll-peri0-25m",
-        "clk27m-fanout",
+        "clk27m_fanout",
         "clk-fanout"
       ]
     },
@@ -3520,7 +3536,7 @@
         "pll-peri0-16m",
         "sys24M",
         "pll-peri0-25m",
-        "clk27m-fanout",
+        "clk27m_fanout",
         "clk-fanout"
       ]
     },
@@ -3538,7 +3554,7 @@
         "pll-peri0-16m",
         "sys24M",
         "pll-peri0-25m",
-        "clk27m-fanout",
+        "clk27m_fanout",
         "clk-fanout"
       ]
     },
@@ -3549,12 +3565,7 @@
         "ahb",
         "apb0",
         "apb1",
-        "apb-uart",
-        "mbus",
-        "nsi",
-        "ddr0",
-        "pll-ddr",
-        "dram0"
+        "apb-uart"
       ]
     },
     {
@@ -3569,12 +3580,7 @@
         "ahb",
         "apb0",
         "apb1",
-        "apb-uart",
-        "mbus",
-        "nsi",
-        "ddr0",
-        "pll-ddr",
-        "dram0"
+        "apb-uart"
       ]
     },
     {

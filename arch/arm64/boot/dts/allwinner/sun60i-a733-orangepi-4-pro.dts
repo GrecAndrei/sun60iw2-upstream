@@ -35,6 +35,22 @@
 		regulator-max-microvolt = <3300000>;
 		regulator-always-on;
 	};
+
+	reg_vcc3v3_eth: regulator-vcc3v3-eth {
+		compatible = "regulator-fixed";
+		regulator-name = "vcc3v3-eth";
+		regulator-min-microvolt = <3300000>;
+		regulator-max-microvolt = <3300000>;
+		regulator-always-on;
+	};
+
+	reg_usb_host_vbus: regulator-usb-host-vbus {
+		compatible = "regulator-fixed";
+		regulator-name = "usb-host-vbus";
+		regulator-min-microvolt = <5000000>;
+		regulator-max-microvolt = <5000000>;
+		regulator-always-on;
+	};
 };
 
 &uart0 {
@@ -78,4 +94,25 @@
 	mmc-hs200-1_8v;
 	no-sdio;
 	no-sd;
+};
+
+&usbphy {
+	usb1_vbus-supply = <&reg_usb_host_vbus>;
+	status = "okay";
+};
+
+&gmac0_phy0 {
+	phy-supply = <&reg_vcc3v3_eth>;
+};
+
+&gmac0 {
+	phy-supply = <&reg_vcc3v3_eth>;
+};
+
+&ehci1 {
+	status = "okay";
+};
+
+&ohci1 {
+	status = "okay";
 };

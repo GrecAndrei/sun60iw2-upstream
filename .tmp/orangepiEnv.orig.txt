@@ -1,0 +1,4 @@
+console=none
+earlycon=off
+verbosity=4
+extraargs=rootwait console=ttyS0,115200n8 panic=0

@@ -1,0 +1,5 @@
+console=serial
+earlycon=on
+verbosity=8
+debugboot=on
+extraargs=rootwait panic=0

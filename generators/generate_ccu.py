@@ -27,6 +27,7 @@ SUPPORTED_TYPES = {
     "nm",
     "nkmp",
     "divider",
+    "divider_gate",
     "fixed_factor",
     "gate",
     "gate_with_fixed_rate",
@@ -790,6 +791,18 @@ static const struct clk_ops sun60i_fixed_rate_gate_ops = {
             f" {reg_hex(c['reg'])}, {c.get('shift', 0)}, {c.get('width', 0)}, 0);\n\n"
         )
 
+    def emit_divider_gate(self, c: Dict) -> str:
+        name = c_name(c["name"])
+        self.emitted_common.append(c["name"])
+        self.emitted_hw.append(c["name"])
+        self.defined_names.add(c["name"])
+        flags = flag_expr(c.get("flags"))
+        return (
+            f'static SUNXI_CCU_M_WITH_GATE({name}_clk, "{c["name"]}", "{c["parent"]}",'
+            f" {reg_hex(c['reg'])}, {c.get('shift', 0)}, {c.get('width', 0)},"
+            f" BIT({c['gate_bit']}), {flags});\n\n"
+        )
+
     def emit_gate(self, c: Dict) -> str:
         name = c_name(c["name"])
         self.emitted_common.append(c["name"])
@@ -955,6 +968,8 @@ static const struct clk_ops sun60i_fixed_rate_gate_ops = {
         t = c.get("type")
         if t == "divider":
             return self.emit_divider(c)
+        if t == "divider_gate":
+            return self.emit_divider_gate(c)
         if t == "gate":
             return self.emit_gate(c)
         if t == "gate_with_fixed_rate":

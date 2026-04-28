@@ -6,13 +6,14 @@ Mainline Linux upstream port for the **Allwinner A733 (sun60iw2p1)** SoC and the
 
 ## Status: WIP / PRE-ALPHA
 
-This repository now contains a real early-bringup port. It is **not production-ready yet**, but it now boots SD media to a BusyBox userspace shell.
+This repository now contains a real early-bringup port. It is **not production-ready yet**, but it now boots SD media to a BusyBox userspace shell and exposes working thermal zones.
 
 ### Verified So Far
 - Kernel boots on Orange Pi 4 Pro hardware
 - All 8 CPUs come online
 - GICv3, timer, PSCI, and serial console basics are working
 - SD card boot reaches a BusyBox root shell prompt
+- Thermal zones register and report temperatures in `/sys/class/thermal`
 - Generated CCU, R-CCU, RTC CCU, CPUPLL, and pinctrl drivers build in the Linux tree
 - DTS/DTSI, generator pipeline, and factory validation are in active use
 
@@ -91,7 +92,7 @@ Allwinner/Xunlong provides a vendor kernel (`orange-pi-6.6-sun60iw2`) with a mas
 
 ### Phase 2: Storage & Power (~1,250 LoC)
 - [x] MMC/SD/eMMC host driver
-- [x] Thermal sensor support
+- [x] Thermal sensor support and sysfs zones
 - [ ] CPUFreq / DVFS
 - [ ] Power domains (PCK600)
 - [ ] PMIC drivers (AXP515, AXP8191)

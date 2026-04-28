@@ -120,7 +120,7 @@ static struct ccu_nm pll_ref_clk = {
 	.common		= {
 		.reg		= 0x000,
 		.hw.init	= CLK_HW_INIT("pll-ref", "dcxo", &ccu_nm_ops,
-				      CLK_SET_RATE_GATE | CLK_IS_CRITICAL),
+					      CLK_SET_RATE_GATE),
 	},
 };
 
@@ -132,7 +132,7 @@ static struct ccu_nm pll_ddr_clk = {
 	.common		= {
 		.reg		= 0x020,
 		.hw.init	= CLK_HW_INIT("pll-ddr", "pll-ref", &ccu_nm_ops,
-				      CLK_SET_RATE_GATE | CLK_IS_CRITICAL),
+					      CLK_SET_RATE_GATE),
 	},
 };
 
@@ -1091,6 +1091,10 @@ static SUNXI_CCU_GATE(pll_de_3x_auto_clk, "pll-de-3x-auto", "dcxo", 0x1928, BIT(
 
 static SUNXI_CCU_GATE(pll_de_4x_auto_clk, "pll-de-4x-auto", "dcxo", 0x1928, BIT(0), 0);
 
+static SUNXI_CCU_M_WITH_GATE(gmac0_phy_clk, "gmac0-phy", "pll-peri0-150m", 0x1410, 0, 5, BIT(31), 0);
+
+static SUNXI_CCU_M_WITH_GATE(gmac1_phy_clk, "gmac1-phy", "pll-peri0-150m", 0x1420, 0, 5, BIT(31), 0);
+
 static const struct clk_parent_data apb0_parents[] = {
 	{ .fw_name = "sys24M" },
 	{ .fw_name = "osc32k" },
@@ -1553,9 +1557,9 @@ static SUNXI_CCU_M_DATA_WITH_MUX(apb_uart_clk, "apb-uart", apb_uart_parents, 0x5
 
 static SUNXI_CCU_M_DATA_WITH_MUX_GATE(trace_clk, "trace", trace_parents, 0x540, 24, 3, 0, 5, BIT(31), 0);
 
-static SUNXI_CCU_M_DATA_WITH_MUX_GATE(gic_clk, "gic", gic_parents, 0x560, 24, 3, 0, 5, BIT(31), CLK_IS_CRITICAL);
+static SUNXI_CCU_M_DATA_WITH_MUX_GATE(gic_clk, "gic", gic_parents, 0x560, 24, 3, 0, 5, BIT(31), 0);
 
-static SUNXI_CCU_M_DATA_WITH_MUX_GATE(cpu_peri_clk, "cpu-peri", cpu_peri_parents, 0x568, 24, 3, 0, 5, BIT(31), CLK_IS_CRITICAL);
+static SUNXI_CCU_M_DATA_WITH_MUX_GATE(cpu_peri_clk, "cpu-peri", cpu_peri_parents, 0x568, 24, 3, 0, 5, BIT(31), 0);
 
 static SUNXI_CCU_M_DATA_WITH_MUX(timer0_clk, "timer0", timer_clk_parents, 0x800, 0, 3, 24, 3, 0);
 
@@ -2028,6 +2032,8 @@ static struct ccu_common *sun60i_a733_ccu_clks[] = {
 	&pll_npu_auto_clk.common,
 	&pll_de_3x_auto_clk.common,
 	&pll_de_4x_auto_clk.common,
+	&gmac0_phy_clk.common,
+	&gmac1_phy_clk.common,
 };
 
 static struct clk_hw_onecell_data sun60i_a733_ccu_hw_clks = {
@@ -2349,6 +2355,8 @@ static struct clk_hw_onecell_data sun60i_a733_ccu_hw_clks = {
 	[CLK_PLL_NPU_AUTO]	= &pll_npu_auto_clk.common.hw,
 	[CLK_PLL_DE_3X_AUTO]	= &pll_de_3x_auto_clk.common.hw,
 	[CLK_PLL_DE_4X_AUTO]	= &pll_de_4x_auto_clk.common.hw,
+	[CLK_GMAC0_PHY]	= &gmac0_phy_clk.common.hw,
+	[CLK_GMAC1_PHY]	= &gmac1_phy_clk.common.hw,
 	},
 };
 

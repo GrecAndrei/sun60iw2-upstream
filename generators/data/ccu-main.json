@@ -778,6 +778,16 @@
       "id": "USB1_OHCI"
     },
     {
+      "name": "gmac0-phy",
+      "type": "divider_gate",
+      "parent": "pll-peri0-150m",
+      "reg": "0x1410",
+      "shift": 0,
+      "width": 5,
+      "gate_bit": 31,
+      "id": "GMAC0_PHY"
+    },
+    {
       "name": "gmac0",
       "type": "gate",
       "parent": "dcxo",
@@ -792,6 +802,16 @@
       "reg": "0x142C",
       "bit": 0,
       "id": "GMAC1"
+    },
+    {
+      "name": "gmac1-phy",
+      "type": "divider_gate",
+      "parent": "pll-peri0-150m",
+      "reg": "0x1420",
+      "shift": 0,
+      "width": 5,
+      "gate_bit": 31,
+      "id": "GMAC1_PHY"
     },
     {
       "name": "hdmi",

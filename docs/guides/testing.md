@@ -120,6 +120,22 @@ BusyBox v1.37.0 ...
 
 **We are here now.** Current expected output is kernel messages followed by a BusyBox root shell prompt (`#`).
 
+### Thermal Validation
+
+```bash
+mount -t proc proc /proc 2>/dev/null || true
+mount -t sysfs sysfs /sys 2>/dev/null || true
+ls /sys/class/thermal
+for z in /sys/class/thermal/thermal_zone*; do echo "$(cat "$z/type"): $(awk '{print $1/1000 " C"}' "$z/temp")"; done
+```
+
+Expected zones on A733:
+- `cpu-b-thermal`
+- `cpu-l-thermal`
+- `ddr-thermal`
+- `gpu-thermal`
+- `npu-thermal`
+
 ---
 
 ## Testing Checklist

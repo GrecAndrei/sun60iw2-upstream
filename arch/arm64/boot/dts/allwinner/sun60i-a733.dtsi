@@ -330,8 +330,6 @@
 			clocks = <&ccu CLK_THS0>, <&ccu CLK_GPADC0_24M>;
 			clock-names = "bus", "mod";
 			resets = <&ccu RST_BUS_THS0>;
-			nvmem-cells = <&ths_calibration>;
-			nvmem-cell-names = "calibration";
 			#thermal-sensor-cells = <1>;
 		};
 
@@ -516,6 +514,64 @@
 			cap-sdio-irq;
 			#address-cells = <1>;
 			#size-cells = <0>;
+		};
+
+		usbphy: phy@4100400 {
+			compatible = "allwinner,sun20i-d1-usb-phy";
+			reg = <0x04100400 0x100>,
+			      <0x04101800 0x100>,
+			      <0x04200800 0x100>;
+			reg-names = "phy_ctrl", "pmu0", "pmu1";
+			clocks = <&osc24M>, <&osc24M>;
+			clock-names = "usb0_phy", "usb1_phy";
+			resets = <&ccu RST_USB_0_PHY_RSTN>, <&ccu RST_USB_1_PHY_RSTN>;
+			reset-names = "usb0_reset", "usb1_reset";
+			#phy-cells = <1>;
+			status = "disabled";
+		};
+
+		ehci0: usb@4101000 {
+			compatible = "generic-ehci";
+			reg = <0x04101000 0x100>;
+			interrupts = <GIC_SPI 157 IRQ_TYPE_LEVEL_HIGH>;
+			clocks = <&ccu CLK_USB_REF>, <&ccu CLK_USB0_EHCI>;
+			resets = <&ccu RST_USB_0_EHCI>;
+			phys = <&usbphy 0>;
+			phy-names = "usb";
+			status = "disabled";
+		};
+
+		ohci0: usb@4101400 {
+			compatible = "generic-ohci";
+			reg = <0x04101400 0x100>;
+			interrupts = <GIC_SPI 158 IRQ_TYPE_LEVEL_HIGH>;
+			clocks = <&ccu CLK_USB_REF>, <&ccu CLK_USB0_OHCI>, <&ccu CLK_USB>;
+			resets = <&ccu RST_USB_0_OHCI>;
+			phys = <&usbphy 0>;
+			phy-names = "usb";
+			status = "disabled";
+		};
+
+		ehci1: usb@4200000 {
+			compatible = "generic-ehci";
+			reg = <0x04200000 0x100>;
+			interrupts = <GIC_SPI 159 IRQ_TYPE_LEVEL_HIGH>;
+			clocks = <&ccu CLK_USB_REF>, <&ccu CLK_USB1_EHCI>;
+			resets = <&ccu RST_USB_1_EHCI>;
+			phys = <&usbphy 1>;
+			phy-names = "usb";
+			status = "disabled";
+		};
+
+		ohci1: usb@4200400 {
+			compatible = "generic-ohci";
+			reg = <0x04200400 0x100>;
+			interrupts = <GIC_SPI 160 IRQ_TYPE_LEVEL_HIGH>;
+			clocks = <&ccu CLK_USB_REF>, <&ccu CLK_USB1_OHCI>, <&ccu CLK_USB1>;
+			resets = <&ccu RST_USB_1_OHCI>;
+			phys = <&usbphy 1>;
+			phy-names = "usb";
+			status = "disabled";
 		};
 	};
 

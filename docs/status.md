@@ -1,6 +1,6 @@
 # Development Status
 
-Last updated: 2026-04-26
+Last updated: 2026-04-27
 
 ## Legend
 
@@ -57,12 +57,12 @@ Current CCU pipeline metrics (`python3 generators/generate_ccu.py --report --no-
 |-----------|--------|-------|----------|
 | MMC/SD host | :white_check_mark: | 4 controllers (mmc0-mmc3); reuses `sun20i_d1_cfg` quirks; driver patch committed | - |
 | eMMC | :white_check_mark: | Same driver as MMC; 8-bit mode enabled on mmc2 | - |
-| Thermal (5 sensors) | :white_check_mark: | `sun60i-a733-ths` compatible; piecewise-linear calc_temp; 5 thermal zones with cooling maps | - |
+| Thermal (5 sensors) | :white_check_mark: | `sun60i-a733-ths` compatible; thermal zones now register in `/sys/class/thermal`; boot-time proc/sys/devtmpfs mounting added for BusyBox shells | - |
 | CPUFreq / DVFS | :x: | Needs OPP tables + nvmem | - |
 | Power domains (PCK600) | :x: | Extend sun55i-pck600.c | - |
 | AXP515 PMIC | :x: | New PMIC, needs driver | - |
 | AXP8191 PMIC | :x: | 35+ regulators, major work | - |
-| **Phase 2 Goal** | :white_check_mark: | Boots to userspace shell; SD boot args restore `rootwait` and the rootfs now has a BusyBox init entry | - |
+| **Phase 2 Goal** | :white_check_mark: | Boots to userspace shell; SD boot args restore `rootwait` and the rootfs now auto-mounts proc/sys/devtmpfs at boot | - |
 
 ---
 
@@ -70,8 +70,8 @@ Current CCU pipeline metrics (`python3 generators/generate_ccu.py --report --no-
 
 | Component | Status | Notes | Assignee |
 |-----------|--------|-------|----------|
-| Ethernet (GMAC0) | :x: | Extend dwmac-sun55i.c | - |
-| USB 2.0 Host (EHCI/OHCI) | :x: | Generic platform + glue | - |
+| Ethernet (GMAC0) | :x: | **ABANDONED for now.** MDIO reads all 0xFF (PHY not responding). DTB changes to fix this repeatedly broke SD boot to shell. Reset GPIO, clock routing, and pinctrl alignment all tested without success. Will revisit after pinctrl R-domain or regulator bringup provides more hardware visibility. | - |
+| USB 2.0 Host (EHCI/OHCI) | :construction: | Base A733 `usbphy`, `ehci0/1`, and `ohci0/1` DTS nodes added; board DTS now wires `usb1_vbus-supply` and enables `ehci1`/`ohci1`; runtime validation pending | - |
 | USB 2.0 OTG (MUSB) | :x: | Generic platform + glue | - |
 | USB 3.0 (DWC3/xHCI) | :x: | Needs xhci glue + PHY | - |
 | PCIe RC | :x: | **NO MAINLINE DRIVER EXISTS** | - |
@@ -138,7 +138,7 @@ Run `python3 scripts/validate-factory.py` after any generator or data change.
 
 1. **No mainline U-Boot support.** We rely on vendor bootloader for now.
 2. **Main CCU runtime bringup still needs hardware re-verification.** The defconfig mismatch that left `CONFIG_SUN60I_A733_CCU` disabled was fixed, and the generated main/R CCU drivers now export reset maps instead of empty reset controllers, but the newly built Image still needs boot testing.
-3. **SD boot path has been validated to userspace.** `rootwait` is restored in the SD boot environment and BusyBox init is wired up; remaining work is validation across other media and services.
+3. **SD boot path has been validated to userspace.** `rootwait` is restored in the SD boot environment and BusyBox init is wired up; proc/sys/devtmpfs are auto-mounted at boot; remaining work is validation across other media and services.
 4. **PCIe controller driver does not exist in mainline.** Must be written from scratch using Synopsys DWC framework.
 5. **Cadence Combophy driver does not exist in mainline.** Shared USB3/PCIe PHY.
 6. **AXP8191 PMIC is brand new.** No mainline driver exists.

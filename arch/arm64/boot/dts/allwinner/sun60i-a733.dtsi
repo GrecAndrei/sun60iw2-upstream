@@ -1,5 +1,6 @@
 /dts-v1/;
 
+#include <dt-bindings/gpio/gpio.h>
 #include <dt-bindings/interrupt-controller/arm-gic.h>
 #include <dt-bindings/clock/sun60i-a733-ccu.h>
 #include <dt-bindings/clock/sun60i-a733-r-ccu.h>
@@ -142,6 +143,13 @@
 		clock-output-names = "ext-32k";
 	};
 
+	gmac_phy25m: gmac-phy25m-clk {
+		#clock-cells = <0>;
+		compatible = "fixed-clock";
+		clock-frequency = <25000000>;
+		clock-output-names = "gmac-phy25m";
+	};
+
 	psci {
 		compatible = "arm,psci-1.0";
 		method = "smc";
@@ -266,6 +274,26 @@
 				allwinner,pinmux = <4>;
 				function = "mmc3";
 				drive-strength = <30>;
+				bias-pull-up;
+			};
+
+			/omit-if-no-ref/
+			rgmii0_pins: rgmii0-pins {
+				pins = "PH0", "PH1", "PH2", "PH3", "PH4", "PH5", "PH6", "PH7",
+				       "PH8", "PH9", "PH10", "PH11", "PH12", "PH13", "PH14", "PH15";
+				allwinner,pinmux = <5>;
+				function = "gmac0";
+				drive-strength = <40>;
+				bias-pull-up;
+			};
+
+			/omit-if-no-ref/
+			gmac1_pins: gmac1-pins {
+				pins = "PJ0", "PJ1", "PJ2", "PJ3", "PJ4", "PJ5", "PJ6", "PJ7",
+				       "PJ8", "PJ9", "PJ10", "PJ11", "PJ12", "PJ13", "PJ14", "PJ15";
+				allwinner,pinmux = <5>;
+				function = "gmac1";
+				drive-strength = <40>;
 				bias-pull-up;
 			};
 		};
@@ -572,6 +600,70 @@
 			phys = <&usbphy 1>;
 			phy-names = "usb";
 			status = "disabled";
+		};
+
+		gmac0: ethernet@4500000 {
+			compatible = "allwinner,sun60i-a733-gmac210", "snps,dwmac-5.20";
+			reg = <0x04500000 0x8000>, <0x04508000 0x1000>;
+			interrupts = <GIC_SPI 172 IRQ_TYPE_LEVEL_HIGH>;
+			interrupt-names = "macirq";
+			clocks = <&ccu CLK_GMAC0>, <&ccu CLK_GMAC0_MBUS>,
+				 <&gmac_phy25m>, <&ccu CLK_GMAC_PTP>;
+			clock-names = "stmmaceth", "pclk", "phy25m", "ptp_ref";
+			resets = <&ccu RST_BUS_GMAC0_AXI>, <&ccu RST_BUS_GMAC0>;
+			reset-names = "stmmaceth", "ahb";
+			pinctrl-names = "default";
+			pinctrl-0 = <&rgmii0_pins>;
+			phy-mode = "rgmii";
+			aw,soc-phy25m;
+			tx-delay = <12>;
+			rx-delay = <10>;
+			phy-handle = <&gmac0_phy0>;
+			status = "disabled";
+
+			mdio0: mdio {
+				compatible = "snps,dwmac-mdio";
+				#address-cells = <1>;
+				#size-cells = <0>;
+
+				gmac0_phy0: ethernet-phy@1 {
+					compatible = "ethernet-phy-ieee802.3-c22";
+					reg = <1>;
+					max-speed = <1000>;
+				};
+			};
+		};
+
+		gmac1: ethernet@4510000 {
+			compatible = "allwinner,sun60i-a733-gmac200", "snps,dwmac-4.20a";
+			reg = <0x04510000 0x8000>, <0x04518000 0x1000>;
+			interrupts = <GIC_SPI 175 IRQ_TYPE_LEVEL_HIGH>;
+			interrupt-names = "macirq";
+			clocks = <&ccu CLK_GMAC1>, <&ccu CLK_GMAC1_MBUS>,
+				 <&ccu CLK_GMAC1_PHY>, <&ccu CLK_GMAC_PTP>;
+			clock-names = "stmmaceth", "pclk", "phy25m", "ptp_ref";
+			resets = <&ccu RST_BUS_GMAC1_AXI>, <&ccu RST_BUS_GMAC1>;
+			reset-names = "stmmaceth", "ahb";
+			pinctrl-names = "default";
+			pinctrl-0 = <&gmac1_pins>;
+			phy-mode = "rgmii";
+			aw,soc-phy25m;
+			tx-delay = <3>;
+			rx-delay = <4>;
+			phy-handle = <&gmac1_phy0>;
+			status = "disabled";
+
+			mdio1: mdio {
+				compatible = "snps,dwmac-mdio";
+				#address-cells = <1>;
+				#size-cells = <0>;
+
+				gmac1_phy0: ethernet-phy@1 {
+					compatible = "ethernet-phy-ieee802.3-c22";
+					reg = <1>;
+					max-speed = <1000>;
+				};
+			};
 		};
 	};
 

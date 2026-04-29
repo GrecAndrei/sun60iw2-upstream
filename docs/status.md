@@ -1,6 +1,6 @@
 # Development Status
 
-Last updated: 2026-04-27
+Last updated: 2026-04-29
 
 ## Legend
 
@@ -70,8 +70,8 @@ Current CCU pipeline metrics (`python3 generators/generate_ccu.py --report --no-
 
 | Component | Status | Notes | Assignee |
 |-----------|--------|-------|----------|
-| Ethernet (GMAC0) | :x: | **ABANDONED for now.** MDIO reads all 0xFF (PHY not responding). DTB changes to fix this repeatedly broke SD boot to shell. Reset GPIO, clock routing, and pinctrl alignment all tested without success. Will revisit after pinctrl R-domain or regulator bringup provides more hardware visibility. | - |
-| USB 2.0 Host (EHCI/OHCI) | :construction: | Base A733 `usbphy`, `ehci0/1`, and `ohci0/1` DTS nodes added; board DTS now wires `usb1_vbus-supply` and enables `ehci1`/`ohci1`; runtime validation pending | - |
+| Ethernet (GMAC0) | :x: | **ABANDONED.** MDIO reads all 0xFF (PHY not responding). DTB changes to fix this repeatedly broke SD boot to shell. CCU clock flag changes and GMAC driver modifications also broke boot. Will revisit only if hardware need arises. | - |
+| USB 2.0 Host (EHCI/OHCI) | :white_check_mark: | `sun20i-d1-usb-phy` driver works on A733. All 4 controllers (ehci0/1, ohci0/1) probe and start. USB storage (usb-storage + scsi + sd) works. Hotplug works. | - |
 | USB 2.0 OTG (MUSB) | :x: | Generic platform + glue | - |
 | USB 3.0 (DWC3/xHCI) | :x: | Needs xhci glue + PHY | - |
 | PCIe RC | :x: | **NO MAINLINE DRIVER EXISTS** | - |
@@ -155,7 +155,7 @@ Run `python3 scripts/validate-factory.py` after any generator or data change.
 | SD card boot | :white_check_mark: | :x: | :x: |
 | eMMC boot | :x: | :x: | :x: |
 | Ethernet | :x: | :x: | :x: |
-| USB host | :x: | :x: | :x: |
+| USB host | :white_check_mark: | :x: | :x: |
 | PCIe/NVMe | :x: | :x: | :x: |
 | WiFi/BT | :x: | :x: | :x: |
 | HDMI output | :x: | :x: | :x: |

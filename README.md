@@ -14,11 +14,14 @@ This repository now contains a real early-bringup port. It is **not production-r
 - GICv3, timer, PSCI, and serial console basics are working
 - SD card boot reaches a BusyBox root shell prompt
 - Thermal zones register and report temperatures in `/sys/class/thermal`
+- USB 2.0 Host (EHCI0/1 + OHCI0/1) works — `sun20i-d1-usb-phy` driver compatible with A733
+- USB storage (mass-storage + SCSI + sd) works with hotplug
 - Generated CCU, R-CCU, RTC CCU, CPUPLL, and pinctrl drivers build in the Linux tree
 - DTS/DTSI, generator pipeline, and factory validation are in active use
 
 ### Still Not Working Reliably
-- eMMC, SDIO, Ethernet, USB, and display still need verification
+- eMMC, SDIO, and display still need verification
+- Ethernet (GMAC0) **ABANDONED** — probe hangs boot; no hardware need
 - Main CCU runtime behavior needs continued hardware soak testing
 - RTC/root clock interactions still need cleanup
 
@@ -32,8 +35,10 @@ If you need a working system today, use the [vendor kernel](https://github.com/o
 - [x] Thermal driver support
 - [x] UART console bringup
 - [x] MMC/SD host description and initial driver support
-- [ ] Ethernet (GMAC)
-- [ ] USB host/device
+- [x] USB 2.0 Host (EHCI/OHCI)
+- [ ] Ethernet (GMAC) — abandoned
+- [ ] USB 3.0 / DWC3
+- [ ] USB OTG
 - [ ] PCIe controller
 - [ ] PMIC support (AXP515 + AXP8191)
 - [ ] Display/DRM
@@ -100,8 +105,9 @@ Allwinner/Xunlong provides a vendor kernel (`orange-pi-6.6-sun60iw2`) with a mas
 - [ ] eMMC validation
 
 ### Phase 3: Connectivity (~2,600 LoC)
-- [ ] Ethernet (GMAC200)
-- [ ] USB 2.0/3.0 host
+- [x] USB 2.0 Host (EHCI/OHCI) — `sun20i-d1-usb-phy` works on A733
+- [ ] Ethernet (GMAC200) — **ABANDONED** for now
+- [ ] USB 3.0 / DWC3 host
 - [ ] PCIe controller + PHY
 - [ ] Headless server/NAS fully functional
 
@@ -200,7 +206,7 @@ All code in this repository is licensed under the [GPL-2.0+](LICENSE) to match t
 
 This project is **not affiliated with** Orange Pi, Xunlong, or Allwinner. We are reverse-engineering and documenting a proprietary SoC using publicly available information, vendor source code (used as reference only), and hardware testing.
 
-**Do not expect a production-ready system yet.** SD boot now reaches a BusyBox shell, but eMMC, SDIO, Ethernet, USB, and display still need validation. If you need a fully working system today, use the vendor kernel or Armbian.
+**Do not expect a production-ready system yet.** SD boot now reaches a BusyBox shell, USB 2.0 host works, but eMMC, SDIO, and display still need validation. Ethernet was abandoned due to boot hangs. If you need a fully working system today, use the vendor kernel or Armbian.
 
 ---
 

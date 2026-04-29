@@ -167,11 +167,11 @@ Expected zones on A733:
 
 ### Phase 3: Connectivity
 
-- [ ] Ethernet link up
+- [ ] Ethernet link up (**ABANDONED** — gmac0 probe hangs boot; MDIO all 0xFF)
 - [ ] DHCP or static IP works
 - [ ] Ping gateway
 - [ ] Ping internet
-- [ ] USB 2.0 host (keyboard, storage)
+- [x] USB 2.0 host (keyboard, storage) — **WORKING** on EHCI0/1 + OHCI0/1
 - [ ] USB 3.0 host (storage)
 - [ ] PCIe link up
 - [ ] NVMe SSD detected

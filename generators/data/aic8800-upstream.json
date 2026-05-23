@@ -60,6 +60,8 @@
     "aic8800d80/fw_adid_8800d80_u02.bin",
     "aic8800d80/fw_adid_8800d80.bin"
   ],
+  "bt_ram_adid_base": "0x00201940",
+  "bt_ram_patch_base": "0x0020b43c",
   "bt_uart_speed": 1500000,
   "bsp_debt": [
     {

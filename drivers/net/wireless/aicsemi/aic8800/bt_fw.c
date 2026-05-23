@@ -8,21 +8,21 @@
 #include <linux/string.h>
 #include "bt_fw.h"
 
-static const char * const aic8800_bt_patch_table_fallbacks[] = {
+const char * const aic8800_bt_patch_table_fallbacks[] = {
             "aic8800d80/fw_patch_table_8800d80_u02.bin",
             "aic8800d80/fw_patch_table_8800d80.bin",
 };
 
-static const char * const aic8800_bt_patch_fallbacks[] = {
+const char * const aic8800_bt_patch_fallbacks[] = {
             "aic8800d80/fw_patch_8800d80_u02.bin",
             "aic8800d80/fw_patch_8800d80.bin",
 };
 
-static const char * const aic8800_bt_patch_ext_fallbacks[] = {
+const char * const aic8800_bt_patch_ext_fallbacks[] = {
             "aic8800d80/fw_patch_8800d80_u02_ext",
 };
 
-static const char * const aic8800_bt_adid_fallbacks[] = {
+const char * const aic8800_bt_adid_fallbacks[] = {
             "aic8800d80/fw_adid_8800d80_u02.bin",
             "aic8800d80/fw_adid_8800d80.bin",
 };

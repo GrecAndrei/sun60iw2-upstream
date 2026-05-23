@@ -54,8 +54,10 @@ Regenerate draft artifacts from structured data:
 - [x] project tree drivers/ populated from generated skeleton
 - [x] BT firmware fallback helper scaffolding is generated from JSON data
 - [x] BT serdev/HCI transport scaffold is generated and compile-checked (`hci_aic8800.o`)
- - [x] BT transport has non-stub H4 RX/TX data path (serdev receive/write wakeup + HCI send/flush)
- - [x] Real SDIO IDs and TX/RX port constants extracted from vendor BSP
+- [x] BT transport has non-stub H4 RX/TX data path (serdev receive/write wakeup + HCI send/flush)
+- [x] Real SDIO IDs and TX/RX port constants extracted from vendor BSP
+- [x] CRC8, IPC messages, flow control, V3 init, system config all byte-verified against vendor BSP
+- [x] BT RAM addresses documented in JSON (`bt_ram_adid_base`, `bt_ram_patch_base`), upload deferred to hardware test
 
 ## 1) Remove BSP dependencies from vendor flow
 

@@ -1,10 +1,10 @@
 # AIC8800 Progress Snapshot
 
-Generated: `2026-05-23T14:26:05.105083+00:00`
+Generated: `2026-05-23T14:40:48.213209+00:00`
 
 ## Checklist
-- Tasks: `58/62`
-- Completion: `93.55%`
+- Tasks: `60/64`
+- Completion: `93.75%`
 
 ## BSP Dependency Inventory
 - Tracked rows: `9`
@@ -14,7 +14,7 @@ Generated: `2026-05-23T14:26:05.105083+00:00`
 
 ## Compile Check
 - Status: `pass`
-- Last checked: `2026-05-23T14:18:32.691971+00:00`
+- Last checked: `2026-05-23T14:40:27.630450+00:00`
 
 ## DTB Check
 - Status: `pass`

@@ -702,19 +702,19 @@ def gen_kernel_draft_files(data: dict) -> dict[str, str]:
             #include <linux/string.h>
             #include "bt_fw.h"
 
-            static const char * const aic8800_bt_patch_table_fallbacks[] = {
+            const char * const aic8800_bt_patch_table_fallbacks[] = {
             __BT_PATCH_TABLE_FALLBACKS__
             };
 
-            static const char * const aic8800_bt_patch_fallbacks[] = {
+            const char * const aic8800_bt_patch_fallbacks[] = {
             __BT_PATCH_FALLBACKS__
             };
 
-            static const char * const aic8800_bt_patch_ext_fallbacks[] = {
+            const char * const aic8800_bt_patch_ext_fallbacks[] = {
             __BT_PATCH_EXT_FALLBACKS__
             };
 
-            static const char * const aic8800_bt_adid_fallbacks[] = {
+            const char * const aic8800_bt_adid_fallbacks[] = {
             __BT_ADID_FALLBACKS__
             };
 

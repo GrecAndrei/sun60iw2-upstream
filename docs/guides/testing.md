@@ -171,6 +171,7 @@ Expected zones on A733:
 - [ ] DHCP or static IP works
 - [ ] Ping gateway
 - [ ] Ping internet
+- [ ] `mmc1` enumerates the on-board AIC8800D80 SDIO function
 - [x] USB 2.0 host (keyboard, storage) — **WORKING** on EHCI0/1 + OHCI0/1
 - [ ] USB 3.0 host (storage)
 - [ ] PCIe link up
@@ -260,6 +261,34 @@ iperf3 -c server_ip
 # WiFi (when working)
 iperf3 -c server_ip
 ```
+
+---
+
+## AIC8800D80 Bringup
+
+Current board wiring assumptions (Orange Pi 4 Pro):
+- `PM1` - WL_REG_ON (SDIO power sequence reset GPIO)
+- `PG6..PG9` - `uart1` TX/RX/RTS/CTS for BT transport
+
+### WiFi checks (AIC SDIO)
+
+```bash
+dmesg | grep -iE 'mmc1|sdio|aic|aic8800'
+lsmod | grep -i aic
+ip link show
+iw dev
+```
+
+### Bluetooth checks (UART transport)
+
+```bash
+dmesg | grep -iE 'uart1|hci|bluetooth|aic'
+hciconfig -a
+bluetoothctl list
+```
+
+If WiFi fails after SDIO enumeration, verify firmware artifacts are installed
+under `/lib/firmware/aic8800d80/` on the target rootfs.
 
 ---
 

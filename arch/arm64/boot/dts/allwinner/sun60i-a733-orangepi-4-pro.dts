@@ -52,6 +52,23 @@
 		regulator-max-microvolt = <5000000>;
 		regulator-always-on;
 	};
+
+	wifi_pwrseq: wifi-pwrseq {
+		compatible = "mmc-pwrseq-simple";
+		reset-gpios = <&r_pio 1 1 GPIO_ACTIVE_LOW>; /* PM1: WL_REG_ON */
+		clocks = <&ext32k>;
+		clock-names = "ext_clock";
+		post-power-on-delay-ms = <200>;
+	};
+};
+
+&pio {
+	uart1_pins: uart1-pins {
+		pins = "PG6", "PG7", "PG8", "PG9";
+		function = "uart1";
+		drive-strength = <10>;
+		bias-pull-up;
+	};
 };
 
 &uart0 {
@@ -76,12 +93,21 @@
 	status = "okay";
 	pinctrl-0 = <&mmc1_pins>;
 	pinctrl-names = "default";
+	#address-cells = <1>;
+	#size-cells = <0>;
 	bus-width = <4>;
 	cap-sd-highspeed;
 	cap-sdio-irq;
 	keep-power-in-suspend;
+	mmc-pwrseq = <&wifi_pwrseq>;
+	non-removable;
 	no-sd;
 	no-mmc;
+
+	wifi@1 {
+		reg = <1>;
+		compatible = "aicsemi,aic8800d80", "aicsemi,aic8800";
+	};
 };
 
 &mmc2 {
@@ -95,6 +121,18 @@
 	mmc-hs200-1_8v;
 	no-sdio;
 	no-sd;
+};
+
+&uart1 {
+	status = "okay";
+	pinctrl-0 = <&uart1_pins>;
+	pinctrl-names = "default";
+	uart-has-rtscts;
+
+	bluetooth {
+		compatible = "aicsemi,aic8800d80-bt", "aicsemi,aic8800-bt";
+		max-speed = <1500000>;
+	};
 };
 
 /* Ethernet abandoned for now — gmac0 probe hangs boot

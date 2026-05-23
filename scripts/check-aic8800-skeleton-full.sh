@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ $# -ne 1 ]]; then
+  printf 'Usage: %s <linux-tree-root>\n' "$0" >&2
+  exit 1
+fi
+
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+LINUX_ROOT="$1"
+
+"$ROOT_DIR/scripts/generate-aic8800-upstream.sh"
+"$ROOT_DIR/scripts/export-aic8800-kernel-skeleton.sh" "$LINUX_ROOT"
+
+make -C "$LINUX_ROOT" ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- M=drivers/net/wireless/aicsemi/aic8800 modules
+make -C "$LINUX_ROOT" ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- drivers/bluetooth/hci_aic8800.o
+make -C "$LINUX_ROOT" ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- W=1 M=drivers/net/wireless/aicsemi/aic8800 modules
+
+python3 - <<'PY' "$ROOT_DIR" "$LINUX_ROOT"
+import json
+import sys
+from datetime import datetime, timezone
+from pathlib import Path
+
+root = Path(sys.argv[1])
+linux_root = Path(sys.argv[2])
+out = root / "docs" / "aic8800-compile-check.json"
+payload = {
+    "checked_at_utc": datetime.now(timezone.utc).isoformat(),
+    "linux_tree": str(linux_root),
+    "status": "pass",
+    "checks": [
+        "modules",
+        "bluetooth_obj",
+        "modules_w1",
+    ],
+}
+out.write_text(json.dumps(payload, indent=2) + "\n")
+PY
+
+printf 'AIC8800 full check passed in %s (modules + BT obj + W=1)\n' "$LINUX_ROOT"

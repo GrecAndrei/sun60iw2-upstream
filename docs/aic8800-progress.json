@@ -1,0 +1,43 @@
+{
+  "generated_at_utc": "2026-05-23T14:26:05.105083+00:00",
+  "checklist": {
+    "tasks_total": 62,
+    "tasks_done": 58,
+    "completion_percent": 93.55
+  },
+  "bsp_dependency_inventory": {
+    "rows": 9
+  },
+  "generated_artifacts": {
+    "total_files": 27,
+    "by_extension": {
+      ".c": 8,
+      ".fragment": 1,
+      ".h": 5,
+      ".md": 7,
+      ".yaml": 2,
+      "<none>": 4
+    }
+  },
+  "compile_check": {
+    "checked_at_utc": "2026-05-23T14:18:32.691971+00:00",
+    "linux_tree": "/home/grec-alexander/Documents/porting/linux",
+    "status": "pass",
+    "checks": [
+      "modules",
+      "bluetooth_obj",
+      "modules_w1"
+    ]
+  },
+  "dtb_check": {
+    "checked_at_utc": "2026-05-23T09:17:39.057804+00:00",
+    "linux_tree": "/home/grec-alexander/Documents/porting/linux",
+    "target": "allwinner/sun60i-a733-orangepi-4-pro.dtb",
+    "status": "pass"
+  },
+  "agy_delegate": {
+    "jobs_total": 26,
+    "jobs_with_nonempty_stdout": 21,
+    "jobs_with_quota_errors": 8
+  }
+}

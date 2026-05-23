@@ -113,6 +113,35 @@ python3 generators/generate_dma.py > generators/output/dma_patch.c
 - DT snippet for `sun60i-a733.dtsi`
 - UART DMA request line references
 
+### `generate_aic8800_upstream.py`
+
+Reads `data/aic8800-upstream.json` and generates upstream draft artifacts for
+AIC8800D80 WiFi/BT work.
+
+```bash
+python3 generators/generate_aic8800_upstream.py
+```
+
+**What it generates:**
+- Draft DT bindings for SDIO WiFi and UART BT under `docs/upstream-drafts/`
+- Draft DTS fragment for Orange Pi 4 Pro AIC wiring
+- Draft kernel file skeletons for patch 2/6 under
+  `docs/upstream-drafts/kernel-files/`
+- BSP dependency inventory CSV at `docs/aic8800d80-bsp-debt.csv`
+
+### `report_aic8800_progress.py`
+
+Builds a live progress snapshot from checklist state, generated artifact counts,
+BSP dependency inventory, and delegated AGY job history.
+
+```bash
+python3 generators/report_aic8800_progress.py
+```
+
+**What it writes:**
+- `docs/aic8800-progress.json`
+- `docs/aic8800-progress.md`
+
 ### `report_ccu_pipeline.py`
 
 Compares canonical-only coverage vs merged (canonical + extracted) coverage.

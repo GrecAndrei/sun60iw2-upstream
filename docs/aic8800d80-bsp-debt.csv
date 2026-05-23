@@ -1,0 +1,10 @@
+file,symbol,reason,upstream_replacement
+linux-orangepi/bsp/drivers/net/wireless/aic8800/aic8800_bsp/aicusb.c,sunxi_wlan_set_power,Allwinner BSP power API,Regulator framework and GPIO descriptors from DT
+linux-orangepi/bsp/drivers/net/wireless/aic8800/aic8800_bsp/aicsdio.c,sunxi_wlan_set_power,Allwinner BSP power API,Regulator framework and GPIO descriptors from DT
+linux-orangepi/bsp/drivers/net/wireless/aic8800/aic8800_bsp/aicsdio.c,sunxi_mmc_rescan_card,Vendor MMC host rescan hook,Normal MMC detect flow with non-removable or mmc_detect_change where appropriate
+linux-orangepi/bsp/drivers/net/wireless/aic8800/aic8800_bsp/aicsdio.c,sunxi_wlan_get_bus_index,Vendor SDIO bus index query,Native SDIO ID matching and probe order
+linux-orangepi/bsp/drivers/net/wireless/aic8800/aic8800_fdrv/aicwf_sdio.c,sunxi_wlan_get_oob_irq,Vendor OOB IRQ provider,DT IRQ parsing via of_irq_get/gpiod_to_irq
+linux-orangepi/bsp/drivers/net/wireless/aic8800/aic8800_fdrv/aicwf_sdio.c,sunxi_wlan_get_oob_irq_flags,Vendor OOB IRQ flag provider,DT trigger flags and irq_get_trigger_type
+linux-orangepi/bsp/drivers/net/wireless/aic8800/aic8800_bsp/aic_bsp_verify.c,sunxi_get_soc_chipid,Vendor SoC ID API,soc_device_match and standard SoC identification
+linux-orangepi/bsp/drivers/net/wireless/aic8800/aic8800_btusb/aic_btusb.h,get_custom_mac_address,Vendor custom MAC source,local-mac-address and NVMEM cells
+linux-orangepi/bsp/drivers/net/wireless/aic8800/aic8800_fdrv/rwnx_main.c,get_custom_mac_address,Vendor custom MAC source,local-mac-address and NVMEM cells

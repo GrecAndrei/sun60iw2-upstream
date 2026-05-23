@@ -1,0 +1,120 @@
+{
+  "chip": "aic8800d80",
+  "maintainer": {
+    "name": "Alexander Grec",
+    "email": "alex092lap@duck.com"
+  },
+  "sdio_id": {
+    "vendor": "0xc8a1",
+    "device": "0x0182"
+  },
+  "wifi_compatible": [
+    "aicsemi,aic8800d80",
+    "aicsemi,aic8800"
+  ],
+  "bt_compatible": [
+    "aicsemi,aic8800d80-bt",
+    "aicsemi,aic8800-bt"
+  ],
+  "bt_max_speed": 1500000,
+  "firmware_dir": "/lib/firmware/aic8800d80/",
+  "wifi_fw_probe_name": "aic8800d80/fmacfw_8800d80.bin",
+  "wifi_fw_download_addr": "0x00120000",
+  "wifi_tx_port_addr": "0x10",
+  "wifi_rx_len_port_addr": "0x05",
+  "wifi_rx_data_port_addr": "0x0F",
+  "wifi_rx_budget": 8,
+  "wifi_rx_work_max_batches": 32,
+  "wifi_rx_queue_limit": 256,
+  "wifi_rx_submit_budget": 128,
+  "wifi_rx_max_frame_len": 2304,
+  "wifi_rx_use_meta_header": false,
+  "wifi_rx_meta_len": 4,
+  "wifi_rx_meta_len_offset": 0,
+  "wifi_rx_sync_enable": false,
+  "wifi_rx_sync_offset": 0,
+  "wifi_rx_sync_value": 170,
+  "wifi_tx_retry_max": 3,
+  "wifi_tx_retry_delay_us": 200,
+  "wifi_tx_queue_limit": 512,
+  "wifi_tx_queue_wake_threshold": 128,
+  "wifi_tx_reinit_stall_threshold": 3,
+  "wifi_tx_reinit_cooldown_ms": 5000,
+  "wifi_fw_fallback_names": [
+    "aic8800d80/fmacfw_8800d80.bin",
+    "aic8800d80/fmacfw_8800d80_u02.bin",
+    "aic8800d80/fmacfw_8800d80_h_u02.bin"
+  ],
+  "bt_patch_table_fallback_names": [
+    "aic8800d80/fw_patch_table_8800d80_u02.bin",
+    "aic8800d80/fw_patch_table_8800d80.bin"
+  ],
+  "bt_patch_fallback_names": [
+    "aic8800d80/fw_patch_8800d80_u02.bin",
+    "aic8800d80/fw_patch_8800d80.bin"
+  ],
+  "bt_patch_ext_fallback_names": [
+    "aic8800d80/fw_patch_8800d80_u02_ext"
+  ],
+  "bt_adid_fallback_names": [
+    "aic8800d80/fw_adid_8800d80_u02.bin",
+    "aic8800d80/fw_adid_8800d80.bin"
+  ],
+  "bt_uart_speed": 1500000,
+  "bsp_debt": [
+    {
+      "file": "linux-orangepi/bsp/drivers/net/wireless/aic8800/aic8800_bsp/aicusb.c",
+      "symbol": "sunxi_wlan_set_power",
+      "reason": "Allwinner BSP power API",
+      "upstream_replacement": "Regulator framework and GPIO descriptors from DT"
+    },
+    {
+      "file": "linux-orangepi/bsp/drivers/net/wireless/aic8800/aic8800_bsp/aicsdio.c",
+      "symbol": "sunxi_wlan_set_power",
+      "reason": "Allwinner BSP power API",
+      "upstream_replacement": "Regulator framework and GPIO descriptors from DT"
+    },
+    {
+      "file": "linux-orangepi/bsp/drivers/net/wireless/aic8800/aic8800_bsp/aicsdio.c",
+      "symbol": "sunxi_mmc_rescan_card",
+      "reason": "Vendor MMC host rescan hook",
+      "upstream_replacement": "Normal MMC detect flow with non-removable or mmc_detect_change where appropriate"
+    },
+    {
+      "file": "linux-orangepi/bsp/drivers/net/wireless/aic8800/aic8800_bsp/aicsdio.c",
+      "symbol": "sunxi_wlan_get_bus_index",
+      "reason": "Vendor SDIO bus index query",
+      "upstream_replacement": "Native SDIO ID matching and probe order"
+    },
+    {
+      "file": "linux-orangepi/bsp/drivers/net/wireless/aic8800/aic8800_fdrv/aicwf_sdio.c",
+      "symbol": "sunxi_wlan_get_oob_irq",
+      "reason": "Vendor OOB IRQ provider",
+      "upstream_replacement": "DT IRQ parsing via of_irq_get/gpiod_to_irq"
+    },
+    {
+      "file": "linux-orangepi/bsp/drivers/net/wireless/aic8800/aic8800_fdrv/aicwf_sdio.c",
+      "symbol": "sunxi_wlan_get_oob_irq_flags",
+      "reason": "Vendor OOB IRQ flag provider",
+      "upstream_replacement": "DT trigger flags and irq_get_trigger_type"
+    },
+    {
+      "file": "linux-orangepi/bsp/drivers/net/wireless/aic8800/aic8800_bsp/aic_bsp_verify.c",
+      "symbol": "sunxi_get_soc_chipid",
+      "reason": "Vendor SoC ID API",
+      "upstream_replacement": "soc_device_match and standard SoC identification"
+    },
+    {
+      "file": "linux-orangepi/bsp/drivers/net/wireless/aic8800/aic8800_btusb/aic_btusb.h",
+      "symbol": "get_custom_mac_address",
+      "reason": "Vendor custom MAC source",
+      "upstream_replacement": "local-mac-address and NVMEM cells"
+    },
+    {
+      "file": "linux-orangepi/bsp/drivers/net/wireless/aic8800/aic8800_fdrv/rwnx_main.c",
+      "symbol": "get_custom_mac_address",
+      "reason": "Vendor custom MAC source",
+      "upstream_replacement": "local-mac-address and NVMEM cells"
+    }
+  ]
+}

@@ -39,6 +39,8 @@ If you need a working system today, use the [vendor kernel](https://github.com/o
 - [ ] Ethernet (GMAC) — abandoned
 - [ ] USB 3.0 / DWC3
 - [ ] USB OTG
+- [x] WiFi (AIC8800D80) — generated SDIO transport driver, compile-validated, untested on hardware
+- [x] Bluetooth (AIC8800D80) — generated serdev H4 transport driver, compile-validated, untested on hardware
 - [ ] PCIe controller
 - [ ] PMIC support (AXP515 + AXP8191)
 - [ ] Display/DRM
@@ -48,7 +50,14 @@ If you need a working system today, use the [vendor kernel](https://github.com/o
 
 ### Boot Helpers
 - `scripts/update-sd-boot.sh` refreshes a mounted SD boot partition with a built `Image` and DTB while keeping timestamped backups.
+- `scripts/generate-aic8800-upstream.sh` regenerates AIC8800 upstream draft bindings, DTS fragments, kernel skeleton files, and BSP debt CSV from JSON data.
+- `scripts/export-aic8800-kernel-skeleton.sh <linux-tree-root>` syncs generated AIC8800 kernel skeleton files into a target Linux tree.
+- `scripts/check-aic8800-skeleton.sh <linux-tree-root>` regenerates, exports, and compiles AIC8800 WiFi modules + BT object.
+- `scripts/check-aic8800-skeleton-full.sh <linux-tree-root>` full check: regen, export, modules, BT object, and W=1 in one pass.
+- `scripts/check-aic8800-dtb.sh <linux-tree-root>` validates DTS/DTB wiring with AIC8800 nodes.
+- `scripts/report-aic8800-progress.sh` updates AIC8800 progress snapshots (`docs/aic8800-progress.json` and `.md`).
 - `tools/pico_uart_bridge.py` mirrors UART output from a MicroPython bridge and watches for shell readiness.
+- `tools/agy_delegate.py` launches delegated `agy` jobs in background, writes logs under `.tmp/agy-logs/`, and injects environment context into each prompt.
 
 ---
 

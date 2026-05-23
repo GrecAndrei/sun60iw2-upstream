@@ -1,6 +1,6 @@
 # Development Status
 
-Last updated: 2026-04-29
+Last updated: 2026-05-22
 
 ## Legend
 
@@ -18,7 +18,7 @@ Last updated: 2026-04-29
 | Component | Status | Notes | Assignee |
 |-----------|--------|-------|----------|
 | Base DTSI (`sun60i-a733.dtsi`) | :white_check_mark: | Timer, WDT, DMA, UART, MMC, thermal, SID nodes added | - |
-| Board DTS (`sun60i-a733-orangepi-4-pro.dts`) | :white_check_mark: | SD card, eMMC, SDIO WiFi enabled | - |
+| Board DTS (`sun60i-a733-orangepi-4-pro.dts`) | :white_check_mark: | SD card, eMMC, USB 2.0 host, and staged AIC8800D80 SDIO/UART wiring | - |
 | Main CCU driver | :white_check_mark: | 319 clocks, 63 parent arrays, 120 reset lines; generator bug fixed: all 9 previously-missing clocks (including `apb-uart`, `iommu*`, `ve-dec-mbus-gate`) now have explicit IDs in `ccu-main.json` and regenerate identically to committed output; runtime probe still needs hardware re-verification | - |
 
 Current CCU pipeline metrics (`python3 generators/generate_ccu.py --report --no-output`):
@@ -76,7 +76,7 @@ Current CCU pipeline metrics (`python3 generators/generate_ccu.py --report --no-
 | USB 3.0 (DWC3/xHCI) | :x: | Needs xhci glue + PHY | - |
 | PCIe RC | :x: | **NO MAINLINE DRIVER EXISTS** | - |
 | PCIe PHY (Cadence Combophy) | :x: | **NO MAINLINE DRIVER EXISTS** | - |
-| SDIO (WiFi/BT) | :x: | Same MMC driver + firmware | - |
+| SDIO (WiFi/BT) | :construction: | Generator-driven AIC8800D80 driver (SDIO transport + BT serdev H4) is compile-validated (W=1 clean, 0 errors 0 warnings) against Linux v7.0 arm64. Transport layer (SDIO IDs, V3 registers, IPC messages, CRC8, flow control, init sequence, system config writes) verified byte-for-byte against vendor BSP (`orange-pi-6.6-sun60iw2`). Two-PID lifecycle (0x0182 bootloader → 0x0082 normal) implemented. Bootroom START_APP handoff is correct IPC format (0x040D). Board DTS carries `wifi@1` on `mmc1` and `bluetooth` on `uart1`. Progress: 58/62 checklist (93.55%). Untested on hardware — silicon validation pending. | - |
 | **Phase 3 Goal** | :x: | Headless server functional | - |
 
 ---
@@ -157,7 +157,7 @@ Run `python3 scripts/validate-factory.py` after any generator or data change.
 | Ethernet | :x: | :x: | :x: |
 | USB host | :white_check_mark: | :x: | :x: |
 | PCIe/NVMe | :x: | :x: | :x: |
-| WiFi/BT | :x: | :x: | :x: |
+| WiFi/BT | :construction: | :x: | :x: |
 | HDMI output | :x: | :x: | :x: |
 | GPU acceleration | :x: | :x: | :x: |
 | NPU inference | :x: | :x: | :x: |

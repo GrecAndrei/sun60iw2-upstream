@@ -136,7 +136,7 @@ The A733 has **4 separate clock controllers**:
 ### Network
 
 - **Ethernet:** GMAC0, RGMII, Realtek RTL8211F PHY @ MDIO addr 0x1
-- **WiFi/BT:** SDC1 (SDIO), AMPAK AP6275S or similar (WiFi 6 + BT 5.2)
+- **WiFi/BT:** AIC8800D80 (AICSemi) on SDC1 (SDIO) + UART1 (serdev H4). WiFi 6 + BT 5.2. Two-PID SDIO lifecycle (0x0182 bootloader, 0x0082 normal).
 
 ### USB
 

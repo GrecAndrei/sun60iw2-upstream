@@ -67,6 +67,10 @@ cd linux-sun60iw2
 git am ../sun60iw2-upstream/patches/*.patch
 ```
 
+The `patches/` directory is the self-contained SoC boot baseline only.
+Generated AIC8800 WiFi/BT drafts live under `docs/upstream-drafts/` and are
+validated with the export/check scripts instead of `git am patches/*.patch`.
+
 ---
 
 ## Configuration
@@ -164,6 +168,8 @@ label sun60iw2
 
 The current board flow uses `boot.cmd` plus `orangepiEnv.txt` on the SD boot partition, not extlinux. Keep `rootwait` in `extraargs` so the rootfs can settle before PID 1 starts.
 
+Current known-good SD bringup profile uses temporary `non-removable` on `mmc0` in the board DTS while card-detect/hotplug is being reworked.
+
 For fast updates, run:
 
 ```bash
@@ -190,7 +196,7 @@ For fast updates, run:
 |---------|--------------|
 | No UART output | Wrong earlyprintk, clocks not enabled, wrong pins |
 | Kernel panic | Missing device tree nodes, wrong memory map |
-| Hangs after "Starting kernel..." | Wrong UART base address, GIC issue |
+| Hangs after "Starting kernel..." | Mixed tree/config drift, bad Image build, or low-level SoC init regression |
 
 ---
 

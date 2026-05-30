@@ -46,3 +46,4 @@ build/
 out/
 dist/
 .tmp/agy-logs/
+stage/

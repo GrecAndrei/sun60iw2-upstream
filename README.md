@@ -21,6 +21,7 @@ This repository now contains a real early-bringup port. It is **not production-r
 
 ### Still Not Working Reliably
 - eMMC, SDIO, and display still need verification
+- SD card-detect/hotplug path needs follow-up (current known-good DTS keeps `mmc0` as temporary `non-removable`)
 - Ethernet (GMAC0) **ABANDONED** — probe hangs boot; no hardware need
 - Main CCU runtime behavior needs continued hardware soak testing
 - RTC/root clock interactions still need cleanup
@@ -165,14 +166,20 @@ sudo apt install build-essential bc bison flex libssl-dev libncurses5-dev \
 git clone https://github.com/YOURNAME/sun60iw2-upstream.git
 cd sun60iw2-upstream
 
-# Apply patches to a clean Linux 7.0 tree
+# Apply the standalone SoC patch series to a clean Linux 7.0 tree
+# (clock/pinctrl/mmc/dma/thermal/DT only).
 ./scripts/apply-patches.sh /path/to/linux-7.0
 
-# Build
+# Build the bootable baseline
 cd /path/to/linux-7.0
 make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- sun60iw2_defconfig
 make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- -j$(nproc)
 ```
+
+The generated AIC8800 WiFi/BT work is kept separately under
+`docs/upstream-drafts/` and the export/check scripts. It is not part of the
+standalone `patches/` boot baseline until that series is exported as a
+self-contained patchset.
 
 ### Flashing (vendor bootloader path)
 ```bash

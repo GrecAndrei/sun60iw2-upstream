@@ -299,7 +299,8 @@
 		};
 
 		r_pio: pinctrl@7025000 {
-			compatible = "allwinner,sun60i-a733-r-pinctrl";
+			compatible = "allwinner,sun60i-a733-r-pinctrl",
+				     "allwinner,sun55i-a523-r-pinctrl";
 			reg = <0x7025000 0x410>;
 			interrupts = <GIC_SPI 198 IRQ_TYPE_LEVEL_HIGH>,
 				     <GIC_SPI 200 IRQ_TYPE_LEVEL_HIGH>;

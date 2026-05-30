@@ -1,6 +1,6 @@
 # Development Status
 
-Last updated: 2026-05-22
+Last updated: 2026-05-30
 
 ## Legend
 
@@ -55,7 +55,7 @@ Current CCU pipeline metrics (`python3 generators/generate_ccu.py --report --no-
 
 | Component | Status | Notes | Assignee |
 |-----------|--------|-------|----------|
-| MMC/SD host | :white_check_mark: | 4 controllers (mmc0-mmc3); reuses `sun20i_d1_cfg` quirks; driver patch committed | - |
+| MMC/SD host | :white_check_mark: | SD boot now completes to BusyBox shell on `mmcblk0p1` (host probe + card enumerate + ext4 mount confirmed). Current DTS uses temporary `non-removable` on `mmc0` for bringup stability; CD GPIO/hotplug behavior still needs a follow-up pass. | - |
 | eMMC | :white_check_mark: | Same driver as MMC; 8-bit mode enabled on mmc2 | - |
 | Thermal (5 sensors) | :white_check_mark: | `sun60i-a733-ths` compatible; thermal zones now register in `/sys/class/thermal`; boot-time proc/sys/devtmpfs mounting added for BusyBox shells | - |
 | CPUFreq / DVFS | :x: | Needs OPP tables + nvmem | - |
@@ -138,7 +138,7 @@ Run `python3 scripts/validate-factory.py` after any generator or data change.
 
 1. **No mainline U-Boot support.** We rely on vendor bootloader for now.
 2. **Main CCU runtime bringup still needs hardware re-verification.** The defconfig mismatch that left `CONFIG_SUN60I_A733_CCU` disabled was fixed, and the generated main/R CCU drivers now export reset maps instead of empty reset controllers, but the newly built Image still needs boot testing.
-3. **SD boot path has been validated to userspace.** `rootwait` is restored in the SD boot environment and BusyBox init is wired up; proc/sys/devtmpfs are auto-mounted at boot; remaining work is validation across other media and services.
+3. **SD boot path is now confirmed end-to-end.** `mmc0` probes, card and partition enumerate (`mmcblk0p1`), ext4 root mounts, and BusyBox init starts. Remaining storage work is eMMC validation and reintroducing robust SD card-detect/hotplug without regressions.
 4. **PCIe controller driver does not exist in mainline.** Must be written from scratch using Synopsys DWC framework.
 5. **Cadence Combophy driver does not exist in mainline.** Shared USB3/PCIe PHY.
 6. **AXP8191 PMIC is brand new.** No mainline driver exists.

@@ -17,11 +17,10 @@ DEFCONFIG_SPEC = {
     "_metadata": {
         "board": "Orange Pi 4 Pro",
         "soc": "Allwinner A733 (sun60iw2)",
-        "purpose": "Initial bringup - UART, SD, network",
+        "purpose": "Initial bringup - UART, SD, USB",
     },
     "architecture": {
         "CONFIG_ARCH_SUNXI": "y",
-        "CONFIG_ARCH_SUN60IW2": "y",  # Will add when we create the Kconfig entry
         "CONFIG_64BIT": "y",
         "CONFIG_ARM64": "y",
         "CONFIG_ARM64_4K_PAGES": "y",
@@ -68,22 +67,20 @@ DEFCONFIG_SPEC = {
         "CONFIG_PINCTRL_SUN50I_H6": "y",
         "CONFIG_PINCTRL_SUN50I_H616": "y",
         "CONFIG_PINCTRL_SUN55I_A523": "y",
+        "CONFIG_PINCTRL_SUN55I_A523_R": "y",
         "CONFIG_PINCTRL_SUN60I_A733": "y",  # Our new driver
     },
     "mmc": {
         "CONFIG_MMC": "y",
+        "CONFIG_MMC_BLOCK": "y",
         "CONFIG_MMC_SUNXI": "y",
+        "CONFIG_PWRSEQ_SIMPLE": "y",
+        "CONFIG_REGULATOR": "y",
+        "CONFIG_REGULATOR_FIXED_VOLTAGE": "y",
     },
     "network": {
         "CONFIG_NET": "y",
-        "CONFIG_ETHERNET": "y",
-        "CONFIG_NET_VENDOR_STMICRO": "y",
-        "CONFIG_STMMAC_ETH": "y",
-        "CONFIG_STMMAC_PLATFORM": "y",
-        "CONFIG_DWMAC_SUNXI": "y",
-        "CONFIG_DWMAC_SUN55I": "y",
-        "CONFIG_MDIO_DEVICE": "y",
-        "CONFIG_PHYLIB": "y",
+        "CONFIG_MODULES": "y",
     },
     "usb": {
         "CONFIG_USB": "y",
@@ -101,9 +98,12 @@ DEFCONFIG_SPEC = {
         "CONFIG_TMPFS": "y",
         "CONFIG_DEVTMPFS": "y",
         "CONFIG_DEVTMPFS_MOUNT": "y",
+        "CONFIG_PROC_FS": "y",
+        "CONFIG_SYSFS": "y",
     },
     "debug": {
         "CONFIG_DEBUG_KERNEL": "y",
+        "CONFIG_DEBUG_FS": "y",
         "CONFIG_DEBUG_LL": "y",
         "CONFIG_EARLY_PRINTK": "y",
         "CONFIG_PRINTK_TIME": "y",
@@ -141,7 +141,6 @@ def generate_minimal_defconfig():
 # This is the smallest config that can boot to a shell prompt
 
 CONFIG_ARCH_SUNXI=y
-CONFIG_ARCH_SUN60IW2=y
 CONFIG_64BIT=y
 CONFIG_ARM64=y
 

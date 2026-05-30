@@ -59,12 +59,14 @@
 		clocks = <&ext32k>;
 		clock-names = "ext_clock";
 		post-power-on-delay-ms = <200>;
+		status = "disabled";
 	};
 };
 
 &pio {
 	uart1_pins: uart1-pins {
-		pins = "PG6", "PG7", "PG8", "PG9";
+		pins = "PK20", "PK21", "PK22", "PK23";
+		allwinner,pinmux = <8>;
 		function = "uart1";
 		drive-strength = <10>;
 		bias-pull-up;
@@ -77,9 +79,9 @@
 
 &mmc0 {
 	status = "okay";
-	pinctrl-0 = <&mmc0_pins>;
+	pinctrl-0 = <&mmc0_pins &mmc0_clk_pin>;
 	pinctrl-names = "default";
-	cd-gpios = <&pio 5 6 GPIO_ACTIVE_LOW>;
+	non-removable;
 	bus-width = <4>;
 	cap-sd-highspeed;
 	no-1-8-v;
@@ -90,7 +92,7 @@
 };
 
 &mmc1 {
-	status = "okay";
+	status = "disabled";
 	pinctrl-0 = <&mmc1_pins>;
 	pinctrl-names = "default";
 	#address-cells = <1>;

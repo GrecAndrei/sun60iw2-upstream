@@ -1,0 +1,89 @@
+## Saved Debug State (2026-05-26)
+
+- Hardware: Orange Pi 4 Pro
+- Boot path: vendor U-Boot + ATF, kernel `Image` + `sun60i-a733-orangepi-4-pro.dtb` from SD `/boot`
+
+### Last confirmed Linux-state logs
+
+1. **Early panic fixed**
+- `Kernel panic - not syncing: Failed to allocate page table page`
+- Cause: missing `/memory` node in board DTS.
+- Fix applied: add
+  - `memory@40000000`
+  - `reg = <0x0 0x40000000 0x2 0x00000000>`
+
+2. **Deferred probe NULL deref fixed**
+- Oops in `sunxi_ccu_probe+0x94`, from `sun60i_a733_r_ccu_probe`.
+- Cause: generated `clk_hw_onecell_data.hws` tables empty in
+  - `ccu-sun60i-a733-r.c`
+  - `ccu-sun60i-a733-cpupll.c`
+- Fix applied: populate `hws[]` with full ID->`clk_hw` mappings.
+
+3. **Console visibility trap identified**
+- Symptom: output appears stuck after `Starting kernel ...` with only vendor BL logs.
+- Cause: `boot.cmd` sets wrong defaults for this board if not overridden:
+  - `console=ttyS1,115200n8`
+  - `earlycon=uart8250,mmio32,0x02501000`
+- Working override is done via `orangepiEnv.txt extraargs`, keeping root logic intact:
+  - `earlycon=uart8250,mmio32,0x02500000`
+  - `console=ttyS0,115200n8`
+
+4. **Current boot blocker after Linux starts**
+- `sunxi-mmc ... no support for card's volts`
+- `Waiting for root device PARTUUID=...`
+- Indicates kernel runs, serial works, but root device still not mounted under current runtime config/rails.
+
+### Persistence decision
+
+- Persistent working tree created (not in `/tmp`):
+  - `/home/grec-alexander/Documents/porting/linux-v7-debug`
+- Baseline patches applied there (`0001..0006`) plus runtime debug fixes above.
+
+### New boot log state (2026-05-30)
+
+- Kernel reaches full SMP bring-up (8 CPUs online), serial handoff works, and no early panic is present.
+- Current stall point is still:
+  - `Waiting for root device /dev/mmcblk0p1...`
+- New late message observed:
+  - `platform wifi-pwrseq: deferred probe pending: pwrseq_simple: reset GPIOs not ready`
+
+### Follow-up boot log state (2026-05-30, later run)
+
+- Pinctrl now binds in both domains:
+  - `sun55i-a523-r-pinctrl 7025000.pinctrl: initialized`
+  - `sun60i-a733-pinctrl 2000000.pinctrl: initialized`
+- MMC host now probes and initializes cleanly:
+  - `sunxi-mmc 4020000.mmc: probe start`
+  - `sunxi-mmc 4020000.mmc: resources ready`
+  - `sunxi-mmc 4020000.mmc: initialized ... uses new timings mode`
+- Root device still not appears (`Waiting for root device /dev/mmcblk0p1...`), indicating card-detect/enumeration path still not completing after host init.
+
+### Additional recovery adjustment queued for next boot
+
+- For bringup isolation, `mmc0` was switched to `non-removable` (temporary) and CD GPIO-based detect was removed.
+- This bypasses card-detect polarity/debounce ambiguity and forces direct SD init to confirm rootfs path.
+
+### Confirmed recovery result (2026-05-30, final run)
+
+- `mmc0` now fully enumerates and rootfs mounts:
+  - `mmc0: new high speed SDHC card ...`
+  - `mmcblk0: ... p1`
+  - `EXT4-fs (mmcblk0p1): mounted ...`
+  - `Run /sbin/init as init process`
+- BusyBox userspace shell reached successfully.
+- Current known-good bringup profile keeps:
+  - `mmc0` as `non-removable` (temporary)
+  - `wifi_pwrseq` disabled and `mmc1` disabled during SD root-path stabilization
+
+### Cross-check + applied changes
+
+- Vendor DTS cross-reference confirms SD card detect on `PF6` and R-domain GPIO usage for WiFi power sequencing.
+- Upstream DTS updates applied:
+  - `mmc0` now explicitly uses `<&mmc0_pins &mmc0_clk_pin>`.
+  - `mmc0` uses temporary `non-removable` for stable bringup (CD GPIO path deferred for follow-up).
+  - `wifi_pwrseq` is temporarily `status = "disabled"` to avoid unrelated deferred probe noise while root-on-SD is being stabilized.
+  - `mmc1` is temporarily `status = "disabled"` during SD root-path recovery.
+  - `r_pio` gains fallback compatible `allwinner,sun55i-a523-r-pinctrl` for existing mainline R-pinctrl driver matching.
+- Defconfig updates applied:
+  - `CONFIG_REGULATOR_FIXED_VOLTAGE=y` (required by fixed `regulator-*` DTS nodes).
+  - `CONFIG_PINCTRL_SUN55I_A523_R=y` (for R-domain pinctrl fallback match).

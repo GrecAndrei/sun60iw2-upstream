@@ -142,23 +142,23 @@ Expected zones on A733:
 
 ### Phase 1: UART Boot
 
-- [ ] Connect serial cable, see U-Boot SPL output
-- [ ] U-Boot loads kernel Image
-- [ ] Kernel starts, prints version string
-- [ ] Device tree is parsed correctly
-- [ ] Earlyprintk works
-- [ ] Timers initialize
-- [ ] CPU cores come online
+- [x] Connect serial cable, see U-Boot SPL output
+- [x] U-Boot loads kernel Image
+- [x] Kernel starts, prints version string
+- [x] Device tree is parsed correctly
+- [x] Earlyprintk works
+- [x] Timers initialize
+- [x] CPU cores come online
 
 ### Phase 2: Storage Boot
 
-- [ ] SD card detected (MMC0)
-- [ ] SD card read/write works
+- [x] SD card detected (MMC0)
+- [x] SD card read/write works
 - [ ] eMMC detected (MMC2)
 - [ ] eMMC read/write works
-- [ ] Rootfs mounts from SD/eMMC
-- [ ] Init/systemd starts
-- [ ] Get shell prompt
+- [x] Rootfs mounts from SD (eMMC path still pending)
+- [x] Init/systemd starts (BusyBox init path confirmed)
+- [x] Get shell prompt
 
 ### Boot Helpers
 
@@ -268,7 +268,7 @@ iperf3 -c server_ip
 
 Current board wiring assumptions (Orange Pi 4 Pro):
 - `PM1` - WL_REG_ON (SDIO power sequence reset GPIO)
-- `PG6..PG9` - `uart1` TX/RX/RTS/CTS for BT transport
+- `PK20..PK23` - `uart1` TX/RX/RTS/CTS for BT transport
 
 ### WiFi checks (AIC SDIO)
 

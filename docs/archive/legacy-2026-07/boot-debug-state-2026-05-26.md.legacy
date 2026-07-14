@@ -71,7 +71,7 @@
   - `EXT4-fs (mmcblk0p1): mounted ...`
   - `Run /sbin/init as init process`
 - BusyBox userspace shell reached successfully.
-- Current known-good bringup profile keeps:
+- Transitional bringup profile (superseded later) kept:
   - `mmc0` as `non-removable` (temporary)
   - `wifi_pwrseq` disabled and `mmc1` disabled during SD root-path stabilization
 
@@ -87,3 +87,18 @@
 - Defconfig updates applied:
   - `CONFIG_REGULATOR_FIXED_VOLTAGE=y` (required by fixed `regulator-*` DTS nodes).
   - `CONFIG_PINCTRL_SUN55I_A523_R=y` (for R-domain pinctrl fallback match).
+
+### Card-detect follow-up result (2026-05-30, latest)
+
+- Removed temporary `non-removable` workaround and restored `mmc0` card-detect path.
+- Initial CD re-enable attempt failed due to PF6 double-claim (`cd-gpios` + explicit PF6 pinctrl entry).
+- Final fix:
+  - keep `cd-gpios` on PF6
+  - drop explicit PF6 pinctrl claim from `mmc0` pinctrl list
+  - remove `cd-inverted`
+  - use `cd-gpios = <&pio 5 6 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>` with `cd-debounce-delay-ms = <200>`
+- Verified outcome on boot log:
+  - `mmc0: new high speed SDHC card ...`
+  - `mmcblk0: ... p1`
+  - `EXT4-fs (mmcblk0p1): mounted ...`
+  - BusyBox userspace shell reached

@@ -1,234 +1,46 @@
 # sun60iw2-upstream
 
-Mainline Linux upstream port for the **Allwinner A733 (sun60iw2p1)** SoC and the **Orange Pi 4 Pro** board.
+This is the source repository for an upstream-quality Linux port of the
+Allwinner A733 SoC and Orange Pi 4 Pro board. It owns Device Tree sources,
+generator inputs, generated driver sources, defconfigs, and a boot-baseline
+patch series.
 
----
+The live, evidence-based state is generated at
+[`docs/status.md`](docs/status.md). Do not infer validation or hardware success
+from historical notes, generated-artifact timestamps, or the presence of a
+local debug tree.
 
-## Status: WIP / PRE-ALPHA
+## Repository layout
 
-This repository now contains a real early-bringup port. It is **not production-ready yet**, but it now boots SD media to a BusyBox userspace shell and exposes working thermal zones.
+| Path | Ownership |
+|---|---|
+| `arch/`, `drivers/`, `include/` | Kernel changes and generated driver outputs. |
+| `generators/data/` | Source data for generated CCU, pinctrl, and AIC8800 artifacts. |
+| `generators/` | Deterministic generator and extraction code. |
+| `generated/aic8800/` | Generated AIC8800 bindings, DTS fragment, kernel skeleton, and debt inventory. |
+| `patches/` | Standalone Git-format boot-baseline patches. |
+| `configs/` | Defconfigs installed by `scripts/apply-patches.sh`. |
+| `docs/` | Maintained process documentation; `status.md` is generated. |
+| `.tmp/validation/` | Local, ignored validation evidence written by AIC8800 checks. |
 
-### Verified So Far
-- Kernel boots on Orange Pi 4 Pro hardware
-- All 8 CPUs come online
-- GICv3, timer, PSCI, and serial console basics are working
-- SD card boot reaches a BusyBox root shell prompt
-- Thermal zones register and report temperatures in `/sys/class/thermal`
-- USB 2.0 Host (EHCI0/1 + OHCI0/1) works — `sun20i-d1-usb-phy` driver compatible with A733
-- USB storage (mass-storage + SCSI + sd) works with hotplug
-- Generated CCU, R-CCU, RTC CCU, CPUPLL, and pinctrl drivers build in the Linux tree
-- DTS/DTSI, generator pipeline, and factory validation are in active use
+## Start of work
 
-### Still Not Working Reliably
-- eMMC, SDIO, and display still need verification
-- SD card-detect/hotplug path needs follow-up (current known-good DTS keeps `mmc0` as temporary `non-removable`)
-- Ethernet (GMAC0) **ABANDONED** — probe hangs boot; no hardware need
-- Main CCU runtime behavior needs continued hardware soak testing
-- RTC/root clock interactions still need cleanup
-
-If you need a working system today, use the [vendor kernel](https://github.com/orangepi-xunlong/linux-orangepi) or [Armbian](https://github.com/jonas5/orangepi-4pro-armbian) instead.
-
-### What's Here Now
-- [x] Project scaffolding
-- [x] Device Tree Source (DTS/DTSI)
-- [x] Clock drivers (CCU)
-- [x] Pinctrl drivers
-- [x] Thermal driver support
-- [x] UART console bringup
-- [x] MMC/SD host description and initial driver support
-- [x] USB 2.0 Host (EHCI/OHCI)
-- [ ] Ethernet (GMAC) — abandoned
-- [ ] USB 3.0 / DWC3
-- [ ] USB OTG
-- [x] WiFi (AIC8800D80) — generated SDIO transport driver, compile-validated, untested on hardware
-- [x] Bluetooth (AIC8800D80) — generated serdev H4 transport driver, compile-validated, untested on hardware
-- [ ] PCIe controller
-- [ ] PMIC support (AXP515 + AXP8191)
-- [ ] Display/DRM
-- [ ] GPU (Imagination BXM-4-64)
-- [ ] NPU (3 TOPS)
-- [ ] VIN/ISP/Camera
-
-### Boot Helpers
-- `scripts/update-sd-boot.sh` refreshes a mounted SD boot partition with a built `Image` and DTB while keeping timestamped backups.
-- `scripts/generate-aic8800-upstream.sh` regenerates AIC8800 upstream draft bindings, DTS fragments, kernel skeleton files, and BSP debt CSV from JSON data.
-- `scripts/export-aic8800-kernel-skeleton.sh <linux-tree-root>` syncs generated AIC8800 kernel skeleton files into a target Linux tree.
-- `scripts/check-aic8800-skeleton.sh <linux-tree-root>` regenerates, exports, and compiles AIC8800 WiFi modules + BT object.
-- `scripts/check-aic8800-skeleton-full.sh <linux-tree-root>` full check: regen, export, modules, BT object, and W=1 in one pass.
-- `scripts/check-aic8800-dtb.sh <linux-tree-root>` validates DTS/DTB wiring with AIC8800 nodes.
-- `scripts/report-aic8800-progress.sh` updates AIC8800 progress snapshots (`docs/aic8800-progress.json` and `.md`).
-- `tools/pico_uart_bridge.py` mirrors UART output from a MicroPython bridge and watches for shell readiness.
-- `tools/agy_delegate.py` launches delegated `agy` jobs in background, writes logs under `.tmp/agy-logs/`, and injects environment context into each prompt.
-
----
-
-## Why This Exists
-
-The Orange Pi 4 Pro (Allwinner A733) launched with no upstream Linux support and minimal documentation. This project aims to:
-
-1. **Port the A733 to mainline Linux** following proper kernel coding standards
-2. **Document everything** so other boards using this SoC can be supported
-3. **Upstream all code** to `torvalds/linux.git` so every distro works out of the box
-
-### The Vendor Situation
-
-Allwinner/Xunlong provides a vendor kernel (`orange-pi-6.6-sun60iw2`) with a massive `bsp/` directory containing ~1.3 million lines of out-of-tree drivers. This vendor code **will not be copied verbatim** into this project. Instead, we use it as a reference for register maps and hardware behavior, then write clean, upstreamable drivers using Linux kernel frameworks.
-
----
-
-## Hardware
-
-| Spec | Details |
-|------|---------|
-| **SoC** | Allwinner A733 (sun60iw2p1) |
-| **CPU** | 6x Cortex-A55 @ 1.8GHz + 2x Cortex-A76 @ 2.0GHz |
-| **GPU** | Imagination BXM-4-64 |
-| **NPU** | 3 TOPS (VeriSilicon/Vivante VIP) |
-| **RAM** | 2GB / 4GB / 8GB LPDDR5 |
-| **Storage** | microSD, 32-128GB eMMC, UFS |
-| **Network** | Gigabit Ethernet (GMAC), WiFi 6 + BT 5.2 (SDIO) |
-| **USB** | USB 2.0 OTG, USB 2.0 Host, USB 3.0 SS+ |
-| **PCIe** | PCIe 3.0 x1 |
-| **Display** | HDMI 2.0, MIPI DSI, eDP, LVDS |
-| **PMIC** | AXP515 + AXP8191 (dual PMIC) |
-| **Extras** | RISC-V co-processor, 8-channel thermal sensors |
-
----
-
-## Roadmap
-
-### Phase 1: "Hello World" Boot (~3,750 LoC)
-- [x] Base Device Tree (`sun60i-a733.dtsi`)
-- [x] Orange Pi 4 Pro board DTS
-- [x] Clock Controller Unit (CCU) - main + R-domain
-- [x] Pinctrl (GPIO/Pinmux)
-- [x] UART earlyprintk
-- [x] Kernel prints boot messages over serial
-
-### Phase 2: Storage & Power (~1,250 LoC)
-- [x] MMC/SD/eMMC host driver
-- [x] Thermal sensor support and sysfs zones
-- [ ] CPUFreq / DVFS
-- [ ] Power domains (PCK600)
-- [ ] PMIC drivers (AXP515, AXP8191)
-- [x] SD boot reaches a BusyBox shell
-- [ ] eMMC validation
-
-### Phase 3: Connectivity (~2,600 LoC)
-- [x] USB 2.0 Host (EHCI/OHCI) — `sun20i-d1-usb-phy` works on A733
-- [ ] Ethernet (GMAC200) — **ABANDONED** for now
-- [ ] USB 3.0 / DWC3 host
-- [ ] PCIe controller + PHY
-- [ ] Headless server/NAS fully functional
-
-### Phase 4: "Cool Stuff" (~43,000+ LoC)
-- [ ] Display Engine (DE v352)
-- [ ] HDMI 2.0 / DSI / eDP
-- [ ] GPU (Imagination BXM)
-- [ ] NPU (3 TOPS)
-- [ ] VIN/ISP/Camera pipeline
-- [ ] Full desktop/media/AI acceleration
-
-**Total estimated upstream code: ~7,600 lines for Phases 1-3 (realistic), ~50,000+ for everything.**
-
----
-
-## Contributing
-
-This is a community effort. All contributions must follow the [Linux kernel coding style](https://www.kernel.org/doc/html/latest/process/coding-style.html) and will eventually be submitted via patch series to `linux-sunxi@lists.linux.dev`.
-
-### Patch Workflow
-1. Write clean, framework-compliant code
-2. Test on real hardware (Orange Pi 4 Pro)
-3. Submit as a patch series in `patches/`
-4. Review & iterate
-5. Submit to linux-sunxi mailing list
-6. Land in torvalds/linux.git
-
-### Communication
-- **Issues:** Use GitHub Issues for bugs, tasks, and hardware questions
-- **Discussions:** Use GitHub Discussions for general chat and planning
-- **Mail:** Eventually patch series go to `linux-sunxi@lists.linux.dev`
-
----
-
-## Building
-
-### Prerequisites
 ```bash
-sudo apt install build-essential bc bison flex libssl-dev libncurses5-dev \
-    libelf-dev dwarves crossbuild-essential-arm64 git
+python3 scripts/refresh-documentation.py
+python3 scripts/refresh-documentation.py --check
+python3 scripts/validate-factory.py
 ```
 
-### Quick Build (when code exists)
-```bash
-# Clone this repo alongside your linux tree
-git clone https://github.com/YOURNAME/sun60iw2-upstream.git
-cd sun60iw2-upstream
+Read [`docs/README.md`](docs/README.md) for the documentation contract and
+[`AGENTS.md`](AGENTS.md) before editing generated files.
 
-# Apply the standalone SoC patch series to a clean Linux 7.0 tree
-# (clock/pinctrl/mmc/dma/thermal/DT only).
-./scripts/apply-patches.sh /path/to/linux-7.0
+## Core rules
 
-# Build the bootable baseline
-cd /path/to/linux-7.0
-make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- sun60iw2_defconfig
-make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- -j$(nproc)
-```
-
-The generated AIC8800 WiFi/BT work is kept separately under
-`docs/upstream-drafts/` and the export/check scripts. It is not part of the
-standalone `patches/` boot baseline until that series is exported as a
-self-contained patchset.
-
-### Flashing (vendor bootloader path)
-```bash
-# Update the SD boot partition with scripts/update-sd-boot.sh
-# or copy Image + DTB manually when using the vendor bootloader.
-```
-
----
-
-## Directory Structure
-
-```
-.
-├── arch/arm64/boot/dts/allwinner/    # Device Tree files
-├── drivers/
-│   ├── clk/sunxi-ng/                  # Clock drivers
-│   ├── pinctrl/sunxi/                 # Pinctrl drivers
-│   └── thermal/                       # Thermal driver patches
-├── configs/                            # Kernel defconfigs
-├── patches/                            # Patch series for upstream submission
-├── scripts/                            # Build/helper scripts
-├── docs/
-│   ├── status.md                       # Current development status
-│   ├── hardware.md                     # Hardware documentation
-│   ├── development.md                  # Development guidelines
-│   └── guides/                         # How-to guides
-├── README.md
-└── LICENSE
-```
-
----
-
-## License
-
-All code in this repository is licensed under the [GPL-2.0+](LICENSE) to match the Linux kernel license. Device Tree files are dual-licensed GPL-2.0+ OR MIT where applicable.
-
----
-
-## Disclaimer
-
-This project is **not affiliated with** Orange Pi, Xunlong, or Allwinner. We are reverse-engineering and documenting a proprietary SoC using publicly available information, vendor source code (used as reference only), and hardware testing.
-
-**Do not expect a production-ready system yet.** SD boot now reaches a BusyBox shell, USB 2.0 host works, but eMMC, SDIO, and display still need validation. Ethernet was abandoned due to boot hangs. If you need a fully working system today, use the vendor kernel or Armbian.
-
----
-
-## Acknowledgments
-
-- [linux-sunxi](https://linux-sunxi.org/) community for sunxi knowledge and templates
-- [jonas5](https://github.com/jonas5/orangepi-4pro-armbian) for the Armbian board definition
-- Orange Pi / Xunlong for releasing vendor source code (used as reference)
-- Andre Przywara and the sunxi upstream maintainers
+- Edit generator data, then regenerate; do not hand-edit generated C or AIC8800
+  outputs.
+- Use the vendor kernel only as a reference for observable behavior and
+  register maps. Do not import BSP implementation.
+- Treat `../../kernels/a733-debug/` as a separate experimental worktree, not a
+  patch source.
+- Keep boot-baseline patches reproducible independently of AIC8800 draft
+  skeleton work.

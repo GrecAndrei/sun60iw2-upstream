@@ -89,10 +89,6 @@ def gen_wifi_binding(data: dict) -> str:
               wifi@1 {{
                 reg = <1>;
                 compatible = "{c0}", "{c1}";
-                interrupts-extended = <&pio 6 4 IRQ_TYPE_LEVEL_LOW>;
-                interrupt-names = "host-wake";
-                reset-gpios = <&r_pio 0 1 GPIO_ACTIVE_LOW>;
-                wakeup-source;
               }};
             }};
         """
@@ -159,7 +155,6 @@ def gen_bt_binding(data: dict) -> str:
               bluetooth {{
                 compatible = "{c0}", "{c1}";
                 max-speed = <{speed}>;
-                enable-gpios = <&r_pio 0 1 GPIO_ACTIVE_HIGH>;
               }};
             }};
         """
@@ -187,10 +182,6 @@ def gen_dts_fragment(data: dict) -> str:
         \twifi@1 {{
         \t\treg = <1>;
         \t\tcompatible = "{w0}", "{w1}";
-        \t\tinterrupt-parent = <&pio>;
-        \t\tinterrupts = <6 4 IRQ_TYPE_LEVEL_LOW>;
-        \t\tinterrupt-names = "host-wake";
-        \t\twakeup-source;
         \t}};
         }};
 
@@ -2840,6 +2831,7 @@ def write_bsp_csv(path: Path, data: dict) -> None:
         writer = csv.DictWriter(
             f,
             fieldnames=["file", "symbol", "reason", "upstream_replacement"],
+            lineterminator="\n",
         )
         writer.writeheader()
         for row in data["bsp_debt"]:
@@ -2855,30 +2847,32 @@ def main() -> None:
         help="Path to source JSON data",
     )
     parser.add_argument(
+        "--output-root",
         "--docs-root",
+        dest="output_root",
         type=Path,
-        default=ROOT / "docs" / "upstream-drafts",
-        help="Destination root for generated draft docs",
+        default=ROOT / "generated" / "aic8800",
+        help="Destination root for generated AIC8800 artifacts",
     )
     args = parser.parse_args()
 
     data = load_data(args.data)
 
-    docs_root = args.docs_root
+    output_root = args.output_root
 
-    write_text(docs_root / "aicsemi,aic8800.yaml", gen_wifi_binding(data))
-    write_text(docs_root / "aicsemi,aic8800-bt.yaml", gen_bt_binding(data))
+    write_text(output_root / "aicsemi,aic8800.yaml", gen_wifi_binding(data))
+    write_text(output_root / "aicsemi,aic8800-bt.yaml", gen_bt_binding(data))
     write_text(
-        docs_root / "sun60i-a733-orangepi-4-pro-aic8800d80.dts.fragment",
+        output_root / "sun60i-a733-orangepi-4-pro-aic8800d80.dts.fragment",
         gen_dts_fragment(data),
     )
 
-    kernel_root = docs_root / "kernel-files"
+    kernel_root = output_root / "kernel-files"
     for rel_path, content in gen_kernel_draft_files(data).items():
         write_text(kernel_root / rel_path, content)
         write_text(ROOT / rel_path, content)
 
-    write_bsp_csv(ROOT / "docs" / "aic8800d80-bsp-debt.csv", data)
+    write_bsp_csv(output_root / "aic8800d80-bsp-debt.csv", data)
 
 
 if __name__ == "__main__":

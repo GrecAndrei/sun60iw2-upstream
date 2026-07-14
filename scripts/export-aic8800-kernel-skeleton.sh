@@ -8,7 +8,7 @@ fi
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 LINUX_ROOT="$1"
-SRC="$ROOT_DIR/docs/upstream-drafts/kernel-files"
+SRC="$ROOT_DIR/generated/aic8800/kernel-files"
 
 if [[ ! -d "$LINUX_ROOT/drivers" || ! -f "$LINUX_ROOT/Makefile" || ! -f "$LINUX_ROOT/Kconfig" ]]; then
   printf 'Not a full linux tree (expected drivers/, Makefile, Kconfig): %s\n' "$LINUX_ROOT" >&2

@@ -52,6 +52,5 @@ examples:
       bluetooth {
         compatible = "aicsemi,aic8800d80-bt", "aicsemi,aic8800-bt";
         max-speed = <1500000>;
-        enable-gpios = <&r_pio 0 1 GPIO_ACTIVE_HIGH>;
       };
     };

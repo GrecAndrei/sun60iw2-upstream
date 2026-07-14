@@ -5,9 +5,9 @@ Thermal sensor chip descriptor generator for sun8i_thermal.c
 Reads generators/data/thermal-main.json and emits a patched
 sun8i_thermal.c with the new chip definitions merged in.
 
-Usage:
+Usage (from the source repository):
     python3 generators/generate_thermal.py \
-        --input linux/drivers/thermal/sun8i_thermal.c \
+        --input ../../kernels/mainline-v7/drivers/thermal/sun8i_thermal.c \
         --output generators/output/sun8i_thermal.c
 """
 
@@ -16,6 +16,10 @@ import json
 import re
 import sys
 from pathlib import Path
+
+
+ROOT = Path(__file__).resolve().parents[1]
+WORKSPACE = ROOT.parents[1]
 
 
 def generate_calc_temp(chip):
@@ -235,17 +239,17 @@ def main():
     parser = argparse.ArgumentParser(description="Generate thermal driver patches")
     parser.add_argument(
         "--data",
-        default="generators/data/thermal-main.json",
+        default=ROOT / "generators/data/thermal-main.json",
         help="Path to thermal chip JSON data",
     )
     parser.add_argument(
         "--input",
-        default="../linux/drivers/thermal/sun8i_thermal.c",
+        default=WORKSPACE / "kernels/mainline-v7/drivers/thermal/sun8i_thermal.c",
         help="Path to original sun8i_thermal.c",
     )
     parser.add_argument(
         "--output",
-        default="generators/output/sun8i_thermal.c",
+        default=ROOT / "generators/output/sun8i_thermal.c",
         help="Path to write patched driver",
     )
     args = parser.parse_args()

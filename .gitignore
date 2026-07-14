@@ -46,4 +46,5 @@ build/
 out/
 dist/
 .tmp/agy-logs/
+.tmp/validation/
 stage/

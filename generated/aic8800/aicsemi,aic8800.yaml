@@ -59,9 +59,5 @@ examples:
       wifi@1 {
         reg = <1>;
         compatible = "aicsemi,aic8800d80", "aicsemi,aic8800";
-        interrupts-extended = <&pio 6 4 IRQ_TYPE_LEVEL_LOW>;
-        interrupt-names = "host-wake";
-        reset-gpios = <&r_pio 0 1 GPIO_ACTIVE_LOW>;
-        wakeup-source;
       };
     };

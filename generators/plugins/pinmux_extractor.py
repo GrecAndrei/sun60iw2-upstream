@@ -344,7 +344,8 @@ def main():
     # Default vendor file location
     vendor_default = (
         Path(__file__).resolve().parent.parent.parent.parent
-        / "linux-orangepi"
+        / "references"
+        / "aic8800-bsp-snapshot"
         / "bsp"
         / "drivers"
         / "pinctrl"

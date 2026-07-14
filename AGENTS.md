@@ -1,312 +1,53 @@
-# AGENTS.md — sun60iw2-upstream
+# Agent guide
 
-## Project Overview
+## Scope
 
-This is the **mainline Linux upstream port** for the Allwinner A733 (sun60iw2p1) SoC and the Orange Pi 4 Pro board. 
+This repository is the reviewable source for the Allwinner A733 / Orange Pi 4
+Pro upstream port. The workspace debug worktree is
+`../../kernels/a733-debug/`; do not silently copy its changes into this
+repository or describe them as integrated support.
 
-**Key principle:** We generate C kernel driver code from structured JSON data using Python scripts. We do NOT write repetitive C data tables by hand.
+## Generated-source rule
 
----
+Never hand-edit a file marked `GENERATED FILE`.
 
-## Architecture
+- CCU and pinctrl: edit `generators/data/`, regenerate, then validate.
+- AIC8800: edit `generators/data/aic8800-upstream.json`, run
+  `scripts/generate-aic8800-upstream.sh`, and review both `drivers/` and
+  `generated/aic8800/` outputs.
 
-```
-sun60iw2-upstream/
-├── arch/arm64/boot/dts/allwinner/     # Device Tree files
-│   ├── sun60i-a733.dtsi               # Base SoC DTSI
-│   └── sun60i-a733-orangepi-4-pro.dts # Board DTS
-├── drivers/
-│   ├── clk/sunxi-ng/
-│   │   └── ccu-sun60i-a733.c          # GENERATED - Clock driver
-│   └── pinctrl/sunxi/
-│       └── pinctrl-sun60i-a733.c      # GENERATED - Pinctrl driver
-├── include/dt-bindings/
-│   ├── clock/sun60i-a733-*.h          # Clock ID headers
-│   ├── reset/sun60i-a733-*.h          # Reset ID headers
-│   └── power/sun60i-a733-power.h      # Power domain IDs
-├── generators/                        # Code generation scripts
-│   ├── generate_pinctrl.py            # Generates pinctrl C driver
-│   ├── generate_ccu.py                # Generates CCU C driver
-│   ├── data/
-│   │   ├── pinctrl-main.json          # Pin bank sizes, IRQ mappings
-│   │   └── ccu-main.json              # Clock definitions
-│   └── README.md                      # Generator documentation
-├── docs/
-│   ├── status.md                      # Living status page
-│   ├── hardware.md                    # Memory map, specs
-│   ├── development.md                 # Coding standards
-│   └── guides/                        # Build, test, upstream guides
-├── configs/                           # Kernel defconfigs (TBD)
-├── patches/                           # Patch series for upstream (TBD)
-└── scripts/
-    └── apply-patches.sh               # Apply patches to linux tree
-```
+Commit source data and generated output together.
 
----
+## Vendor and upstream rules
 
-## Code Generation Factory (CRITICAL)
+- The vendor tree is reference-only. Do not copy BSP code, BSP-only APIs, or
+  vendor logging/framework layers.
+- Follow existing mainline sunxi patterns and Linux coding conventions.
+- Keep the AIC8800 draft skeleton separate from the standalone boot-baseline
+  patch series until it is independently reviewable.
 
-**NEVER edit generated C files manually.** Always edit the JSON/source data and regenerate.
+## Required verification
 
-### Sunxi Semantic Extraction Engine (SSEE)
-
-A modular, self-improving tool that understands vendor BSP C code semantically.
-The semantic map is PERSISTENT — it lives on disk and learns from every run.
-
-```python
-from generators.extractor import Engine
-engine = Engine()  # Auto-loads semantic map from disk
-result = engine.extract('clocks', source_file=Path('vendor/ccu-sun60iw2.c'))
-print(engine.report(result))  # 160 clocks, 82.90% confidence
-# Map is auto-saved with vendor history + stats
-```
-
-**Architecture:**
-- **Core parser**: Tokenizes C into blocks (structs, macros, comments)
-- **Semantic map**: Persistent JSON knowledge base (`data/semantic_map.json`)
-  - Macros: Signatures for each SUNXI_* macro
-  - Types: Mappings from C types to semantic types
-  - Vendor history: Which files processed, with SHA256 checksums
-  - Learned patterns: Manual corrections stored permanently
-- **Plugin registry**: Modular extractors per subsystem
-- **Validation**: Cross-checks against semantic rules
-- **CLI**: `python3 -m generators.extractor.cli {status|history|learn|reset}`
-
-**Plugins:**
-- `clocks`: Extracts PLLs, dividers, gates, fixed-factors
-- `resets`: Extracts reset line definitions
-- `registers`: Extracts register offsets from headers
-
-### Current Generators
-
-| Generator | Input | Output | Purpose |
-|-----------|-------|--------|---------|
-| `generate_pinctrl.py` | `data/pinctrl-main.json` | `drivers/pinctrl/sunxi/*.c` | Pin controller driver |
-| `generate_ccu.py` | `data/ccu-main.json` | `drivers/clk/sunxi-ng/*.c` | Clock controller driver |
-| `generate_buildsys.py` | Internal Python dict | `output/BUILD_PATCH.txt` | Kconfig + Makefile rules |
-| `generate_defconfig.py` | Internal Python dict | `configs/*.config` | Kernel defconfigs |
-| `extract_registers.py` | Vendor C headers | `output/registers.json` | Auto-extract register maps |
-| `generate_bindings.py` | Internal Python dict | `output/bindings/*.yaml` | DT binding docs |
-
-### Pinctrl Driver
+After generator, DTS, binding, or patch-series changes run:
 
 ```bash
-# Edit source data
-$EDITOR generators/data/pinctrl-main.json
-
-# Regenerate
-python3 generators/generate_pinctrl.py > drivers/pinctrl/sunxi/pinctrl-sun60i-a733.c
+python3 scripts/validate-factory.py
+python3 scripts/refresh-documentation.py
+python3 scripts/refresh-documentation.py --check
 ```
 
-### CCU Driver
+Factory failures are real state; do not retain or add documentation that says
+validation passed while they exist. Hardware-success claims require an exact
+Image/DTB and captured console evidence.
 
-```bash
-# Edit source data  
-$EDITOR generators/data/ccu-main.json
+## Documentation
 
-# Regenerate
-python3 generators/generate_ccu.py > drivers/clk/sunxi-ng/ccu-sun60i-a733.c
-```
+`docs/status.md` is generated from live workspace state. Keep permanent docs
+limited to ownership and procedure, refresh the generated report after relevant
+changes, and move superseded material to `docs/archive/` rather than leaving it
+in active guidance.
 
-### Build System
+## Git
 
-```bash
-# Generate Kconfig and Makefile patches
-python3 generators/generate_buildsys.py
-# Outputs to generators/output/BUILD_PATCH.txt and Kconfig.sun60iw2
-```
-
-### Kernel Config
-
-```bash
-# Generate defconfigs
-python3 generators/generate_defconfig.py
-# Outputs to configs/sun60iw2_defconfig and configs/sun60iw2_minimal_defconfig
-```
-
-### Register Extraction (from vendor headers)
-
-```bash
-# Auto-extract register offsets from vendor BSP headers
-python3 generators/extract_registers.py \
-    --input /path/to/vendor/bsp/include \
-    --output generators/data/registers.json \
-    --c-header include/generated/sun60i-a733-regs.h
-```
-
-### Device Tree Bindings
-
-```bash
-# Generate YAML binding docs for upstream submission
-python3 generators/generate_bindings.py
-# Outputs to generators/output/bindings/*.yaml
-```
-
-### Generator Rules
-
-1. **Source data is the truth** — Generated files are build artifacts
-2. **Commit both source and output** — Allows building without Python
-3. **Verify generated code compiles** before committing
-4. **Generators use mainline frameworks** — No custom kernel frameworks
-
----
-
-## dt-bindings Headers
-
-These ARE hand-written (they're simple `#define` constants). They must stay in sync with:
-- The vendor kernel dt-bindings (reference only)
-- The JSON data files (generators use these IDs)
-- The Device Tree files (references these IDs)
-
-When adding a new clock/reset/power ID:
-1. Add to the appropriate `include/dt-bindings/*.h` header
-2. Add to the corresponding `generators/data/*.json` file
-3. Reference in the DTSI if needed
-
----
-
-## Device Tree
-
-### File Naming
-
-- `sun60i-a733.dtsi` — Base SoC (matches `sun55i-a523.dtsi` pattern)
-- `sun60i-a733-orangepi-4-pro.dts` — Board-specific
-- Future boards: `sun60i-a733-<vendor>-<board>.dts`
-
-### Compatible Strings
-
-- SoC: `"allwinner,sun60i-a733"`
-- Board: `"xunlong,orangepi-4-pro", "allwinner,sun60i-a733"`
-- Drivers: `"allwinner,sun60i-a733-<subsystem>"` (e.g., `-ccu`, `-pinctrl`)
-
-### Conventions
-
-- Use `snps,dw-apb-uart` for UART (DesignWare APB UART)
-- Use `arm,gic-v3` for interrupt controller
-- Use `arm,armv8-timer` for architectural timer
-- Use `allwinner,sun50i-timer` for SoC timer (same as sun55i)
-
----
-
-## Generated C Code Conventions
-
-### Headers
-
-```c
-// SPDX-License-Identifier: GPL-2.0
-/*
- * Allwinner A733 SoC <subsystem> driver.
- *
- * GENERATED FILE - DO NOT EDIT MANUALLY
- * Generated by: generators/generate_<name>.py
- * Source data:  generators/data/<name>.json
- */
-```
-
-### Naming
-
-- Variables/functions: `a733_*` (not `sun60iw2_*`)
-- Structs: `sun60i_a733_*`
-- Drivers: `"sun60i-a733-<name>"`
-
----
-
-## Building
-
-### Prerequisites
-
-```bash
-sudo apt install build-essential bc bison flex libssl-dev \
-    libncurses5-dev libelf-dev dwarves git \
-    crossbuild-essential-arm64 python3
-```
-
-### Apply to Linux Tree
-
-```bash
-# Clone mainline Linux
-git clone https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
-cd linux
-git checkout v7.0
-
-# Apply patches from this repo
-cd ../sun60iw2-upstream
-./scripts/apply-patches.sh ../linux
-
-# Or manually copy files:
-# cp arch/arm64/boot/dts/allwinner/* ../linux/arch/arm64/boot/dts/allwinner/
-# cp drivers/* ../linux/drivers/
-# cp include/dt-bindings/* ../linux/include/dt-bindings/
-```
-
-### Build
-
-```bash
-cd ../linux
-make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- sun60iw2_defconfig
-make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- -j$(nproc)
-```
-
----
-
-## Upstreaming Workflow
-
-1. Generate code from JSON
-2. Test on real Orange Pi 4 Pro hardware
-3. Run `./scripts/checkpatch.pl --strict` on patches
-4. Submit patch series to `linux-sunxi@lists.linux.dev`
-5. Iterate through review (v2, v3, ...)
-6. Land in torvalds/linux.git
-
-See `docs/guides/upstreaming.md` for details.
-
----
-
-## Status Tracking
-
-Always update `docs/status.md` when completing work. Use the legend:
-
-| Symbol | Meaning |
-|--------|---------|
-| :white_check_mark: | Working / Complete |
-| :construction: | In Progress |
-| :x: | Not Started / Blocked |
-
----
-
-## Workflow
-
-This is a **personal project** by Alexander Grec. All changes go through GitHub PRs.
-
-1. Create a feature branch: `git checkout -b feature/name`
-2. Make changes, commit with descriptive messages
-3. Open a Pull Request on GitHub
-4. Review, iterate, merge
-
-**Do not push directly to `main`.**
-
-## Communication
-
-- **GitHub Issues:** Task tracking, bugs
-- **GitHub Discussions:** General chat
-- **Mail:** `linux-sunxi@lists.linux.dev` for upstream patches (later)
-
----
-
-## Git Identity
-
-This repo uses the following git identity. Do NOT use fake emails.
-
-```bash
-git config user.name "GrecAndrei"
-git config user.email "alex092lap@duck.com"
-```
-
-## Critical Notes for AI Agents
-
-1. **Always check if a file is generated before editing.** If it says "GENERATED FILE", edit the JSON source instead.
-2. **Use the vendor kernel as reference only.** Do not copy vendor BSP code verbatim. It is not upstreamable.
-3. **Follow mainline sunxi patterns.** Use `sun55i-a523` as the primary template.
-4. **Linux kernel is C.** There is no Rust or Go option for core bringup drivers.
-5. **Test before claiming something works.** We have real hardware (Orange Pi 4 Pro 8GB).
-6. **Keep the generator framework clean.** If adding a new generator, follow the existing pattern (Python script + JSON data + README update).
+Work on a feature branch and do not push directly to `main`. Preserve existing
+worktree changes unless the user explicitly asks to replace them.

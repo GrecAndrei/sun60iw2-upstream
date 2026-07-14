@@ -31,7 +31,8 @@ from pathlib import Path
 
 root = Path(sys.argv[1])
 linux_root = Path(sys.argv[2])
-out = root / "docs" / "aic8800-dtb-check.json"
+out = root / ".tmp" / "validation" / "aic8800-dtb-check.json"
+out.parent.mkdir(parents=True, exist_ok=True)
 payload = {
     "checked_at_utc": datetime.now(timezone.utc).isoformat(),
     "linux_tree": str(linux_root),

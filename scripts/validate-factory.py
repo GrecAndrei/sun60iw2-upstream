@@ -13,6 +13,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+WORKSPACE = ROOT.parents[1]
 sys.path.insert(0, str(ROOT))
 RESET_DEFINE_RE = re.compile(r"^#define\s+RST_([A-Z0-9_]+)\s+\d+", re.M)
 
@@ -387,7 +388,7 @@ def main() -> int:
         (ROOT / "drivers/pinctrl/sunxi/pinctrl-sun60i-a733.c").read_text()
     )
     template_c = parse_c_driver(
-        (ROOT.parent / "linux/drivers/pinctrl/sunxi/pinctrl-sun55i-a523.c").read_text()
+        (WORKSPACE / "kernels/mainline-v7/drivers/pinctrl/sunxi/pinctrl-sun55i-a523.c").read_text()
     )
     mainline_devs = compare_to_mainline(generated_c, template_c)
     mainline_ok = not any(d["severity"] == "error" for d in mainline_devs)

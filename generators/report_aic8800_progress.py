@@ -3,31 +3,12 @@
 
 from __future__ import annotations
 
-import csv
 import json
 from datetime import datetime, timezone
 from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-
-
-def count_checkboxes(path: Path) -> tuple[int, int]:
-    total = 0
-    done = 0
-    for line in path.read_text().splitlines():
-        s = line.strip()
-        if s.startswith("- [ "):
-            total += 1
-        elif s.startswith("- [x]"):
-            total += 1
-            done += 1
-    return total, done
-
-
-def count_bsp_rows(path: Path) -> int:
-    with path.open(newline="") as f:
-        return sum(1 for _ in csv.DictReader(f))
 
 
 def generated_files_stats(path: Path) -> dict:
@@ -62,15 +43,11 @@ def agy_stats(log_dir: Path) -> dict:
 
 
 def build_report() -> dict:
-    checklist = ROOT / "docs" / "aic8800d80-upstream-checklist.md"
-    bsp_csv = ROOT / "docs" / "aic8800d80-bsp-debt.csv"
-    drafts = ROOT / "docs" / "upstream-drafts"
+    generated = ROOT / "generated" / "aic8800"
     logs = ROOT / ".tmp" / "agy-logs"
-    compile_check = ROOT / "docs" / "aic8800-compile-check.json"
-    dtb_check = ROOT / "docs" / "aic8800-dtb-check.json"
-
-    tasks_total, tasks_done = count_checkboxes(checklist)
-    bsp_total = count_bsp_rows(bsp_csv)
+    validation = ROOT / ".tmp" / "validation"
+    compile_check = validation / "aic8800-compile-check.json"
+    dtb_check = validation / "aic8800-dtb-check.json"
 
     compile_info = {
         "status": "not_run",
@@ -86,15 +63,7 @@ def build_report() -> dict:
 
     return {
         "generated_at_utc": datetime.now(timezone.utc).isoformat(),
-        "checklist": {
-            "tasks_total": tasks_total,
-            "tasks_done": tasks_done,
-            "completion_percent": round((tasks_done / tasks_total * 100.0), 2) if tasks_total else 0.0,
-        },
-        "bsp_dependency_inventory": {
-            "rows": bsp_total,
-        },
-        "generated_artifacts": generated_files_stats(drafts),
+        "generated_artifacts": generated_files_stats(generated),
         "compile_check": compile_info,
         "dtb_check": dtb_info,
         "agy_delegate": agy_stats(logs) if logs.exists() else {
@@ -106,25 +75,20 @@ def build_report() -> dict:
 
 
 def write_outputs(report: dict) -> None:
-    out_json = ROOT / "docs" / "aic8800-progress.json"
-    out_md = ROOT / "docs" / "aic8800-progress.md"
+    out_dir = ROOT / ".tmp" / "validation"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    out_json = out_dir / "aic8800-progress.json"
+    out_md = out_dir / "aic8800-progress.md"
 
     out_json.write_text(json.dumps(report, indent=2) + "\n")
 
     md = [
-        "# AIC8800 Progress Snapshot",
+        "# AIC8800 Local Validation Snapshot",
         "",
         f"Generated: `{report['generated_at_utc']}`",
         "",
-        "## Checklist",
-        f"- Tasks: `{report['checklist']['tasks_done']}/{report['checklist']['tasks_total']}`",
-        f"- Completion: `{report['checklist']['completion_percent']}%`",
-        "",
-        "## BSP Dependency Inventory",
-        f"- Tracked rows: `{report['bsp_dependency_inventory']['rows']}`",
-        "",
         "## Generated Artifacts",
-        f"- Files in `docs/upstream-drafts`: `{report['generated_artifacts']['total_files']}`",
+        f"- Files in `generated/aic8800`: `{report['generated_artifacts']['total_files']}`",
         "",
         "## Compile Check",
         f"- Status: `{report['compile_check'].get('status', 'unknown')}`",

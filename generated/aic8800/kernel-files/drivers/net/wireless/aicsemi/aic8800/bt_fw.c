@@ -9,22 +9,22 @@
 #include "bt_fw.h"
 
 const char * const aic8800_bt_patch_table_fallbacks[] = {
-            "aic8800d80/fw_patch_table_8800d80_u02.bin",
-            "aic8800d80/fw_patch_table_8800d80.bin",
+	"aic8800d80/fw_patch_table_8800d80_u02.bin",
+	"aic8800d80/fw_patch_table_8800d80.bin",
 };
 
 const char * const aic8800_bt_patch_fallbacks[] = {
-            "aic8800d80/fw_patch_8800d80_u02.bin",
-            "aic8800d80/fw_patch_8800d80.bin",
+	"aic8800d80/fw_patch_8800d80_u02.bin",
+	"aic8800d80/fw_patch_8800d80.bin",
 };
 
 const char * const aic8800_bt_patch_ext_fallbacks[] = {
-            "aic8800d80/fw_patch_8800d80_u02_ext",
+	"aic8800d80/fw_patch_8800d80_u02_ext",
 };
 
 const char * const aic8800_bt_adid_fallbacks[] = {
-            "aic8800d80/fw_adid_8800d80_u02.bin",
-            "aic8800d80/fw_adid_8800d80.bin",
+	"aic8800d80/fw_adid_8800d80_u02.bin",
+	"aic8800d80/fw_adid_8800d80.bin",
 };
 
 static int aic8800_request_with_fallbacks(struct device *dev,

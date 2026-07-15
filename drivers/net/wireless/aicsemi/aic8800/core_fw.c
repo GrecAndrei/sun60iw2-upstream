@@ -9,9 +9,9 @@
 #include "core_types.h"
 
 static const char * const aic8800_fw_fallbacks[] = {
-            "aic8800d80/fmacfw_8800d80.bin",
-            "aic8800d80/fmacfw_8800d80_u02.bin",
-            "aic8800d80/fmacfw_8800d80_h_u02.bin",
+	"aic8800d80/fmacfw_8800d80.bin",
+	"aic8800d80/fmacfw_8800d80_u02.bin",
+	"aic8800d80/fmacfw_8800d80_h_u02.bin",
 };
 
 static const char *aic8800_core_fw_name(struct aic8800_core *core)
@@ -55,7 +55,9 @@ int aic8800_core_set_fw_override(struct aic8800_core *core, const char *name)
 	if (!core || !name || !name[0])
 		return -EINVAL;
 
-	strscpy(core->fw_override, name, sizeof(core->fw_override));
+	if (strscpy(core->fw_override, name,
+		    sizeof(core->fw_override)) < 0)
+		return -E2BIG;
 	return 0;
 }
 

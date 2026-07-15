@@ -10,76 +10,39 @@
 #include <net/cfg80211.h>
 #include "cfg80211_core.h"
 
-static struct aic8800_core *aic8800_core_from_wiphy(struct wiphy *wiphy)
-{
-	if (!wiphy)
-		return NULL;
-
-	return *((struct aic8800_core **)wiphy_priv(wiphy));
-}
-
 static int aic8800_cfg80211_scan(struct wiphy *wiphy,
 				    struct cfg80211_scan_request *request)
 {
-	struct cfg80211_scan_info info = {
-		.aborted = false,
-	};
-
 	(void)wiphy;
 	if (!request)
 		return -EINVAL;
 
-	cfg80211_scan_done(request, &info);
-	return 0;
+	return -EOPNOTSUPP;
 }
 
 static int aic8800_cfg80211_connect(struct wiphy *wiphy,
 				       struct net_device *dev,
 				       struct cfg80211_connect_params *sme)
 {
-	struct aic8800_core *core = aic8800_core_from_wiphy(wiphy);
-
 	(void)wiphy;
 
-	if (!dev || !sme || !core)
+	if (!dev || !sme)
 		return -EINVAL;
 
-	if (sme->bssid)
-		ether_addr_copy(core->bssid, sme->bssid);
-	else
-		eth_zero_addr(core->bssid);
-
-	core->link_up = true;
-
-	cfg80211_connect_result(
-		dev,
-		core->bssid,
-		NULL,
-		0,
-		NULL,
-		0,
-		WLAN_STATUS_SUCCESS,
-		GFP_KERNEL
-	);
-	return 0;
+	return -EOPNOTSUPP;
 }
 
 static int aic8800_cfg80211_disconnect(struct wiphy *wiphy,
 					  struct net_device *dev,
 					  u16 reason_code)
 {
-	struct aic8800_core *core = aic8800_core_from_wiphy(wiphy);
-
 	(void)wiphy;
+	(void)reason_code;
 
-	if (!dev || !core)
+	if (!dev)
 		return -EINVAL;
 
-	core->link_up = false;
-	eth_zero_addr(core->bssid);
-
-	cfg80211_disconnected(dev, reason_code, NULL, 0, true, GFP_KERNEL);
-	return 0;
+	return -EOPNOTSUPP;
 }
 
 static int aic8800_cfg80211_change_virtual_intf(struct wiphy *wiphy,

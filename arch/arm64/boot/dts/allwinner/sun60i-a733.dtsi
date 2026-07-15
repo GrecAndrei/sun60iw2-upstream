@@ -239,7 +239,7 @@
 
 			/omit-if-no-ref/
 			mmc0_pins: mmc0-pins {
-				pins = "PF0", "PF1", "PF2", "PF3", "PF4", "PF5";
+				pins = "PF0", "PF1", "PF3", "PF4", "PF5";
 				allwinner,pinmux = <2>;
 				function = "mmc0";
 				drive-strength = <30>;
@@ -248,11 +248,37 @@
 			};
 
 			/omit-if-no-ref/
+			mmc0_clk_pin: mmc0-clk-pin {
+				pins = "PF2";
+				allwinner,pinmux = <2>;
+				function = "mmc0";
+				drive-strength = <30>;
+				bias-disable;
+				power-source = <3300>;
+			};
+
+			/omit-if-no-ref/
+			mmc0_cd_pin: mmc0-cd-pin {
+				pins = "PF6";
+				function = "gpio_in";
+				bias-pull-up;
+			};
+
+			/omit-if-no-ref/
 			mmc1_pins: mmc1-pins {
-				pins = "PG0", "PG1", "PG2", "PG3", "PG4", "PG5";
+				pins = "PG1", "PG2", "PG3", "PG4", "PG5";
 				allwinner,pinmux = <2>;
 				function = "mmc1";
-				drive-strength = <30>;
+				drive-strength = <10>;
+				bias-pull-up;
+			};
+
+			/omit-if-no-ref/
+			mmc1_clk_pin: mmc1-clk-pin {
+				pins = "PG0";
+				allwinner,pinmux = <2>;
+				function = "mmc1";
+				drive-strength = <20>;
 				bias-pull-up;
 			};
 

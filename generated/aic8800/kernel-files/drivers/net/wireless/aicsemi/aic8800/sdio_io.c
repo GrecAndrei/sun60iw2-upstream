@@ -65,46 +65,43 @@ int aic8800_sdio_io_init(struct sdio_func *func)
 	}
 
 	ret = sdio_enable_func(func);
-	if (ret) {
-		sdio_release_host(func);
-		return ret;
-	}
-
-	sdio_release_host(func);
-
-	sdio_claim_host(func);
-	ret = sdio_writesb(func, 0x00, "", 1);
-	sdio_release_host(func);
 	if (ret)
-		return ret;
+		goto out_release;
 
-	sdio_claim_host(func);
-	ret = sdio_writesb(func, 0x07, "", 1);
-	sdio_release_host(func);
+	sdio_writeb(func, 0x01, 0x07, &ret);
 	if (ret)
-		return ret;
+		goto out_disable;
 
-	sdio_claim_host(func);
-	ret = sdio_writesb(func, 0x02, "", 1);
-	sdio_release_host(func);
+	sdio_writeb(func, 0x11, 0x02, &ret);
 	if (ret)
-		return ret;
+		goto out_disable;
+
+	sdio_release_host(func);
 
 	msleep(10);
 
 	sdio_claim_host(func);
-	ret = sdio_readsb(func, &val, 0x01, 1);
+	val = sdio_readb(func, 0x01, &ret);
 	sdio_release_host(func);
 	if (ret)
-		return ret;
+		goto err_disable;
 
 	if (!(val & 0x10)) {
 		dev_err(&func->dev,
 			"chip not ready after init (sleep_reg=0x%02x)\n", val);
-		return -ETIMEDOUT;
+		ret = -ETIMEDOUT;
+		goto err_disable;
 	}
 
 	return 0;
+
+err_disable:
+	sdio_claim_host(func);
+out_disable:
+	sdio_disable_func(func);
+out_release:
+	sdio_release_host(func);
+	return ret;
 }
 
 void aic8800_sdio_io_deinit(struct sdio_func *func)
@@ -120,68 +117,23 @@ void aic8800_sdio_io_deinit(struct sdio_func *func)
 int aic8800_sdio_fw_download(struct sdio_func *func,
 			     u32 addr, const u8 *data, size_t len)
 {
-	int ret;
-
 	if (!func || !data || !len)
 		return -EINVAL;
 
-	sdio_claim_host(func);
-	ret = sdio_memcpy_toio(func, addr, (void *)data, len);
-	sdio_release_host(func);
-
-	if (ret)
-		dev_err(&func->dev,
-			 "firmware download to 0x%08x failed: %d\n",
-			 addr, ret);
-
-	return ret;
+	(void)addr;
+	dev_err(&func->dev,
+		"firmware block-write protocol is not implemented\n");
+	return -EOPNOTSUPP;
 }
 
 int aic8800_sdio_start_firmware(struct sdio_func *func, u32 entry)
 {
-	/* IPC message: 16-byte transport header + 8-byte lmac_msg + 8-byte param
-	 * DBG_START_APP_REQ = 0x040D. bootaddr + boottype (both u32 LE) */
-	u8  msg[24] = {0};
-	u16 payload_len = 20;
-	u16 msg_id = 0x040D;
-	int ret;
-
 	if (!func || !entry)
 		return -EINVAL;
 
-	msg[0] = payload_len & 0xFF;
-	msg[1] = ((payload_len >> 8) & 0x0F);
-	msg[2] = 0x11;
-	msg[3] = aic8800_crc8_ponl_107(msg, 3);
-	/* msg[4..7] already 0 (dummy word) */
-	msg[8]  = msg_id & 0xFF;
-	msg[9]  = (msg_id >> 8) & 0xFF;
-	msg[10] = 1;  /* dest = TASK_DBG */
-	msg[12] = 100; /* src = DRV_TASK_ID */
-	msg[14] = 8;                /* param_len LE */
-	msg[16] = entry & 0xFF;     /* bootaddr u32 LE */
-	msg[17] = (entry >> 8) & 0xFF;
-	msg[18] = (entry >> 16) & 0xFF;
-	msg[19] = (entry >> 24) & 0xFF;
-	msg[20] = 1;                /* boottype u32 LE = HOST_START_APP_AUTO */
-	/* msg[21..23] already 0 */
-
-	sdio_claim_host(func);
-	{
-		u8 *buf = kzalloc(512, GFP_KERNEL);
-		if (!buf) { sdio_release_host(func); return -ENOMEM; }
-		memcpy(buf, msg, sizeof(msg));
-		ret = sdio_writesb(func, 0x10, buf, 512);
-		kfree(buf);
-	}
-	sdio_release_host(func);
-	if (ret) {
-		dev_err(&func->dev,
-			"START_APP IPC failed: %d\n", ret);
-		return ret;
-	}
-
-	return 0;
+	dev_err(&func->dev,
+		"firmware start protocol is not implemented\n");
+	return -EOPNOTSUPP;
 }
 
 int aic8800_sdio_tx_write(struct sdio_func *func,
@@ -260,7 +212,7 @@ int aic8800_sdio_rx_drain(struct aic8800_core *core, int budget)
 			return ret;
 		}
 
-		byte_mode = (int_status >= 120);
+		byte_mode = (int_status == 120);
 		if (byte_mode) {
 			u8 byte_len;
 
@@ -293,29 +245,14 @@ int aic8800_sdio_rx_drain(struct aic8800_core *core, int budget)
 			return ret;
 		}
 
-		if (skb->len < ETH_HLEN) {
-			core->rx_malformed++;
-			core->rx_drop_malformed++;
-			core->ndev->stats.rx_dropped++;
-			dev_kfree_skb_any(skb);
-			frames++;
-			continue;
-		}
-
-		if (core->rx_submit) {
-			ret = core->rx_submit(core, skb);
-			if (ret) {
-				if (ret == -ENOSPC)
-					core->rx_drop_queue_full++;
-				core->ndev->stats.rx_dropped++;
-				core->rx_errors++;
-				dev_kfree_skb_any(skb);
-			}
-		} else {
-			core->ndev->stats.rx_dropped++;
-			core->rx_errors++;
-			dev_kfree_skb_any(skb);
-		}
+		/*
+		 * The device returns AIC transport messages, not Ethernet
+		 * frames. Drain them to keep the SDIO FIFO healthy, but do
+		 * not inject unparsed firmware data into the network stack.
+		 */
+		core->rx_drop_malformed++;
+		core->ndev->stats.rx_dropped++;
+		dev_kfree_skb_any(skb);
 		frames++;
 	}
 

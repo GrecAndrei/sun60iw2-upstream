@@ -125,9 +125,8 @@ def factory_snapshot() -> dict[str, object]:
         capture_output=True,
         text=True,
     )
-    payload_text = result.stdout.split("\n\nFAILURES:", 1)[0].strip()
     try:
-        payload = json.loads(payload_text)
+        payload, _ = json.JSONDecoder().raw_decode(result.stdout.lstrip())
     except json.JSONDecodeError:
         return {
             "status": "ERROR",
@@ -190,10 +189,11 @@ def render_snapshot() -> str:
         lines.extend(
             [
                 f"- Result: **{factory['status']}** — {factory['passed']}/{factory['total']} checks passed; {factory['failed_count']} failed.",
-                "- Failing checks:",
             ]
         )
-        lines.extend(f"  - `{name}`" for name in factory["failed"])
+        if factory["failed"]:
+            lines.append("- Failing checks:")
+            lines.extend(f"  - `{name}`" for name in factory["failed"])
     lines.extend(
         [
             "",

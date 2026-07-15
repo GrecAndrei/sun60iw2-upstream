@@ -58,8 +58,6 @@ static int aic8800_sdio_fw_load(struct aic8800_sdio *sdio, bool reload);
 static int aic8800_sdio_fw_start(struct aic8800_sdio *sdio);
 static int aic8800_sdio_fw_load_and_start(struct aic8800_sdio *sdio,
 					 bool reload);
-static int aic8800_sdio_send_mem_write(struct sdio_func *func,
-				  u32 addr, u32 value);
 static void aic8800_sdio_rx_purge(struct aic8800_sdio *sdio);
 static void aic8800_sdio_irq_handler(struct sdio_func *func);
 static irqreturn_t aic8800_sdio_oob_irq_thread(int irq, void *data);
@@ -285,99 +283,14 @@ static int aic8800_sdio_fw_load(struct aic8800_sdio *sdio, bool reload)
 	return aic8800_core_request_firmware(&sdio->core);
 }
 
-static int aic8800_sdio_send_mem_write(struct sdio_func *func,
-				  u32 addr, u32 value)
-{
-	u8 msg[24] = {0};
-	int ret;
-
-	msg[0] = 20 & 0xFF;
-	msg[1] = 0;
-	msg[2] = 0x11;
-	msg[3] = aic8800_crc8_ponl_107(msg, 3);
-	msg[8]  = 0x02;
-	msg[9]  = 0x04;
-	msg[10] = 1;
-	msg[12] = 100;
-	msg[14] = 8;
-	msg[16] = addr & 0xFF;
-	msg[17] = (addr >> 8) & 0xFF;
-	msg[18] = (addr >> 16) & 0xFF;
-	msg[19] = (addr >> 24) & 0xFF;
-	msg[20] = value & 0xFF;
-	msg[21] = (value >> 8) & 0xFF;
-	msg[22] = (value >> 16) & 0xFF;
-	msg[23] = (value >> 24) & 0xFF;
-
-	{
-		u8 *buf = kzalloc(512, GFP_KERNEL);
-		if (!buf) return -ENOMEM;
-		memcpy(buf, msg, sizeof(msg));
-		sdio_claim_host(func);
-		ret = sdio_writesb(func, 0x10, buf, 512);
-		sdio_release_host(func);
-		kfree(buf);
-	}
-
-	return ret;
-}
-
 static int aic8800_sdio_fw_start(struct aic8800_sdio *sdio)
 {
-	struct sdio_func *func;
-	const char *fw_name;
-	int ret;
-
 	if (!sdio)
 		return -EINVAL;
 
-	if (!sdio->core.fw_data)
-		return -ENOENT;
-
-	if (!sdio->core.dev)
-		return -ENODEV;
-
-	func = dev_to_sdio_func(sdio->core.dev);
-	if (!func)
-		return -ENODEV;
-
-	fw_name = sdio->core.fw_loaded[0] ?
-		  sdio->core.fw_loaded : aic8800_core_get_fw_active_name(&sdio->core);
-
-	if (sdio->core.fw_hooks && sdio->core.fw_hooks->pre_start) {
-		ret = sdio->core.fw_hooks->pre_start(&sdio->core, fw_name);
-		if (ret)
-			return ret;
-	}
-
-	ret = aic8800_sdio_fw_download(
-		func, 0x00120000,
-		sdio->core.fw_data->data, sdio->core.fw_data->size);
-	if (ret)
-		goto out_start;
-
-	/* Pre-start system config: GPIO/OOB register setup
-	 * required before bootrom handoff for 8800D80 */
-	ret = aic8800_sdio_send_mem_write(func, 0x40504084, 0x00000006);
-	if (ret) goto out_start;
-	ret = aic8800_sdio_send_mem_write(func, 0x40500040, 0x00000000);
-	if (ret) goto out_start;
-	ret = aic8800_sdio_send_mem_write(func, 0x40100030, 0x00000001);
-	if (ret) goto out_start;
-	ret = aic8800_sdio_send_mem_write(func, 0x40241020, 0x00000001);
-	if (ret) goto out_start;
-	ret = aic8800_sdio_send_mem_write(func, 0x40240030, 0x00000004);
-	if (ret) goto out_start;
-	ret = aic8800_sdio_send_mem_write(func, 0x40240020, 0x03020700);
-	if (ret) goto out_start;
-
-	ret = aic8800_sdio_start_firmware(func, 0x00120000);
-
-out_start:
-	if (sdio->core.fw_hooks && sdio->core.fw_hooks->post_start)
-		sdio->core.fw_hooks->post_start(&sdio->core, fw_name, ret);
-
-	return ret;
+	dev_err(sdio->core.dev,
+		"firmware control protocol is not implemented\n");
+	return -EOPNOTSUPP;
 }
 
 static int aic8800_sdio_fw_load_and_start(struct aic8800_sdio *sdio,
@@ -504,6 +417,7 @@ static void aic8800_sdio_tx_work(struct work_struct *work)
 		return;
 
 	while (!sdio->tx_stopping) {
+		u8 fc_reg;
 		int ret;
 		int tries = 0;
 
@@ -515,7 +429,6 @@ static void aic8800_sdio_tx_work(struct work_struct *work)
 
 		/* Flow control: read available TX buffers */
 		{
-			u8 fc_reg;
 			int fc_retries = 0;
 
 			sdio_claim_host(func);
@@ -539,6 +452,12 @@ static void aic8800_sdio_tx_work(struct work_struct *work)
 				if (ret)
 					break;
 			}
+		}
+
+		if (ret || fc_reg <= 2) {
+			if (ret)
+				sdio->core.tx_errors++;
+			break;
 		}
 
 		do {
@@ -711,6 +630,17 @@ static int aic8800_sdio_reinit_transport(struct aic8800_sdio *sdio,
 		goto out_finish;
 	}
 
+	sdio_claim_host(func);
+	sdio_writeb(func, 0x07, 0x00, &ret);
+	sdio_release_host(func);
+	if (ret) {
+		sdio_claim_host(func);
+		sdio_release_irq(func);
+		sdio_release_host(func);
+		aic8800_sdio_io_deinit(func);
+		goto out_finish;
+	}
+
 	sdio->core.tx_reinit_events++;
 	sdio->tx_watch_stall_ticks = 0;
 	sdio->tx_watch_last_frames = sdio->core.tx_frames;
@@ -777,26 +707,26 @@ static void aic8800_sdio_irq_handler(struct sdio_func *func)
 {
 	struct aic8800_sdio *sdio = sdio_get_drvdata(func);
 	u8 pending;
+	int ret;
 
 	if (!sdio)
 		return;
 
 	sdio->core.irq_count++;
 
-	/* Clear pending interrupt bit 0 in INTR_PENDING_REG_V3 (0x01) */
-	sdio_claim_host(func);
-	if (sdio_readsb(func, &pending, 0x01, 1) == 0) {
+	/* The SDIO core invokes this handler with the host claimed. */
+	pending = sdio_readb(func, 0x01, &ret);
+	if (!ret) {
 		pending &= ~0x01;
-		sdio_writesb(func, 0x01, &pending, 1);
+		sdio_writeb(func, pending, 0x01, &ret);
 	}
-	sdio_release_host(func);
 
 	if (!sdio->rx_stopping)
 		schedule_work(&sdio->rx_work);
 }
 
 static int aic8800_sdio_probe(struct sdio_func *func,
-                              const struct sdio_device_id *id)
+			      const struct sdio_device_id *id)
 {
 	struct aic8800_sdio *sdio;
 	const struct soc_device_attribute *soc;
@@ -807,6 +737,10 @@ static int aic8800_sdio_probe(struct sdio_func *func,
 		return -EINVAL;
 
 	bootloader_mode = (func->device == 0x0182);
+
+	if (bootloader_mode)
+		return dev_err_probe(&func->dev, -EOPNOTSUPP,
+			"bootloader firmware protocol is not implemented\n");
 
 	sdio = devm_kzalloc(&func->dev, sizeof(*sdio), GFP_KERNEL);
 	if (!sdio)
@@ -854,47 +788,29 @@ static int aic8800_sdio_probe(struct sdio_func *func,
 	if (ret)
 		return ret;
 
-	if (bootloader_mode) {
-		dev_info(&func->dev,
-			"bootloader mode, loading firmware\n");
-		ret = aic8800_sdio_io_init(func);
-		if (ret)
-			goto err_power;
-		ret = aic8800_sdio_fw_load_and_start(sdio, false);
-		aic8800_sdio_io_deinit(func);
-		if (ret) {
-			dev_err(&func->dev,
-				"firmware start failed: %d\n", ret);
-			goto err_power;
-		}
-		dev_info(&func->dev,
-			"firmware started, waiting for re-enumeration\n");
-		return 0;
-	}
-
-	/* Normal mode: firmware already running, full setup */
+	/* Normal mode: firmware already running, transport setup only. */
 	dev_info(&func->dev, "normal mode probe\n");
 
-	ret = aic8800_core_register(&sdio->core);
-	if (ret)
-		goto err_power;
-
+	sdio_set_drvdata(func, sdio);
 	sdio->core.bus_priv = sdio;
 	sdio->core.tx_frame = aic8800_sdio_tx_frame;
 	sdio->core.rx_submit = aic8800_sdio_rx_submit;
-	schedule_delayed_work(&sdio->tx_watchdog_work,
-			      msecs_to_jiffies(500));
-	aic8800_sdio_debugfs_init(sdio);
 
 	ret = aic8800_sdio_io_init(func);
 	if (ret)
-		goto err_unregister;
+		goto err_drvdata;
 
 	sdio_claim_host(func);
 	ret = sdio_claim_irq(func, aic8800_sdio_irq_handler);
 	sdio_release_host(func);
 	if (ret)
 		goto err_io;
+
+	sdio_claim_host(func);
+	sdio_writeb(func, 0x07, 0x00, &ret);
+	sdio_release_host(func);
+	if (ret)
+		goto err_irq;
 
 	/* Enable master interrupt on CCCR func0 for 8800D80 */
 	sdio_claim_host(func);
@@ -920,17 +836,25 @@ static int aic8800_sdio_probe(struct sdio_func *func,
 		}
 	}
 
-	sdio_set_drvdata(func, sdio);
+	ret = aic8800_core_register(&sdio->core);
+	if (ret)
+		goto err_irq;
+
+	aic8800_sdio_debugfs_init(sdio);
+	schedule_delayed_work(&sdio->tx_watchdog_work,
+			      msecs_to_jiffies(500));
 	return 0;
 
+err_irq:
+	sdio_claim_host(func);
+	sdio_release_irq(func);
+	sdio_release_host(func);
 err_io:
-	aic8800_sdio_debugfs_deinit(sdio);
 	aic8800_sdio_rx_flush(sdio);
 	aic8800_sdio_tx_flush(sdio);
 	aic8800_sdio_io_deinit(func);
-err_unregister:
-	aic8800_core_unregister(&sdio->core);
-err_power:
+err_drvdata:
+	sdio_set_drvdata(func, NULL);
 	aic8800_sdio_power_off(sdio);
 	return ret;
 }
@@ -942,21 +866,18 @@ static void aic8800_sdio_remove(struct sdio_func *func)
 	if (!sdio)
 		return;
 
-	/* Bootloader mode: no core/netdev/irq were set up */
-	if (sdio->core.ndev || sdio->core.wiphy) {
-		sdio_claim_host(func);
-		sdio_release_irq(func);
-		sdio_release_host(func);
-		aic8800_sdio_debugfs_deinit(sdio);
-		aic8800_sdio_rx_flush(sdio);
-		aic8800_sdio_tx_flush(sdio);
-		aic8800_sdio_io_deinit(func);
-		sdio->core.bus_priv = NULL;
-		sdio->core.tx_frame = NULL;
-		sdio->core.rx_submit = NULL;
-		aic8800_core_unregister(&sdio->core);
-	}
-
+	sdio_claim_host(func);
+	sdio_release_irq(func);
+	sdio_release_host(func);
+	aic8800_sdio_debugfs_deinit(sdio);
+	aic8800_sdio_rx_flush(sdio);
+	aic8800_sdio_tx_flush(sdio);
+	aic8800_sdio_io_deinit(func);
+	sdio->core.bus_priv = NULL;
+	sdio->core.tx_frame = NULL;
+	sdio->core.rx_submit = NULL;
+	aic8800_core_unregister(&sdio->core);
+	sdio_set_drvdata(func, NULL);
 	aic8800_sdio_power_off(sdio);
 }
 

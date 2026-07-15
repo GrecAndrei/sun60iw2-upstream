@@ -15,7 +15,7 @@ description: |
   Binding for AICsemi AIC8800 series WiFi devices connected over SDIO.
 
 allOf:
-  - $ref: /schemas/mmc/mmc-controller.yaml#
+  - $ref: /schemas/net/wireless/wireless-controller.yaml#
 
 properties:
   compatible:
@@ -38,8 +38,6 @@ properties:
     maxItems: 1
     description: Optional reset line to the WiFi device.
 
-  vmmc-supply: true
-  vqmmc-supply: true
   wakeup-source: true
 
 required:

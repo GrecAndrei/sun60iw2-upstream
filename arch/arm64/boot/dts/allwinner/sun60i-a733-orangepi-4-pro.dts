@@ -3,6 +3,7 @@
 /dts-v1/;
 
 #include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/interrupt-controller/irq.h>
 #include "sun60i-a733.dtsi"
 
 / {
@@ -45,6 +46,14 @@
 		regulator-always-on;
 	};
 
+	reg_vcc1v8_wifi: regulator-vcc1v8-wifi {
+		compatible = "regulator-fixed";
+		regulator-name = "vcc1v8-wifi";
+		regulator-min-microvolt = <1800000>;
+		regulator-max-microvolt = <1800000>;
+		regulator-always-on;
+	};
+
 	reg_usb_host_vbus: regulator-usb-host-vbus {
 		compatible = "regulator-fixed";
 		regulator-name = "usb-host-vbus";
@@ -55,15 +64,16 @@
 
 	wifi_pwrseq: wifi-pwrseq {
 		compatible = "mmc-pwrseq-simple";
-		reset-gpios = <&r_pio 1 1 GPIO_ACTIVE_LOW>; /* PM1: WL_REG_ON */
-		clocks = <&ext32k>;
-		clock-names = "ext_clock";
+		/* WL_REG_ON is an active-high enable, hence active-low reset. */
+		reset-gpios = <&r_pio 1 1 GPIO_ACTIVE_LOW>; /* PM1 */
 		post-power-on-delay-ms = <200>;
-		status = "disabled";
 	};
 };
 
 &pio {
+	vcc-pg-supply = <&reg_vcc1v8_wifi>;
+	vcc-pf-supply = <&reg_vcc3v3_sd>;
+
 	uart1_pins: uart1-pins {
 		pins = "PK20", "PK21", "PK22", "PK23";
 		allwinner,pinmux = <8>;
@@ -71,6 +81,10 @@
 		drive-strength = <10>;
 		bias-pull-up;
 	};
+};
+
+&r_pio {
+	vcc-pm-supply = <&reg_vcc1v8_wifi>;
 };
 
 &uart0 {
@@ -81,7 +95,8 @@
 	status = "okay";
 	pinctrl-0 = <&mmc0_pins &mmc0_clk_pin>;
 	pinctrl-names = "default";
-	non-removable;
+	cd-gpios = <&pio 5 6 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>; /* PF6 */
+	cd-debounce-delay-ms = <200>;
 	bus-width = <4>;
 	cap-sd-highspeed;
 	no-1-8-v;
@@ -92,8 +107,8 @@
 };
 
 &mmc1 {
-	status = "disabled";
-	pinctrl-0 = <&mmc1_pins>;
+	status = "okay";
+	pinctrl-0 = <&mmc1_pins &mmc1_clk_pin>;
 	pinctrl-names = "default";
 	#address-cells = <1>;
 	#size-cells = <0>;
@@ -101,14 +116,25 @@
 	cap-sd-highspeed;
 	cap-sdio-irq;
 	keep-power-in-suspend;
+	ignore-pm-notify;
+	execute_tuning_in_kernel;
+	sunxi-dly-208M = <0xff 0x1 0xff 0xff 0xff 0xff>;
+	ctl-spec-caps = <0x428>;
 	mmc-pwrseq = <&wifi_pwrseq>;
 	non-removable;
+	max-frequency = <50000000>;
 	no-sd;
 	no-mmc;
+	vmmc-supply = <&reg_vcc1v8_wifi>;
+	vqmmc-supply = <&reg_vcc1v8_wifi>;
 
 	wifi@1 {
 		reg = <1>;
 		compatible = "aicsemi,aic8800d80", "aicsemi,aic8800";
+		interrupt-parent = <&r_pio>;
+		interrupts = <1 0 IRQ_TYPE_LEVEL_HIGH>; /* PM0: WL_HOST_WAKE */
+		interrupt-names = "host-wake";
+		wakeup-source;
 	};
 };
 

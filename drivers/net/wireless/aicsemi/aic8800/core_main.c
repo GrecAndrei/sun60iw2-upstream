@@ -22,9 +22,6 @@ int aic8800_core_register(struct aic8800_core *core)
 	core->fw_hooks = NULL;
 	core->fw_override[0] = '\0';
 	core->fw_loaded[0] = '\0';
-	core->bus_priv = NULL;
-	core->tx_frame = NULL;
-	core->rx_submit = NULL;
 	core->irq_count = 0;
 	core->rx_batches = 0;
 	core->rx_frames = 0;

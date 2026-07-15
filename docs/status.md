@@ -19,14 +19,7 @@ The source checkout's revision and Git-change list are intentionally omitted: co
 
 ## Generated-source validation
 
-- Result: **FAIL** — 45/51 checks passed; 6 failed.
-- Failing checks:
-  - `ccu_committed_fresh_match:main`
-  - `ccu_committed_fresh_match:r`
-  - `ccu_committed_fresh_match:rtc`
-  - `ccu_committed_fresh_match:cpupll`
-  - `pinctrl_committed_fresh_match`
-  - `pinctrl_mainline_pattern_match`
+- Result: **PASS** — 51/51 checks passed; 0 failed.
 
 ## Local debug build artifacts
 

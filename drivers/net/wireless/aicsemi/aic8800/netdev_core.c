@@ -15,8 +15,8 @@ struct aic8800_vif {
 
 static int aic8800_ndo_open(struct net_device *ndev)
 {
-	netif_start_queue(ndev);
-	return 0;
+	(void)ndev;
+	return -EOPNOTSUPP;
 }
 
 static int aic8800_ndo_stop(struct net_device *ndev)
@@ -31,7 +31,8 @@ static netdev_tx_t aic8800_ndo_start_xmit(struct sk_buff *skb,
 	struct aic8800_vif *vif = netdev_priv(ndev);
 	int ret;
 
-	if (!vif || !vif->core || !vif->core->tx_frame) {
+	if (!vif || !vif->core || !vif->core->link_up ||
+	    !vif->core->tx_frame) {
 		ndev->stats.tx_dropped++;
 		dev_kfree_skb_any(skb);
 		return NETDEV_TX_OK;
@@ -39,7 +40,6 @@ static netdev_tx_t aic8800_ndo_start_xmit(struct sk_buff *skb,
 
 	ret = vif->core->tx_frame(vif->core, skb->data, skb->len);
 	if (ret == -ENOSPC) {
-		vif->core->tx_drop_queue_full++;
 		netif_stop_queue(ndev);
 		return NETDEV_TX_BUSY;
 	}

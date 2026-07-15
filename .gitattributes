@@ -1,0 +1,2 @@
+# Git-format patches retain the source tree's exact whitespace.
+bootloader/patches/*.patch -whitespace

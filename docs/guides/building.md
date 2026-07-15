@@ -23,3 +23,8 @@ Expected outputs are `arch/arm64/boot/Image` and
 
 The AIC8800 driver is separate from the boot-baseline patches. See
 [`../aic8800.md`](../aic8800.md) before exporting it to a Linux tree.
+
+The legacy recovery U-Boot has an independent source tree, toolchain, package
+format, and guarded flash procedure. Follow
+[`bootloader.md`](bootloader.md) rather than placing its binary in the kernel
+tree.

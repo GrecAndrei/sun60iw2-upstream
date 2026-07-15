@@ -20,6 +20,7 @@ local debug tree.
 | `generators/` | Deterministic generator and extraction code. |
 | `generated/aic8800/` | Generated AIC8800 bindings, DTS fragment, kernel snapshot, and debt inventory. |
 | `patches/` | Standalone Git-format boot-baseline patches. |
+| `bootloader/patches/` | Git-format fixes for the separate legacy U-Boot recovery source. |
 | `configs/` | Defconfigs installed by `scripts/apply-patches.sh`. |
 | `docs/` | Maintained process documentation; `status.md` is generated. |
 | `.tmp/validation/` | Local, ignored validation evidence written by AIC8800 checks. |
@@ -44,3 +45,6 @@ Read [`docs/README.md`](docs/README.md) for the documentation contract and
 - Treat `../../kernels/a733-debug/` as a separate experimental worktree, not a
   patch source.
 - Keep boot-baseline patches reproducible independently of AIC8800 driver work.
+- Build and flash legacy A733 U-Boot through the checked procedure in
+  [`docs/guides/bootloader.md`](docs/guides/bootloader.md); never overwrite
+  the whole SD device with a sparse merged image.

@@ -2,9 +2,10 @@
 
 ## Edit the correct layer
 
-Generated files carry a generated-file banner. Change their JSON source under
-`generators/data/` or the generator itself, then regenerate. Hand-written DTS,
-dt-bindings, scripts, and patch metadata may be edited directly.
+Generated files carry a generated-file banner. Change structured values under
+`generators/data/`, AIC8800 driver code under `generators/templates/aic8800/`,
+or the generator itself, then regenerate. Hand-written DTS, dt-bindings,
+scripts, and patch metadata may be edited directly.
 
 ## Required local checks
 

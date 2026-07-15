@@ -2,10 +2,11 @@
 
 ## Source layers
 
-`generators/data/` is the source of truth for generated artifacts. The CCU and
-pinctrl generators produce the corresponding files under `drivers/`; the
-AIC8800 generator produces both the tracked skeleton under `drivers/` and the
-review material under `generated/aic8800/`.
+`generators/data/` owns structured values for generated artifacts. The CCU and
+pinctrl generators produce the corresponding files under `drivers/`. The
+AIC8800 generator combines its JSON data with focused source templates under
+`generators/templates/aic8800/`, producing the tracked driver under `drivers/`
+and the review snapshot under `generated/aic8800/`.
 
 Device Tree source, dt-bindings, defconfigs, and patches are hand-maintained.
 When a DTS node references a generated provider, update the corresponding
@@ -31,5 +32,5 @@ implementation must use upstream Linux interfaces and coding patterns.
 
 `generated/aic8800/` holds bindings, a DTS fragment, a kernel-file snapshot,
 and the BSP-dependency inventory. The standalone boot patch series intentionally
-does not install that experimental AIC8800 skeleton. See
+does not install the experimental AIC8800 driver. See
 [`aic8800.md`](aic8800.md).

@@ -15,9 +15,10 @@ local debug tree.
 | Path | Ownership |
 |---|---|
 | `arch/`, `drivers/`, `include/` | Kernel changes and generated driver outputs. |
-| `generators/data/` | Source data for generated CCU, pinctrl, and AIC8800 artifacts. |
+| `generators/data/` | Structured source data for generated CCU, pinctrl, and AIC8800 artifacts. |
+| `generators/templates/aic8800/` | Maintainable source templates for the native AIC8800 driver. |
 | `generators/` | Deterministic generator and extraction code. |
-| `generated/aic8800/` | Generated AIC8800 bindings, DTS fragment, kernel skeleton, and debt inventory. |
+| `generated/aic8800/` | Generated AIC8800 bindings, DTS fragment, kernel snapshot, and debt inventory. |
 | `patches/` | Standalone Git-format boot-baseline patches. |
 | `configs/` | Defconfigs installed by `scripts/apply-patches.sh`. |
 | `docs/` | Maintained process documentation; `status.md` is generated. |
@@ -36,11 +37,10 @@ Read [`docs/README.md`](docs/README.md) for the documentation contract and
 
 ## Core rules
 
-- Edit generator data, then regenerate; do not hand-edit generated C or AIC8800
-  outputs.
+- Edit generator data or templates, then regenerate; do not hand-edit generated
+  C or AIC8800 outputs.
 - Use the vendor kernel only as a reference for observable behavior and
   register maps. Do not import BSP implementation.
 - Treat `../../kernels/a733-debug/` as a separate experimental worktree, not a
   patch source.
-- Keep boot-baseline patches reproducible independently of AIC8800 draft
-  skeleton work.
+- Keep boot-baseline patches reproducible independently of AIC8800 driver work.

@@ -11,7 +11,7 @@ Before exporting a series:
 3. Test the exact patchset and record the outcome.
 4. Run the Linux tree's `scripts/checkpatch.pl --strict` and obtain current
    maintainers with `scripts/get_maintainer.pl`.
-5. Keep experimental AIC8800 skeleton work separate until it is a coherent,
+5. Keep experimental AIC8800 driver work separate until it is a coherent,
    independently reviewable series.
 
 `scripts/apply-patches.sh` is a local integration helper, not an upstream

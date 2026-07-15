@@ -12,6 +12,7 @@ from textwrap import dedent
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA_PATH = ROOT / "generators" / "data" / "aic8800-upstream.json"
+TEMPLATE_ROOT = ROOT / "generators" / "templates" / "aic8800"
 
 
 def load_data(path: Path) -> dict:
@@ -237,7 +238,7 @@ def gen_kernel_draft_files(data: dict) -> dict[str, str]:
     bt_patch_c = to_c_lines(bt_patch)
     bt_patch_ext_c = to_c_lines(bt_patch_ext)
     bt_adid_c = to_c_lines(bt_adid)
-    return {
+    files = {
         "drivers/net/wireless/aicsemi/Kconfig": dedent(
             """\
             # GENERATED FILE - DO NOT EDIT MANUALLY
@@ -2643,6 +2644,12 @@ def gen_kernel_draft_files(data: dict) -> dict[str, str]:
             """
         ).replace("__BT_UART_SPEED__", str(data["bt_uart_speed"])),
     }
+
+    for template in sorted(TEMPLATE_ROOT.glob("*.in")):
+        relative = template.name.removesuffix(".in").replace("__", "/")
+        files[relative] = template.read_text()
+
+    return files
 
 
 def write_bsp_csv(path: Path, data: dict) -> None:

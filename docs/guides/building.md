@@ -21,5 +21,5 @@ make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- -j"$(nproc)" Image dtbs
 Expected outputs are `arch/arm64/boot/Image` and
 `arch/arm64/boot/dts/allwinner/sun60i-a733-orangepi-4-pro.dtb`.
 
-The AIC8800 skeleton is separate from the boot-baseline patches. See
+The AIC8800 driver is separate from the boot-baseline patches. See
 [`../aic8800.md`](../aic8800.md) before exporting it to a Linux tree.

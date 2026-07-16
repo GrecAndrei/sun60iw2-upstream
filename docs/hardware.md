@@ -15,11 +15,15 @@ tracked board DTS and the local debug DTS on every refresh.
 
 ## Current integration boundary
 
-The tracked board DTS contains the boot-baseline description and AIC8800
-nodes. The local debug tree additionally declares R-TWI0, an AXP8191 node, and
-R-PIO supply assignments. Those debug-tree additions are not yet represented
-by the tracked source and standalone patch series, so they must not be described
-as upstream-port support.
+The tracked DTS now declares R-TWI0, the AXP8191, and the physical 1.8 V Wi-Fi
+rails: BLDO5 for the PG SDIO bank and CLDO1 for the PM control bank. It also
+describes both A733 pin controllers as hardware-managed I/O-voltage domains.
+
+Those declarations are not an upstream-support claim. The standalone patch
+series must carry the matching PMIC support before it can be applied as a
+self-contained port, and the current candidate has not enumerated the SDIO
+device on hardware. The debug tree remains an experimental integration build,
+not an authority for implementation choices.
 
 ## Hardware-validation rule
 

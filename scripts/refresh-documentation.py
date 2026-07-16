@@ -154,6 +154,24 @@ def render_snapshot() -> str:
     image = debug_tree / "arch/arm64/boot/Image"
     dtb = debug_tree / "arch/arm64/boot/dts/allwinner/sun60i-a733-orangepi-4-pro.dtb"
     factory = factory_snapshot()
+    declarations = {
+        "mmc1 enabled": (
+            node_enabled(source_dts, "mmc1"),
+            node_enabled(debug_dts, "mmc1"),
+        ),
+        "AXP8191 node (`x-powers,axp8191`)": (
+            contains(source_dts, "x-powers,axp8191"),
+            contains(debug_dts, "x-powers,axp8191"),
+        ),
+        "R-TWI0 enabled": (
+            contains(source_dts, "&s_twi0 {"),
+            contains(debug_dts, "&s_twi0 {"),
+        ),
+        "R-PIO PL supply declared": (
+            contains(source_dts, "vcc-pl-supply"),
+            contains(debug_dts, "vcc-pl-supply"),
+        ),
+    }
     source_state = (
         f"`{source['branch']}`"
         if source["managed"]
@@ -207,12 +225,12 @@ def render_snapshot() -> str:
             "",
             "| Declaration | Source repository | Debug tree |",
             "|---|---:|---:|",
-            f"| `mmc1` enabled | {'yes' if node_enabled(source_dts, 'mmc1') else 'no'} | {'yes' if node_enabled(debug_dts, 'mmc1') else 'no'} |",
-            f"| AXP8191 node (`x-powers,axp8191`) | {'yes' if contains(source_dts, 'x-powers,axp8191') else 'no'} | {'yes' if contains(debug_dts, 'x-powers,axp8191') else 'no'} |",
-            f"| R-TWI0 enabled | {'yes' if contains(source_dts, '&s_twi0 {') else 'no'} | {'yes' if contains(debug_dts, '&s_twi0 {') else 'no'} |",
-            f"| R-PIO PL supply declared | {'yes' if contains(source_dts, 'vcc-pl-supply') else 'no'} | {'yes' if contains(debug_dts, 'vcc-pl-supply') else 'no'} |",
+            *(
+                f"| `{name}` | {'yes' if source else 'no'} | {'yes' if debug else 'no'} |"
+                for name, (source, debug) in declarations.items()
+            ),
             "",
-            "The debug tree has declarations that are absent from the tracked source tree. Treat it as an experimental integration snapshot until those changes are represented by source, generated outputs, and reviewable patches.",
+            "These rows describe DTS text only. They do not establish driver availability, electrical behavior, or hardware success.",
             "",
             "## Uncommitted integration changes",
             "",

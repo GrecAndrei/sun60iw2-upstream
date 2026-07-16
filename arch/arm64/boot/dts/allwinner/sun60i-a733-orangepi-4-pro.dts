@@ -3,7 +3,6 @@
 /dts-v1/;
 
 #include <dt-bindings/gpio/gpio.h>
-#include <dt-bindings/interrupt-controller/irq.h>
 #include "sun60i-a733.dtsi"
 
 / {
@@ -46,14 +45,6 @@
 		regulator-always-on;
 	};
 
-	reg_vcc1v8_wifi: regulator-vcc1v8-wifi {
-		compatible = "regulator-fixed";
-		regulator-name = "vcc1v8-wifi";
-		regulator-min-microvolt = <1800000>;
-		regulator-max-microvolt = <1800000>;
-		regulator-always-on;
-	};
-
 	reg_usb_host_vbus: regulator-usb-host-vbus {
 		compatible = "regulator-fixed";
 		regulator-name = "usb-host-vbus";
@@ -71,7 +62,8 @@
 };
 
 &pio {
-	vcc-pg-supply = <&reg_vcc1v8_wifi>;
+	/* PG carries the Wi-Fi SDIO bus and is supplied by BLDO5 at 1.8 V. */
+	vcc-pg-supply = <&reg_bldo5>;
 	vcc-pf-supply = <&reg_vcc3v3_sd>;
 
 	uart1_pins: uart1-pins {
@@ -84,7 +76,24 @@
 };
 
 &r_pio {
-	vcc-pm-supply = <&reg_vcc1v8_wifi>;
+	/* PM0/PM1 are WL_HOST_WAKE/WL_REG_ON and are supplied by CLDO1. */
+	vcc-pm-supply = <&reg_cldo1>;
+	vcc-pl-supply = <&reg_vcc3v3_sd>;
+
+	s_twi0_pins_default: s-twi0-default-pins {
+		pins = "PL0", "PL1";
+		function = "s_twi0";
+		allwinner,pinmux = <2>;
+		drive-strength = <10>;
+		bias-pull-up;
+	};
+
+	s_twi0_pins_sleep: s-twi0-sleep-pins {
+		pins = "PL0", "PL1";
+		function = "io_disabled";
+		allwinner,pinmux = <7>;
+		drive-strength = <10>;
+	};
 };
 
 &uart0 {
@@ -106,6 +115,57 @@
 	vqmmc-supply = <&reg_vcc3v3_sd>;
 };
 
+&s_twi0 {
+	status = "okay";
+	pinctrl-0 = <&s_twi0_pins_default>;
+	pinctrl-1 = <&s_twi0_pins_sleep>;
+	pinctrl-names = "default", "sleep";
+	clock-frequency = <400000>;
+
+	pmu0: pmu@36 {
+		compatible = "x-powers,axp8191";
+		reg = <0x36>;
+
+		regulators {
+			/* U4 VBAT: VCC-WIFI / VCC-3V3-WIFI (schematic sheet 21). */
+			reg_dcdc1: dcdc1 {
+				regulator-name = "vcc-wifi";
+				regulator-min-microvolt = <3300000>;
+				regulator-max-microvolt = <3300000>;
+				regulator-init-microvolt = <3300000>;
+			};
+
+			/* U4 VDDIO: VCCIO-WIFI (schematic sheets 4 and 21). */
+			reg_bldo2: bldo2 {
+				regulator-name = "vccio-wifi";
+				regulator-min-microvolt = <1800000>;
+				regulator-max-microvolt = <1800000>;
+				regulator-init-microvolt = <1800000>;
+				regulator-enable-ramp-delay = <1000>;
+			};
+
+			reg_bldo5: bldo5 {
+				regulator-name = "axp8191-bldo5";
+				regulator-min-microvolt = <1800000>;
+				regulator-max-microvolt = <1800000>;
+				regulator-init-microvolt = <1800000>;
+				regulator-enable-ramp-delay = <1000>;
+				regulator-boot-on;
+			};
+
+			reg_cldo1: cldo1 {
+				regulator-name = "axp8191-cldo1";
+				regulator-min-microvolt = <1800000>;
+				regulator-max-microvolt = <1800000>;
+				regulator-init-microvolt = <1800000>;
+				regulator-enable-ramp-delay = <1000>;
+				regulator-boot-on;
+				regulator-always-on;
+			};
+		};
+	};
+};
+
 &mmc1 {
 	status = "okay";
 	pinctrl-0 = <&mmc1_pins &mmc1_clk_pin>;
@@ -125,16 +185,13 @@
 	max-frequency = <50000000>;
 	no-sd;
 	no-mmc;
-	vmmc-supply = <&reg_vcc1v8_wifi>;
-	vqmmc-supply = <&reg_vcc1v8_wifi>;
+	/* AP6611 VBAT is 3.3 V DCDC1; its SDIO VDDIO is 1.8 V BLDO2. */
+	vmmc-supply = <&reg_dcdc1>;
+	vqmmc-supply = <&reg_bldo2>;
 
 	wifi@1 {
 		reg = <1>;
 		compatible = "aicsemi,aic8800d80", "aicsemi,aic8800";
-		interrupt-parent = <&r_pio>;
-		interrupts = <1 0 IRQ_TYPE_LEVEL_HIGH>; /* PM0: WL_HOST_WAKE */
-		interrupt-names = "host-wake";
-		wakeup-source;
 	};
 };
 

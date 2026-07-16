@@ -1,0 +1,62 @@
+From: Alexander Grec <alex092lap@duck.com>
+Subject: [PATCH] wifi: aic8800: add wireless and Bluetooth build integration
+
+Wire the generated AIC8800 SDIO fullmac and UART Bluetooth transports
+into their standard kernel build locations. This patch applies after
+the generated driver files and bindings have been added.
+
+Signed-off-by: Alexander Grec <alex092lap@duck.com>
+---
+ drivers/bluetooth/Kconfig          | 10 ++++++++++
+ drivers/bluetooth/Makefile         |  1 +
+ drivers/net/wireless/Kconfig       |  1 +
+ drivers/net/wireless/Makefile      |  1 +
+ 4 files changed, 13 insertions(+)
+
+diff --git a/drivers/net/wireless/Kconfig b/drivers/net/wireless/Kconfig
+--- a/drivers/net/wireless/Kconfig
++++ b/drivers/net/wireless/Kconfig
+@@ -20,4 +20,5 @@
+ 
+ source "drivers/net/wireless/admtek/Kconfig"
++source "drivers/net/wireless/aicsemi/Kconfig"
+ source "drivers/net/wireless/ath/Kconfig"
+ source "drivers/net/wireless/atmel/Kconfig"
+diff --git a/drivers/net/wireless/Makefile b/drivers/net/wireless/Makefile
+--- a/drivers/net/wireless/Makefile
++++ b/drivers/net/wireless/Makefile
+@@ -5,4 +5,5 @@
+ 
+ obj-$(CONFIG_WLAN_VENDOR_ADMTEK) += admtek/
++obj-$(CONFIG_WLAN_VENDOR_AICSEMI) += aicsemi/
+ obj-$(CONFIG_WLAN_VENDOR_ATH) += ath/
+ obj-$(CONFIG_WLAN_VENDOR_ATMEL) += atmel/
+diff --git a/drivers/bluetooth/Kconfig b/drivers/bluetooth/Kconfig
+--- a/drivers/bluetooth/Kconfig
++++ b/drivers/bluetooth/Kconfig
+@@ -120,5 +120,16 @@
+ config BT_HCIUART_SERDEV
+ 	bool
+ 	depends on SERIAL_DEV_BUS && BT_HCIUART
+ 	default y
++
++config BT_HCI_AIC8800
++	tristate "AIC8800 UART HCI driver"
++	depends on SERIAL_DEV_BUS
++	help
++	  Bluetooth HCI transport for AICsemi AIC8800 devices attached
++	  through a UART serdev controller.
++
++	  Say Y here to build the driver into the kernel or M to build it
++	  as the hci_aic8800 module.
++
+ config BT_HCIUART_H4
+diff --git a/drivers/bluetooth/Makefile b/drivers/bluetooth/Makefile
+--- a/drivers/bluetooth/Makefile
++++ b/drivers/bluetooth/Makefile
+@@ -5,4 +5,5 @@
+ 
+ obj-$(CONFIG_BT_HCIVHCI)	+= hci_vhci.o
+ obj-$(CONFIG_BT_HCIUART)	+= hci_uart.o
++obj-$(CONFIG_BT_HCI_AIC8800)	+= hci_aic8800.o
+ obj-$(CONFIG_BT_HCIBCM203X)	+= bcm203x.o

@@ -26,19 +26,9 @@ properties:
   reg:
     maxItems: 1
 
-  interrupts:
-    maxItems: 1
-    description: Optional OOB host wake interrupt from the WiFi chip.
-
-  interrupt-names:
-    items:
-      - const: host-wake
-
   reset-gpios:
     maxItems: 1
     description: Optional reset line to the WiFi device.
-
-  wakeup-source: true
 
 required:
   - compatible

@@ -3,10 +3,14 @@
 ## Source layers
 
 `generators/data/` owns structured values for generated artifacts. The CCU and
-pinctrl generators produce the corresponding files under `drivers/`. The
-AIC8800 generator combines its JSON data with focused source templates under
-`generators/templates/aic8800/`, producing the tracked driver under `drivers/`
-and the review snapshot under `generated/aic8800/`.
+main-PIO pinctrl generators produce the corresponding files under `drivers/`.
+The small A733 R-PIO driver is hand-maintained because it uses the generic
+DT-table path: only its verified L/M-bank geometry and automatic-voltage flag
+are SoC-specific. The
+AIC8800 generator renders its JSON-driven driver sources directly and uses the
+two template-only firmware-protocol sources under `generators/templates/aic8800/`.
+It produces the tracked driver under `drivers/` and the review snapshot under
+`generated/aic8800/`.
 
 Device Tree source, dt-bindings, defconfigs, and patches are hand-maintained.
 When a DTS node references a generated provider, update the corresponding

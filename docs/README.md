@@ -12,6 +12,7 @@ live, generated evidence.
 | [`aic8800.md`](aic8800.md) | AIC8800 source, generated outputs, and test boundaries. | Update with generator or export workflow changes. |
 | [`guides/`](guides) | Build, test, and patch workflow. | Update with script behavior. |
 | [`guides/bootloader.md`](guides/bootloader.md) | Legacy U-Boot packaging, guarded flash, and UART acceptance procedure. | Update with bootloader script or layout changes. |
+| [`guides/wifi-sdio-bringup.md`](guides/wifi-sdio-bringup.md) | Evidence-led A733 SDIO Wi-Fi validation procedure. | Update with each validated state transition. |
 
 Refresh the live report after source, generator, DTS, or integration changes:
 

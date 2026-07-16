@@ -16,8 +16,8 @@ local debug tree.
 |---|---|
 | `arch/`, `drivers/`, `include/` | Kernel changes and generated driver outputs. |
 | `generators/data/` | Structured source data for generated CCU, pinctrl, and AIC8800 artifacts. |
-| `generators/templates/aic8800/` | Maintainable source templates for the native AIC8800 driver. |
-| `generators/` | Deterministic generator and extraction code. |
+| `generators/templates/aic8800/` | Template-only AIC8800 firmware-protocol sources. |
+| `generators/` | Deterministic generator and extraction code; the AIC8800 generator owns the remaining driver sources. |
 | `generated/aic8800/` | Generated AIC8800 bindings, DTS fragment, kernel snapshot, and debt inventory. |
 | `patches/` | Standalone Git-format boot-baseline patches. |
 | `bootloader/patches/` | Git-format fixes for the separate legacy U-Boot recovery source. |

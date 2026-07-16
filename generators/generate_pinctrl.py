@@ -31,25 +31,52 @@ except Exception:
 # --- Pinctrl Generator ---
 
 
+def io_bias_cfg_variant(data):
+    """Return the sunxi pinctrl I/O-bias selector named by the SoC data."""
+
+    variants = {
+        "pio_pow_mode_ctl": "BIAS_VOLTAGE_PIO_POW_MODE_CTL",
+        "pio_pow_mode_sel": "BIAS_VOLTAGE_PIO_POW_MODE_SEL",
+    }
+    try:
+        return variants[data["io_bias_cfg_variant"]]
+    except KeyError as exc:
+        valid = ", ".join(sorted(variants))
+        raise ValueError(
+            f"unsupported io_bias_cfg_variant {data.get('io_bias_cfg_variant')!r}; "
+            f"expected one of: {valid}"
+        ) from exc
+
+
+def pinctrl_flags(data, continuation_indent):
+    """Return the pinctrl feature flags as a wrap-safe C expression."""
+
+    flag_names = {
+        "new_reg_layout": "SUNXI_PINCTRL_NEW_REG_LAYOUT",
+        "eleven_banks": "SUNXI_PINCTRL_ELEVEN_BANKS",
+        "auto_power_switch": "SUNXI_PINCTRL_AUTO_POWER_SWITCH",
+    }
+    values = [
+        flag_names[flag]
+        for flag in ("new_reg_layout", "eleven_banks", "auto_power_switch")
+        if flag in data.get("flags", [])
+    ]
+    return f" |\n{continuation_indent}".join(values) if values else "0"
+
+
 def generate_pinctrl_dt(data):
     """Generate DT-mode pinctrl driver (base driver without pinmux tables)."""
 
     banks = data["banks"]
     irq_map = data["irq_bank_map"]
     irq_muxes = data["irq_bank_muxes"]
-    flags = data.get("flags", [])
+    bias_cfg_variant = io_bias_cfg_variant(data)
 
     nr_banks = ", ".join(str(banks.get(f"P{chr(65 + i)}", 0)) for i in range(11))
     irq_map_str = ", ".join(str(x) for x in irq_map)
     irq_muxes_str = ", ".join(str(x) for x in irq_muxes)
 
-    flag_vals = []
-    if "new_reg_layout" in flags:
-        flag_vals.append("SUNXI_PINCTRL_NEW_REG_LAYOUT")
-    if "eleven_banks" in flags:
-        flag_vals.append("SUNXI_PINCTRL_ELEVEN_BANKS")
-
-    flag_str = " | ".join(flag_vals) if flag_vals else "0"
+    flag_str = pinctrl_flags(data, "\t\t\t\t\t   ")
 
     return f"""// SPDX-License-Identifier: GPL-2.0
 /*
@@ -82,7 +109,7 @@ static struct sunxi_pinctrl_desc a733_pinctrl_data = {{
 	.irq_banks = ARRAY_SIZE(a733_irq_bank_map),
 	.irq_bank_map = a733_irq_bank_map,
 	.irq_read_needs_mux = true,
-	.io_bias_cfg_variant = BIAS_VOLTAGE_PIO_POW_MODE_SEL,
+	.io_bias_cfg_variant = {bias_cfg_variant},
 }};
 
 static int a733_pinctrl_probe(struct platform_device *pdev)
@@ -113,17 +140,11 @@ def generate_pinctrl_c(data, pinmux_section):
     """Generate C-array-mode pinctrl driver with integrated pinmux tables."""
 
     irq_map = data["irq_bank_map"]
-    flags = data.get("flags", [])
+    bias_cfg_variant = io_bias_cfg_variant(data)
 
     irq_map_str = ", ".join(str(x) for x in irq_map)
 
-    flag_vals = []
-    if "new_reg_layout" in flags:
-        flag_vals.append("SUNXI_PINCTRL_NEW_REG_LAYOUT")
-    if "eleven_banks" in flags:
-        flag_vals.append("SUNXI_PINCTRL_ELEVEN_BANKS")
-
-    flag_str = " | ".join(flag_vals) if flag_vals else "0"
+    flag_str = pinctrl_flags(data, "\t\t\t\t\t     ")
 
     return f"""// SPDX-License-Identifier: GPL-2.0
 /*
@@ -152,7 +173,7 @@ static struct sunxi_pinctrl_desc a733_pinctrl_data = {{
 	.irq_banks = ARRAY_SIZE(a733_irq_bank_map),
 	.irq_bank_map = a733_irq_bank_map,
 	.irq_read_needs_mux = true,
-	.io_bias_cfg_variant = BIAS_VOLTAGE_PIO_POW_MODE_SEL,
+	.io_bias_cfg_variant = {bias_cfg_variant},
 }};
 
 static int a733_pinctrl_probe(struct platform_device *pdev)

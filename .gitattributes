@@ -1,2 +1,4 @@
 # Git-format patches retain the source tree's exact whitespace.
 bootloader/patches/*.patch -whitespace
+patches/*.patch -whitespace
+generated/aic8800/*.patch -whitespace

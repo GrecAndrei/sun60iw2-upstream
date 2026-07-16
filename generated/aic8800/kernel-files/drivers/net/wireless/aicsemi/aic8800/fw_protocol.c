@@ -544,23 +544,12 @@ void aic8800_protocol_deinit(struct aic8800_core *core)
 
 int aic8800_protocol_boot(struct aic8800_core *core)
 {
-	static const struct {
-		u32 address;
-		u32 value;
-	} oob_setup[] = {
-		{ 0x40504084, 6 },
-		{ 0x40500040, 0 },
-		{ 0x40100030, 1 },
-		{ 0x40241020, 1 },
-		{ 0x40240030, 4 },
-	};
 	struct aic8800_protocol *protocol = core->protocol;
 	struct {
 		__le32 boot_address;
 		__le32 boot_type;
 	} start = { cpu_to_le32(AIC_FW_ADDR), cpu_to_le32(1) };
 	int ret;
-	int index;
 
 	ret = aic8800_core_request_firmware(core);
 	if (ret)
@@ -571,12 +560,6 @@ int aic8800_protocol_boot(struct aic8800_core *core)
 	ret = aic8800_configure_firmware_patch(protocol);
 	if (ret)
 		goto release;
-	for (index = 0; index < ARRAY_SIZE(oob_setup); index++) {
-		ret = aic8800_mem_write(protocol, oob_setup[index].address,
-					oob_setup[index].value);
-		if (ret)
-			goto release;
-	}
 	ret = aic8800_command(protocol, AIC_DBG_START_APP_REQ, AIC_TASK_DBG,
 			      &start, sizeof(start), AIC_DBG_START_APP_CFM,
 			      NULL, 0);
@@ -1108,3 +1091,8 @@ int aic8800_protocol_wrap_tx(struct aic8800_core *core, const u8 *frame,
 	*out_len = 4 + packet_len;
 	return 0;
 }
+
+EXPORT_SYMBOL_GPL(aic8800_protocol_init);
+EXPORT_SYMBOL_GPL(aic8800_protocol_deinit);
+EXPORT_SYMBOL_GPL(aic8800_protocol_boot);
+EXPORT_SYMBOL_GPL(aic8800_protocol_rx);

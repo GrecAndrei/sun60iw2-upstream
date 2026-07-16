@@ -325,8 +325,7 @@
 		};
 
 		r_pio: pinctrl@7025000 {
-			compatible = "allwinner,sun60i-a733-r-pinctrl",
-				     "allwinner,sun55i-a523-r-pinctrl";
+			compatible = "allwinner,sun60i-a733-r-pinctrl";
 			reg = <0x7025000 0x410>;
 			interrupts = <GIC_SPI 198 IRQ_TYPE_LEVEL_HIGH>,
 				     <GIC_SPI 200 IRQ_TYPE_LEVEL_HIGH>;
@@ -402,7 +401,8 @@
 			interrupts = <GIC_SPI 2 IRQ_TYPE_LEVEL_HIGH>;
 			reg-shift = <2>;
 			reg-io-width = <4>;
-			clocks = <&ccu CLK_UART0>;
+			clocks = <&sys24M>, <&ccu CLK_UART0>;
+			clock-names = "baudclk", "apb_pclk";
 			resets = <&ccu RST_BUS_UART0>;
 			dmas = <&dma 14>, <&dma 14>;
 			dma-names = "tx", "rx";
@@ -415,10 +415,24 @@
 			interrupts = <GIC_SPI 3 IRQ_TYPE_LEVEL_HIGH>;
 			reg-shift = <2>;
 			reg-io-width = <4>;
-			clocks = <&ccu CLK_UART1>;
+			clocks = <&sys24M>, <&ccu CLK_UART1>;
+			clock-names = "baudclk", "apb_pclk";
 			resets = <&ccu RST_BUS_UART1>;
 			dmas = <&dma 15>, <&dma 15>;
 			dma-names = "tx", "rx";
+			status = "disabled";
+		};
+
+		s_twi0: i2c@7083000 {
+			#address-cells = <1>;
+			#size-cells = <0>;
+			compatible = "allwinner,sun55i-a523-i2c",
+				     "allwinner,sun8i-v536-i2c",
+				     "allwinner,sun6i-a31-i2c";
+			reg = <0x07083000 0x400>;
+			interrupts = <GIC_SPI 203 IRQ_TYPE_LEVEL_HIGH>;
+			clocks = <&r_ccu CLK_R_TWI0>;
+			resets = <&r_ccu RST_BUS_R_TWI0>;
 			status = "disabled";
 		};
 
@@ -428,7 +442,8 @@
 			interrupts = <GIC_SPI 4 IRQ_TYPE_LEVEL_HIGH>;
 			reg-shift = <2>;
 			reg-io-width = <4>;
-			clocks = <&ccu CLK_UART2>;
+			clocks = <&sys24M>, <&ccu CLK_UART2>;
+			clock-names = "baudclk", "apb_pclk";
 			resets = <&ccu RST_BUS_UART2>;
 			dmas = <&dma 16>, <&dma 16>;
 			dma-names = "tx", "rx";
@@ -441,7 +456,8 @@
 			interrupts = <GIC_SPI 5 IRQ_TYPE_LEVEL_HIGH>;
 			reg-shift = <2>;
 			reg-io-width = <4>;
-			clocks = <&ccu CLK_UART3>;
+			clocks = <&sys24M>, <&ccu CLK_UART3>;
+			clock-names = "baudclk", "apb_pclk";
 			resets = <&ccu RST_BUS_UART3>;
 			dmas = <&dma 17>, <&dma 17>;
 			dma-names = "tx", "rx";
@@ -454,7 +470,8 @@
 			interrupts = <GIC_SPI 6 IRQ_TYPE_LEVEL_HIGH>;
 			reg-shift = <2>;
 			reg-io-width = <4>;
-			clocks = <&ccu CLK_UART4>;
+			clocks = <&sys24M>, <&ccu CLK_UART4>;
+			clock-names = "baudclk", "apb_pclk";
 			resets = <&ccu RST_BUS_UART4>;
 			dmas = <&dma 18>, <&dma 18>;
 			dma-names = "tx", "rx";
@@ -467,7 +484,8 @@
 			interrupts = <GIC_SPI 7 IRQ_TYPE_LEVEL_HIGH>;
 			reg-shift = <2>;
 			reg-io-width = <4>;
-			clocks = <&ccu CLK_UART5>;
+			clocks = <&sys24M>, <&ccu CLK_UART5>;
+			clock-names = "baudclk", "apb_pclk";
 			resets = <&ccu RST_BUS_UART5>;
 			dmas = <&dma 19>, <&dma 19>;
 			dma-names = "tx", "rx";
@@ -480,7 +498,8 @@
 			interrupts = <GIC_SPI 8 IRQ_TYPE_LEVEL_HIGH>;
 			reg-shift = <2>;
 			reg-io-width = <4>;
-			clocks = <&ccu CLK_UART6>;
+			clocks = <&sys24M>, <&ccu CLK_UART6>;
+			clock-names = "baudclk", "apb_pclk";
 			resets = <&ccu RST_BUS_UART6>;
 			dmas = <&dma 20>, <&dma 20>;
 			dma-names = "tx", "rx";

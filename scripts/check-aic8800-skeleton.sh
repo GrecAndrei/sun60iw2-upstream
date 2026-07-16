@@ -13,10 +13,19 @@ LINUX_ROOT="$1"
 "$ROOT_DIR/scripts/export-aic8800-kernel-skeleton.sh" "$LINUX_ROOT"
 
 make -C "$LINUX_ROOT" ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- M=drivers/net/wireless/aicsemi/aic8800 modules
-make -C "$LINUX_ROOT" ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- drivers/bluetooth/hci_aic8800.o
+
+if grep -q '^CONFIG_SERIAL_DEV_BUS=y' "$LINUX_ROOT/.config"; then
+  make -C "$LINUX_ROOT" ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- drivers/bluetooth/hci_aic8800.o
+  export AIC8800_BT_CHECK="compiled"
+else
+  make -C "$LINUX_ROOT" ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
+    KCFLAGS=-DCONFIG_SERIAL_DEV_BUS=1 drivers/bluetooth/hci_aic8800.o
+  export AIC8800_BT_CHECK="compiled with CONFIG_SERIAL_DEV_BUS test override"
+fi
 
 python3 - <<'PY' "$ROOT_DIR" "$LINUX_ROOT"
 import json
+import os
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -29,6 +38,7 @@ payload = {
     "checked_at_utc": datetime.now(timezone.utc).isoformat(),
     "linux_tree": str(linux_root),
     "status": "pass",
+    "bluetooth_check": os.environ["AIC8800_BT_CHECK"],
 }
 out.write_text(json.dumps(payload, indent=2) + "\n")
 PY

@@ -23,7 +23,7 @@ The source checkout's revision and Git-change list are intentionally omitted: co
 
 ## Local debug build artifacts
 
-- `kernels/a733-debug/arch/arm64/boot/Image`: 11,680,256 bytes; modified 2026-06-16T23:25+03:00
+- `kernels/a733-debug/arch/arm64/boot/Image`: 10,353,152 bytes; modified 2026-07-15T22:14+03:00
 - `kernels/a733-debug/arch/arm64/boot/dts/allwinner/sun60i-a733-orangepi-4-pro.dtb`: 17,721 bytes; modified 2026-06-16T21:08+03:00
 - Artifact presence and timestamps only prove a local build output exists; they do not prove the image was booted successfully.
 
@@ -31,12 +31,12 @@ The source checkout's revision and Git-change list are intentionally omitted: co
 
 | Declaration | Source repository | Debug tree |
 |---|---:|---:|
-| `mmc1` enabled | yes | yes |
-| AXP8191 node (`x-powers,axp8191`) | no | yes |
-| R-TWI0 enabled | no | yes |
-| R-PIO PL supply declared | no | yes |
+| `mmc1 enabled` | yes | yes |
+| `AXP8191 node (`x-powers,axp8191`)` | yes | yes |
+| `R-TWI0 enabled` | yes | yes |
+| `R-PIO PL supply declared` | yes | yes |
 
-The debug tree has declarations that are absent from the tracked source tree. Treat it as an experimental integration snapshot until those changes are represented by source, generated outputs, and reviewable patches.
+These rows describe DTS text only. They do not establish driver availability, electrical behavior, or hardware success.
 
 ## Uncommitted integration changes
 

@@ -1642,7 +1642,9 @@ static struct sunxi_pinctrl_desc a733_pinctrl_data = {
 static int a733_pinctrl_probe(struct platform_device *pdev)
 {
 	return sunxi_pinctrl_init_with_flags(pdev, &a733_pinctrl_data,
-					     SUNXI_PINCTRL_NEW_REG_LAYOUT | SUNXI_PINCTRL_ELEVEN_BANKS);
+					     SUNXI_PINCTRL_NEW_REG_LAYOUT |
+					     SUNXI_PINCTRL_ELEVEN_BANKS |
+					     SUNXI_PINCTRL_AUTO_POWER_SWITCH);
 }
 
 static const struct of_device_id a733_pinctrl_match[] = {

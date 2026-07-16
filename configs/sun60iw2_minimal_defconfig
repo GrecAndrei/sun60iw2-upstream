@@ -2,7 +2,6 @@
 # This is the smallest config that can boot to a shell prompt
 
 CONFIG_ARCH_SUNXI=y
-CONFIG_ARCH_SUN60IW2=y
 CONFIG_64BIT=y
 CONFIG_ARM64=y
 

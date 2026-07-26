@@ -8,7 +8,11 @@ AIC driver comes only after `mmc1` responds.
 
 - SDIO uses `PG0` through `PG5` on SMHC1 (`mmc1`), with mux value 2.
 - BLDO5 powers the PG domain and CLDO1 powers the PM control domain; both are
-  fixed at 1.8 V.
+  fixed at 1.8 V and both are `regulator-always-on`, because nothing else
+  holds them up once pinctrl skips the bank supplies.
+- `mmc1` names fixed board rails for `vmmc-supply` and `vqmmc-supply`, never
+  PMIC outputs. See the rail ownership rule in `docs/aic8800.md`; naming a
+  shared AXP8191 rail there powers the board off during MMC power cycling.
 - `WL_REG_ON` is PM1, active high. `mmc-pwrseq-simple` therefore models it as
   an active-low reset. PM0 is host wake and is not needed for enumeration.
 - A733 PIO and R-PIO choose I/O voltage in hardware. Their pinctrl drivers use

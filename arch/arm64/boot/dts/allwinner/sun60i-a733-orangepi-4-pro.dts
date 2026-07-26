@@ -53,6 +53,32 @@
 		regulator-always-on;
 	};
 
+	/*
+	 * VCC-WIFI and VCCIO-WIFI are board rails that are already up when
+	 * the kernel starts and are not switched per-card. They are modelled
+	 * as fixed regulators on purpose: the MMC core power-cycles whatever
+	 * it is handed as vmmc/vqmmc (sunxi_mmc_card_power() calls
+	 * regulator_disable() on MMC_POWER_OFF), so an AXP8191 rail must
+	 * never be wired here. On this board those rails come off shared PMIC
+	 * outputs that also feed non-Wi-Fi consumers, and cutting them powers
+	 * the board off.
+	 */
+	reg_vcc3v3_wifi: regulator-vcc3v3-wifi {
+		compatible = "regulator-fixed";
+		regulator-name = "vcc3v3-wifi";
+		regulator-min-microvolt = <3300000>;
+		regulator-max-microvolt = <3300000>;
+		regulator-always-on;
+	};
+
+	reg_vcc1v8_wifi_io: regulator-vcc1v8-wifi-io {
+		compatible = "regulator-fixed";
+		regulator-name = "vccio-wifi";
+		regulator-min-microvolt = <1800000>;
+		regulator-max-microvolt = <1800000>;
+		regulator-always-on;
+	};
+
 	wifi_pwrseq: wifi-pwrseq {
 		compatible = "mmc-pwrseq-simple";
 		/* WL_REG_ON is an active-high enable, hence active-low reset. */
@@ -78,7 +104,11 @@
 &r_pio {
 	/* PM0/PM1 are WL_HOST_WAKE/WL_REG_ON and are supplied by CLDO1. */
 	vcc-pm-supply = <&reg_cldo1>;
-	vcc-pl-supply = <&reg_vcc3v3_sd>;
+	/*
+	 * vcc-pl-supply is deliberately not described: PL carries the I2C bus
+	 * to the AXP8191 that would provide it, so naming it here would be a
+	 * circular dependency.
+	 */
 
 	s_twi0_pins_default: s-twi0-default-pins {
 		pins = "PL0", "PL1";
@@ -126,38 +156,54 @@
 		compatible = "x-powers,axp8191";
 		reg = <0x36>;
 
+		/*
+		 * Only the rails this port actually needs are described.
+		 * A rail declared without regulator-always-on is disabled by
+		 * regulator_init_complete() once its use count reaches zero
+		 * (regulator-boot-on does not prevent this), so every rail
+		 * listed here is either always-on or has a permanent consumer.
+		 * Undeclared rails keep the state the bootloader left them in.
+		 */
 		regulators {
-			/* U4 VBAT: VCC-WIFI / VCC-3V3-WIFI (schematic sheet 21). */
+			/*
+			 * Shared 3.3 V system rail: PCIe 3v3 and the input of
+			 * the DC1SW1/DC1SW2 switches. Declared always-on so it
+			 * can never be switched off by a consumer; the range
+			 * matches the vendor description so no voltage is
+			 * written at probe.
+			 */
 			reg_dcdc1: dcdc1 {
-				regulator-name = "vcc-wifi";
-				regulator-min-microvolt = <3300000>;
-				regulator-max-microvolt = <3300000>;
-				regulator-init-microvolt = <3300000>;
-			};
-
-			/* U4 VDDIO: VCCIO-WIFI (schematic sheets 4 and 21). */
-			reg_bldo2: bldo2 {
-				regulator-name = "vccio-wifi";
-				regulator-min-microvolt = <1800000>;
-				regulator-max-microvolt = <1800000>;
-				regulator-init-microvolt = <1800000>;
+				regulator-name = "axp8191-dcdc1";
+				regulator-min-microvolt = <1000000>;
+				regulator-max-microvolt = <3800000>;
+				regulator-ramp-delay = <250>;
 				regulator-enable-ramp-delay = <1000>;
+				regulator-boot-on;
+				regulator-always-on;
 			};
 
+			/*
+			 * PG pad supply for the Wi-Fi SDIO bus, 1.8 V. The
+			 * vendor holds this rail on for the lifetime of the
+			 * Wi-Fi device; A733 pinctrl selects pad voltages
+			 * automatically (SUNXI_PINCTRL_AUTO_POWER_SWITCH) and
+			 * so never claims vcc-pg-supply, leaving no consumer
+			 * to hold it up. always-on is that guarantee.
+			 */
 			reg_bldo5: bldo5 {
 				regulator-name = "axp8191-bldo5";
 				regulator-min-microvolt = <1800000>;
 				regulator-max-microvolt = <1800000>;
-				regulator-init-microvolt = <1800000>;
 				regulator-enable-ramp-delay = <1000>;
 				regulator-boot-on;
+				regulator-always-on;
 			};
 
+			/* PM pad supply for WL_REG_ON / WL_HOST_WAKE, 1.8 V. */
 			reg_cldo1: cldo1 {
 				regulator-name = "axp8191-cldo1";
 				regulator-min-microvolt = <1800000>;
 				regulator-max-microvolt = <1800000>;
-				regulator-init-microvolt = <1800000>;
 				regulator-enable-ramp-delay = <1000>;
 				regulator-boot-on;
 				regulator-always-on;
@@ -185,9 +231,14 @@
 	max-frequency = <50000000>;
 	no-sd;
 	no-mmc;
-	/* AP6611 VBAT is 3.3 V DCDC1; its SDIO VDDIO is 1.8 V BLDO2. */
-	vmmc-supply = <&reg_dcdc1>;
-	vqmmc-supply = <&reg_bldo2>;
+	/*
+	 * Board Wi-Fi rails, not PMIC outputs. vmmc supplies the OCR mask
+	 * (3.3 V module VBAT) and vqmmc selects 1.8 V SDIO signalling to
+	 * match the 1.8 V PG pads. Both are fixed and always-on so the MMC
+	 * power-cycle path cannot drop a rail the rest of the board shares.
+	 */
+	vmmc-supply = <&reg_vcc3v3_wifi>;
+	vqmmc-supply = <&reg_vcc1v8_wifi_io>;
 
 	wifi@1 {
 		reg = <1>;

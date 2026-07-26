@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import re
 from pathlib import Path
 from textwrap import dedent
 
@@ -45,6 +46,11 @@ def gen_wifi_binding(data: dict) -> str:
         description: |
           Binding for AICsemi AIC8800 series WiFi devices connected over SDIO.
 
+          The device is enabled by its WL_REG_ON line before the SDIO card is
+          enumerated, so that line belongs to the host's mmc-pwrseq and not to
+          this node. Bus and enable-signal pad supplies belong to the pin
+          controller banks that carry them.
+
         allOf:
           - $ref: /schemas/net/wireless/wireless-controller.yaml#
 
@@ -56,10 +62,6 @@ def gen_wifi_binding(data: dict) -> str:
 
           reg:
             maxItems: 1
-
-          reset-gpios:
-            maxItems: 1
-            description: Optional reset line to the WiFi device.
 
         required:
           - compatible
@@ -1225,21 +1227,81 @@ def gen_kernel_draft_files(data: dict) -> dict[str, str]:
             #ifndef AIC8800_SDIO_IO_H
             #define AIC8800_SDIO_IO_H
 
+            #include <linux/bits.h>
             #include <linux/mmc/sdio_func.h>
             #include "core_types.h"
 
+            /*
+             * AIC8800D80 ("V3") SDIO function register map. All of these are
+             * function-space registers reached with CMD52 single-byte access;
+             * only the two FIFO addresses take CMD53 block/byte transfers.
+             */
+            #define AIC8800_SDIO_INTR_ENABLE_REG\t\t0x00
+            #define AIC8800_SDIO_INTR_PENDING_REG\t\t0x01
+            #define AIC8800_SDIO_INTR_TO_DEVICE_REG\t\t0x02
+            #define AIC8800_SDIO_FLOW_CTRL_Q1_REG\t\t0x03
+            #define AIC8800_SDIO_MISC_INT_STATUS_REG\t0x04
+            #define AIC8800_SDIO_BYTEMODE_LEN_REG\t\t__RX_LEN_PORT__
+            #define AIC8800_SDIO_BYTEMODE_LEN_MSB_REG\t0x06
+            #define AIC8800_SDIO_BYTEMODE_ENABLE_REG\t0x07
+            #define AIC8800_SDIO_MISC_CTRL_REG\t\t0x08
+            #define AIC8800_SDIO_FLOW_CTRL_Q2_REG\t\t0x09
+            #define AIC8800_SDIO_CLK_TEST_RESULT_REG\t0x0a
+            #define AIC8800_SDIO_RD_FIFO_ADDR\t\t__RX_DATA_PORT__
+            #define AIC8800_SDIO_WR_FIFO_ADDR\t\t__TX_PORT__
+
+            /* Value written to INTR_ENABLE_REG to arm the data interrupts. */
+            #define AIC8800_SDIO_INTR_ENABLE_VAL\t\t0x07
+            /* 1 selects block mode, i.e. disables byte mode. */
+            #define AIC8800_SDIO_BYTEMODE_DISABLE\t\t0x01
+            /* Set in MISC_INT_STATUS for a non-data (soft) interrupt. */
+            #define AIC8800_SDIO_OTHER_INTERRUPT\t\tBIT(7)
+            /* Device-to-host soft IRQ bit inside INTR_PENDING_REG. */
+            #define AIC8800_SDIO_INTR_PENDING_SOFT\t\tBIT(0)
+
+            /* MISC_INT_STATUS encodings: byte-mode markers per source. */
+            #define AIC8800_SDIO_BYTEMODE_MARK_F1\t\t120
+            #define AIC8800_SDIO_BYTEMODE_MARK_F2\t\t127
+            #define AIC8800_SDIO_BLOCK_CNT_MASK_F1\t\t0x7f
+            #define AIC8800_SDIO_BLOCK_CNT_MASK_F2\t\t0x07
+
+            #define AIC8800_SDIO_BLOCK_SIZE\t\t\t512
+            /* Buffer granularity the firmware reports through flow control. */
+            #define AIC8800_SDIO_BUFFER_SIZE\t\t1536
+            /* Keep this many firmware buffers in reserve before sending. */
+            #define AIC8800_SDIO_FLOW_CTRL_THRESH\t\t2
+            #define AIC8800_SDIO_FLOW_CTRL_RETRY\t\t50
+            /* TX payloads are word aligned and terminated by a zero word. */
+            #define AIC8800_SDIO_TX_ALIGNMENT\t\t4
+            #define AIC8800_SDIO_TX_TAIL_LEN\t\t4
+            #define AIC8800_SDIO_TX_HDR_LEN\t\t\t4
+            /* The header carries a 12-bit payload length. */
+            #define AIC8800_SDIO_TX_MAX_PAYLOAD\t\t0x0fff
+            /* Largest frame the block-count encoding can describe. */
+            #define AIC8800_SDIO_RX_MAX_LEN\t\t\t\\
+            \t(AIC8800_SDIO_BLOCK_CNT_MASK_F1 * AIC8800_SDIO_BLOCK_SIZE)
+
+            int aic8800_sdio_readb(struct sdio_func *func, unsigned int addr,
+            \t\t\t u8 *val);
+            int aic8800_sdio_writeb(struct sdio_func *func, unsigned int addr,
+            \t\t\t u8 val);
             int aic8800_sdio_io_init(struct sdio_func *func);
             void aic8800_sdio_io_deinit(struct sdio_func *func);
             int aic8800_sdio_tx_write(struct sdio_func *func,
             \t\t\t const u8 *data, size_t len);
             int aic8800_sdio_tx_frame(struct aic8800_core *core,
             \t\t\t const u8 *data, size_t len);
+            int aic8800_sdio_flow_ctrl(struct sdio_func *func,
+            \t\t\t   const bool *abort);
             int aic8800_sdio_rx_drain(struct aic8800_core *core, int budget);
             u8 aic8800_sdio_crc8(const u8 *buf, size_t len);
 
             #endif
             """
-        ),
+        )
+        .replace("__TX_PORT__", tx_port_addr)
+        .replace("__RX_LEN_PORT__", rx_len_port_addr)
+        .replace("__RX_DATA_PORT__", rx_data_port_addr),
         "drivers/net/wireless/aicsemi/aic8800/sdio_probe.c": dedent(
             """\
             // SPDX-License-Identifier: GPL-2.0-only
@@ -1251,17 +1313,15 @@ def gen_kernel_draft_files(data: dict) -> dict[str, str]:
             #include <linux/debugfs.h>
             #include <linux/etherdevice.h>
             #include <linux/fs.h>
-            #include <linux/gpio/consumer.h>
             #include <linux/interrupt.h>
             #include <linux/jiffies.h>
             #include <linux/module.h>
             #include <linux/mutex.h>
             #include <linux/mmc/card.h>
             #include <linux/mmc/host.h>
+            #include <linux/mmc/sdio.h>
             #include <linux/mmc/sdio_func.h>
             #include <linux/netdevice.h>
-            #include <linux/of_irq.h>
-            #include <linux/regulator/consumer.h>
             #include <linux/skbuff.h>
             #include <linux/slab.h>
             #include <linux/seq_file.h>
@@ -1289,8 +1349,6 @@ def gen_kernel_draft_files(data: dict) -> dict[str, str]:
             \tstruct mutex recovery_lock;
             \tbool tx_reinit_in_progress;
             \tstruct dentry *dbg_dir;
-            \tstruct regulator *vddio;
-            \tstruct gpio_desc *reset_gpio;
             \tbool rx_stopping;
             \tbool tx_stopping;
             };
@@ -1298,8 +1356,6 @@ def gen_kernel_draft_files(data: dict) -> dict[str, str]:
             static int aic8800_sdio_tx_recover(struct aic8800_sdio *sdio);
             static int aic8800_sdio_reinit_transport(struct aic8800_sdio *sdio,
            \t\t\t\t\t bool force);
-            static int aic8800_sdio_power_on(struct aic8800_sdio *sdio);
-            static void aic8800_sdio_power_off(struct aic8800_sdio *sdio);
             static void aic8800_sdio_rx_purge(struct aic8800_sdio *sdio);
             static void aic8800_sdio_irq_handler(struct sdio_func *func);
 
@@ -1454,41 +1510,6 @@ def gen_kernel_draft_files(data: dict) -> dict[str, str]:
             \tsdio->dbg_dir = NULL;
             }
 
-            static int aic8800_sdio_power_on(struct aic8800_sdio *sdio)
-            {
-            \tint ret;
-
-            \tif (!sdio)
-            \t\treturn -EINVAL;
-
-            \tif (sdio->vddio) {
-            \t\tret = regulator_enable(sdio->vddio);
-            \t\tif (ret)
-            \t\t\treturn ret;
-            \t}
-
-            \tif (sdio->reset_gpio) {
-            \t\tgpiod_set_value_cansleep(sdio->reset_gpio, 1);
-            \t\tmsleep(20);
-            \t\tgpiod_set_value_cansleep(sdio->reset_gpio, 0);
-            \t\tmsleep(20);
-            \t}
-
-            \treturn 0;
-            }
-
-            static void aic8800_sdio_power_off(struct aic8800_sdio *sdio)
-            {
-            \tif (!sdio)
-            \t\treturn;
-
-            \tif (sdio->reset_gpio)
-            \t\tgpiod_set_value_cansleep(sdio->reset_gpio, 1);
-
-            \tif (sdio->vddio)
-            \t\tregulator_disable(sdio->vddio);
-            }
-
             static void aic8800_sdio_rx_submit_work(struct work_struct *work)
             {
             \tstruct aic8800_sdio *sdio =
@@ -1601,7 +1622,7 @@ def gen_kernel_draft_files(data: dict) -> dict[str, str]:
             \t\treturn;
 
             \twhile (!sdio->tx_stopping) {
-            \t\tu8 fc_reg;
+            \t\tint avail;
             \t\tint ret;
             \t\tint tries = 0;
 
@@ -1611,38 +1632,18 @@ def gen_kernel_draft_files(data: dict) -> dict[str, str]:
             \t\t\t\tbreak;
             \t\t}
 
-            \t\t/* Flow control: read available TX buffers */
-            \t\t{
-            \t\t\tint fc_retries = 0;
-
-            \t\t\tsdio_claim_host(func);
-            \t\t\tret = sdio_readsb(func, &fc_reg, 0x03, 1);
-            \t\t\tsdio_release_host(func);
-            \t\t\tif (ret)
-            \t\t\t\tbreak;
-
-            \t\t\twhile (fc_reg <= 2 && fc_retries < 50 &&
-            \t\t\t       !sdio->tx_stopping) {
-            \t\t\t\tif (fc_retries < 30)
-            \t\t\t\t\tudelay(200);
-            \t\t\t\telse if (fc_retries < 40)
-            \t\t\t\t\tmsleep(2);
-            \t\t\t\telse
-            \t\t\t\t\tmsleep(10);
-            \t\t\t\tfc_retries++;
-            \t\t\t\tsdio_claim_host(func);
-            \t\t\t\tret = sdio_readsb(func, &fc_reg, 0x03, 1);
-            \t\t\t\tsdio_release_host(func);
-            \t\t\t\tif (ret)
-            \t\t\t\t\tbreak;
-            \t\t\t}
-            \t\t}
-
-            \t\tif (ret || fc_reg <= 2) {
-            \t\t\tif (ret)
+            \t\t/* Wait for the firmware to advertise free TX buffers. */
+            \t\tavail = aic8800_sdio_flow_ctrl(func, &sdio->tx_stopping);
+            \t\tif (avail < 0) {
+            \t\t\tif (avail != -EBUSY)
             \t\t\t\tsdio->core.tx_errors++;
             \t\t\tbreak;
             \t\t}
+
+            \t\t/* Do not start a frame the firmware cannot hold. */
+            \t\tif (sdio->tx_skb->len + AIC8800_SDIO_TX_HDR_LEN >
+            \t\t    (u32)avail * AIC8800_SDIO_BUFFER_SIZE)
+            \t\t\tbreak;
 
             \t\tdo {
             \t\t\tret = aic8800_sdio_tx_write(func, sdio->tx_skb->data,
@@ -1814,9 +1815,8 @@ def gen_kernel_draft_files(data: dict) -> dict[str, str]:
             \t\tgoto out_finish;
             \t}
 
-            \tsdio_claim_host(func);
-            \tsdio_writeb(func, 0x07, __INTR_ENABLE_REG__, &ret);
-            \tsdio_release_host(func);
+            \tret = aic8800_sdio_writeb(func, AIC8800_SDIO_INTR_ENABLE_REG,
+            \t\t\t\t  AIC8800_SDIO_INTR_ENABLE_VAL);
             \tif (ret) {
             \t\tsdio_claim_host(func);
             \t\tsdio_release_irq(func);
@@ -1890,21 +1890,16 @@ def gen_kernel_draft_files(data: dict) -> dict[str, str]:
             static void aic8800_sdio_irq_handler(struct sdio_func *func)
             {
             \tstruct aic8800_sdio *sdio = sdio_get_drvdata(func);
-            \tu8 pending;
-            \tint ret;
 
             \tif (!sdio)
             \t\treturn;
 
             \tsdio->core.irq_count++;
 
-            \t/* The SDIO core invokes this handler with the host claimed. */
-            \tpending = sdio_readb(func, 0x01, &ret);
-            \tif (!ret) {
-            \t\tpending &= ~0x01;
-            \t\tsdio_writeb(func, pending, 0x01, &ret);
-            \t}
-
+            \t/* The SDIO core calls this with the host claimed, so the
+            \t * status read and the FIFO drain are left to the RX work,
+            \t * which also acknowledges a soft interrupt if one is set.
+            \t */
             \tif (!sdio->rx_stopping)
             \t\tschedule_work(&sdio->rx_work);
             }
@@ -1959,22 +1954,6 @@ def gen_kernel_draft_files(data: dict) -> dict[str, str]:
             \t\t\tdev_warn_once(&func->dev,
             \t\t\t\t"SoC match unavailable, using generic AIC8800 path\\n");
 
-            \t\tsdio->vddio = devm_regulator_get_optional(&func->dev, "vddio");
-            \t\tif (IS_ERR(sdio->vddio)) {
-            \t\t\tif (PTR_ERR(sdio->vddio) == -ENODEV)
-            \t\t\t\tsdio->vddio = NULL;
-            \t\t\telse
-            \t\t\t\treturn PTR_ERR(sdio->vddio);
-            \t\t}
-
-            \t\tsdio->reset_gpio = devm_gpiod_get_optional(&func->dev, "reset",
-            \t\t\t\t\t       GPIOD_OUT_LOW);
-            \t\tif (IS_ERR(sdio->reset_gpio))
-            \t\t\treturn PTR_ERR(sdio->reset_gpio);
-
-            \t\tret = aic8800_sdio_power_on(sdio);
-            \t\tif (ret)
-            \t\t\treturn ret;
             \t\tdev_info(&func->dev, "normal mode probe\\n");
             \t} else {
             \t\tdev_info(&bound_func->dev,
@@ -2000,19 +1979,22 @@ def gen_kernel_draft_files(data: dict) -> dict[str, str]:
             \tif (ret)
             \t\tgoto err_io;
 
-            \tsdio_claim_host(func);
-            \tsdio_writeb(func, 0x07, __INTR_ENABLE_REG__, &ret);
-            \tsdio_release_host(func);
+            \tif (!bootloader_mode) {
+            \t\t/* The device wants the CCCR interrupt enables written
+            \t\t * directly once the runtime firmware is up.
+            \t\t */
+            \t\tsdio_claim_host(func);
+            \t\tsdio_f0_writeb(func, 0x07, SDIO_CCCR_IENx, &ret);
+            \t\tsdio_release_host(func);
+            \t\tif (ret)
+            \t\t\tdev_warn(&func->dev,
+            \t\t\t\t"CCCR int enable returned %d\\n", ret);
+            \t}
+
+            \tret = aic8800_sdio_writeb(func, AIC8800_SDIO_INTR_ENABLE_REG,
+            \t\t\t\t  AIC8800_SDIO_INTR_ENABLE_VAL);
             \tif (ret)
             \t\tgoto err_irq;
-
-            \t/* Enable master interrupt on CCCR func0 for 8800D80 */
-            \tsdio_claim_host(func);
-            \tsdio_f0_writeb(func, 0x07, 0x04, &ret);
-            \tsdio_release_host(func);
-            \tif (ret)
-            \t\tdev_warn(&func->dev,
-            \t\t\t"CCCR int enable returned %d\\n", ret);
 
             \tif (bootloader_mode) {
             \t\tret = aic8800_protocol_init(&sdio->core);
@@ -2058,8 +2040,6 @@ def gen_kernel_draft_files(data: dict) -> dict[str, str]:
             \tsdio_set_drvdata(func, NULL);
             \tif (func != bound_func)
             \t\tsdio_set_drvdata(bound_func, NULL);
-            \tif (!bootloader_mode)
-            \t\taic8800_sdio_power_off(sdio);
             \treturn ret;
             }
 
@@ -2083,7 +2063,6 @@ def gen_kernel_draft_files(data: dict) -> dict[str, str]:
             \tsdio->core.rx_submit = NULL;
             \taic8800_core_unregister(&sdio->core);
             \tsdio_set_drvdata(func, NULL);
-            \taic8800_sdio_power_off(sdio);
             }
 
             static const struct sdio_device_id aic8800_boot_sdio_ids[] = {
@@ -2204,9 +2183,38 @@ def gen_kernel_draft_files(data: dict) -> dict[str, str]:
             \treturn crc;
             }
 
+            int aic8800_sdio_readb(struct sdio_func *func, unsigned int addr,
+            \t\t\t u8 *val)
+            {
+            \tint ret;
+
+            \tif (!func || !val)
+            \t\treturn -EINVAL;
+
+            \tsdio_claim_host(func);
+            \t*val = sdio_readb(func, addr, &ret);
+            \tsdio_release_host(func);
+
+            \treturn ret;
+            }
+
+            int aic8800_sdio_writeb(struct sdio_func *func, unsigned int addr,
+            \t\t\t u8 val)
+            {
+            \tint ret;
+
+            \tif (!func)
+            \t\treturn -EINVAL;
+
+            \tsdio_claim_host(func);
+            \tsdio_writeb(func, val, addr, &ret);
+            \tsdio_release_host(func);
+
+            \treturn ret;
+            }
+
             int aic8800_sdio_io_init(struct sdio_func *func)
             {
-            \tu8 val;
             \tint ret;
 
             \tif (!func)
@@ -2214,50 +2222,49 @@ def gen_kernel_draft_files(data: dict) -> dict[str, str]:
 
             \tsdio_claim_host(func);
 
+            \t/* The pad configuration below writes function 0 below 0xf0. */
             \tfunc->card->quirks |= MMC_QUIRK_LENIENT_FN0;
 
-            \tret = sdio_set_block_size(func, 512);
+            \tret = sdio_set_block_size(func, AIC8800_SDIO_BLOCK_SIZE);
             \tif (ret) {
             \t\tsdio_release_host(func);
             \t\treturn ret;
             \t}
 
             \tret = sdio_enable_func(func);
-            \tif (ret)
-            \t\tgoto out_release;
+            \tif (ret) {
+            \t\tsdio_release_host(func);
+            \t\treturn ret;
+            \t}
 
-            \tsdio_writeb(func, 0x01, __BYTEMODE_ENABLE_REG__, &ret);
-            \tif (ret)
-            \t\tgoto out_disable;
-
-            \tsdio_writeb(func, 0x11, __WAKEUP_REG__, &ret);
-            \tif (ret)
-            \t\tgoto out_disable;
-
-            \tsdio_release_host(func);
-
-            \tmsleep(10);
-
-            \tsdio_claim_host(func);
-            \tval = sdio_readb(func, __SLEEP_REG__, &ret);
-            \tsdio_release_host(func);
+            \t/* Device I/O pad drive and delay selection. */
+            \tsdio_f0_writeb(func, 0x7f, 0xf2, &ret);
             \tif (ret)
             \t\tgoto err_disable;
 
-            \tif (!(val & 0x10)) {
+            \tsdio_f0_writeb(func, 0x80, 0xf1, &ret);
+            \tif (ret)
+            \t\tgoto err_disable;
+
+            \tsdio_release_host(func);
+
+            \t/* Let the pad setting settle before the first register access. */
+            \tusleep_range(1000, 2000);
+
+            \t/* Select block mode; this driver does not use byte mode. */
+            \tret = aic8800_sdio_writeb(func, AIC8800_SDIO_BYTEMODE_ENABLE_REG,
+            \t\t\t\t  AIC8800_SDIO_BYTEMODE_DISABLE);
+            \tif (ret) {
             \t\tdev_err(&func->dev,
-            \t\t\t"chip not ready after init (sleep_reg=0x%02x)\\n", val);
-            \t\tret = -ETIMEDOUT;
+            \t\t\t"failed to select SDIO block mode: %d\\n", ret);
+            \t\tsdio_claim_host(func);
             \t\tgoto err_disable;
             \t}
 
             \treturn 0;
 
             err_disable:
-            \tsdio_claim_host(func);
-            out_disable:
             \tsdio_disable_func(func);
-            out_release:
             \tsdio_release_host(func);
             \treturn ret;
             }
@@ -2272,43 +2279,90 @@ def gen_kernel_draft_files(data: dict) -> dict[str, str]:
             \tsdio_release_host(func);
             }
 
+            int aic8800_sdio_flow_ctrl(struct sdio_func *func, const bool *abort)
+            {
+            \tunsigned int count = 0;
+            \tu8 fc_reg;
+            \tint ret;
+
+            \tif (!func)
+            \t\treturn -EINVAL;
+
+            \tfor (;;) {
+            \t\tret = aic8800_sdio_readb(func,
+            \t\t\t\t\t AIC8800_SDIO_FLOW_CTRL_Q1_REG,
+            \t\t\t\t\t &fc_reg);
+            \t\tif (ret)
+            \t\t\treturn ret;
+
+            \t\t/* Buffers beyond the reserve are available to us. */
+            \t\tif (fc_reg > AIC8800_SDIO_FLOW_CTRL_THRESH)
+            \t\t\treturn fc_reg;
+
+            \t\tif (count >= AIC8800_SDIO_FLOW_CTRL_RETRY ||
+            \t\t    (abort && *abort))
+            \t\t\treturn -EBUSY;
+
+            \t\t/* Spin while the firmware is likely to drain quickly,
+            \t\t * then back off to sleeping waits.
+            \t\t */
+            \t\tif (count < 30)
+            \t\t\tudelay(200);
+            \t\telse if (count < 40)
+            \t\t\tusleep_range(2000, 3000);
+            \t\telse
+            \t\t\tusleep_range(10000, 11000);
+            \t\tcount++;
+            \t}
+            }
+
             int aic8800_sdio_tx_write(struct sdio_func *func,
             \t\t\t const u8 *data, size_t len)
             {
-            \t/* TX frame: 4-byte header + payload, padded to 512 blocks
-            \t * [0-1] LE16 len (total payload bytes)
-            \t * [2]   type = 0x01 (data)
-            \t * [3]   CRC8 of bytes 0-2 (8800D80)
+            \t/*
+            \t * Wire format of one frame:
+            \t *   [0-1] payload length, little endian, 12 significant bits
+            \t *   [2]   0x01, data
+            \t *   [3]   CRC8 (polynomial 0x107) over bytes 0-2
+            \t *   payload, zero padded to a 4-byte boundary
+            \t *   a zero terminator word when the result is not already a
+            \t *   whole number of blocks, then zero padding to the block size
             \t */
-            \tu8 hdr[4];
-            \tu16 plen = (u16)len;
+            \tsize_t aligned_len;
             \tsize_t block_len;
+            \tu8 *buf;
             \tint ret;
 
             \tif (!func || !data || !len)
             \t\treturn -EINVAL;
 
-            \thdr[0] = plen & 0xFF;
-            \thdr[1] = (plen >> 8) & 0xFF;
-            \thdr[2] = 0x01;
-            \thdr[3] = aic8800_sdio_crc8(hdr, 3);
+            \tif (len > AIC8800_SDIO_TX_MAX_PAYLOAD)
+            \t\treturn -EMSGSIZE;
 
-            \tblock_len = roundup(sizeof(hdr) + len, 512);
+            \taligned_len = ALIGN(AIC8800_SDIO_TX_HDR_LEN + len,
+            \t\t\t    AIC8800_SDIO_TX_ALIGNMENT);
+            \tif (aligned_len % AIC8800_SDIO_BLOCK_SIZE)
+            \t\taligned_len += AIC8800_SDIO_TX_TAIL_LEN;
+            \tblock_len = ALIGN(aligned_len, AIC8800_SDIO_BLOCK_SIZE);
 
-            \t{
-            \t\tu8 *buf = kzalloc(block_len, GFP_KERNEL);
+            \t/* kzalloc supplies both the alignment padding and the zero
+            \t * terminator word the firmware uses to end the chain.
+            \t */
+            \tbuf = kzalloc(block_len, GFP_KERNEL);
+            \tif (!buf)
+            \t\treturn -ENOMEM;
 
-            \t\tif (!buf)
-            \t\t\treturn -ENOMEM;
+            \tbuf[0] = len & 0xff;
+            \tbuf[1] = (len >> 8) & 0x0f;
+            \tbuf[2] = 0x01;
+            \tbuf[3] = aic8800_sdio_crc8(buf, 3);
+            \tmemcpy(buf + AIC8800_SDIO_TX_HDR_LEN, data, len);
 
-            \t\tmemcpy(buf, hdr, sizeof(hdr));
-            \t\tmemcpy(buf + sizeof(hdr), data, len);
-
-            \t\tsdio_claim_host(func);
-            \t\tret = sdio_writesb(func, __TX_PORT__, buf, block_len);
-            \t\tsdio_release_host(func);
-            \t\tkfree(buf);
-            \t}
+            \tsdio_claim_host(func);
+            \tret = sdio_writesb(func, AIC8800_SDIO_WR_FIFO_ADDR, buf,
+            \t\t\t   block_len);
+            \tsdio_release_host(func);
+            \tkfree(buf);
 
             \tif (ret)
             \t\tdev_err(&func->dev, "TX write failed: %d\\n", ret);
@@ -2338,48 +2392,105 @@ def gen_kernel_draft_files(data: dict) -> dict[str, str]:
             \twhile (frames < budget) {
             \t\tu8 *frame;
             \t\tu8 int_status;
+            \t\tu8 block_mask;
             \t\tu32 data_len;
-            \t\tbool byte_mode;
+            \t\tbool byte_mode = false;
 
-            \t\t/* Read V3 MISC_INT_STATUS_REG to determine data size */
-            \t\tsdio_claim_host(func);
-            \t\tret = sdio_readsb(func, &int_status, __INT_STATUS_REG__, 1);
-            \t\tsdio_release_host(func);
+            \t\tret = aic8800_sdio_readb(func,
+            \t\t\t\t\t AIC8800_SDIO_MISC_INT_STATUS_REG,
+            \t\t\t\t\t &int_status);
             \t\tif (ret) {
             \t\t\tif (ret == -ENOMEDIUM)
             \t\t\t\tbreak;
             \t\t\treturn ret;
             \t\t}
 
-            \t\tbyte_mode = (int_status == 120);
+            \t\t/* A soft interrupt is acknowledged separately, in the
+            \t\t * pending register, and carries no payload of its own.
+            \t\t */
+            \t\tif (int_status & AIC8800_SDIO_OTHER_INTERRUPT) {
+            \t\t\tu8 pending;
+
+            \t\t\tret = aic8800_sdio_readb(func,
+            \t\t\t\t\t\t AIC8800_SDIO_INTR_PENDING_REG,
+            \t\t\t\t\t\t &pending);
+            \t\t\tif (ret)
+            \t\t\t\treturn ret;
+
+            \t\t\tpending &= ~AIC8800_SDIO_INTR_PENDING_SOFT;
+            \t\t\tret = aic8800_sdio_writeb(func,
+            \t\t\t\t\t\t  AIC8800_SDIO_INTR_PENDING_REG,
+            \t\t\t\t\t\t  pending);
+            \t\t\tif (ret)
+            \t\t\t\treturn ret;
+            \t\t}
+
+            \t\tif (!int_status)
+            \t\t\tbreak;
+
+            \t\t/* The status byte encodes both the source and the size.
+            \t\t * Forcing bit 3 set separates the function 2 range, which
+            \t\t * uses a narrower block count. Either range has a marker
+            \t\t * value that means the length comes from a register in
+            \t\t * units of four bytes instead.
+            \t\t */
+            \t\tif ((int_status | BIT(3)) > AIC8800_SDIO_BYTEMODE_MARK_F1) {
+            \t\t\tbyte_mode = (int_status | BIT(3)) ==
+            \t\t\t\t    AIC8800_SDIO_BYTEMODE_MARK_F2;
+            \t\t\tblock_mask = AIC8800_SDIO_BLOCK_CNT_MASK_F2;
+            \t\t} else {
+            \t\t\tbyte_mode = int_status ==
+            \t\t\t\t    AIC8800_SDIO_BYTEMODE_MARK_F1;
+            \t\t\tblock_mask = AIC8800_SDIO_BLOCK_CNT_MASK_F1;
+            \t\t}
+
             \t\tif (byte_mode) {
             \t\t\tu8 byte_len;
 
-            \t\t\tsdio_claim_host(func);
-            \t\t\tret = sdio_readsb(func, &byte_len,
-            \t\t\t\t\t   __RX_LEN_PORT__, 1);
-            \t\t\tsdio_release_host(func);
+            \t\t\tret = aic8800_sdio_readb(func,
+            \t\t\t\t\t\t AIC8800_SDIO_BYTEMODE_LEN_REG,
+            \t\t\t\t\t\t &byte_len);
             \t\t\tif (ret)
             \t\t\t\treturn ret;
 
             \t\t\tdata_len = byte_len * 4;
             \t\t} else {
-            \t\t\tdata_len = (int_status & 0x7F) * 512;
+            \t\t\tdata_len = (int_status & block_mask) *
+            \t\t\t\t   AIC8800_SDIO_BLOCK_SIZE;
             \t\t}
 
-            \t\tif (!data_len || data_len > __RX_MAX_LEN__)
+            \t\tif (!data_len)
             \t\t\tbreak;
+
+            \t\t/* Bounded by the encoding above, but check anyway: the
+            \t\t * length comes from the device.
+            \t\t */
+            \t\tif (data_len > AIC8800_SDIO_RX_MAX_LEN)
+            \t\t\treturn -EPROTO;
 
             \t\tframe = kmalloc(data_len, GFP_KERNEL);
             \t\tif (!frame)
             \t\t\treturn -ENOMEM;
 
+            \t\t/* Always drain what the device announced. Leaving bytes
+            \t\t * in the read FIFO wedges it for good.
+            \t\t */
             \t\tsdio_claim_host(func);
-            \t\tret = sdio_readsb(func, frame, __RX_DATA_PORT__, data_len);
+            \t\tret = sdio_readsb(func, frame, AIC8800_SDIO_RD_FIFO_ADDR,
+            \t\t\t\t  data_len);
             \t\tsdio_release_host(func);
             \t\tif (ret) {
             \t\t\tkfree(frame);
             \t\t\treturn ret;
+            \t\t}
+
+            \t\tif (data_len > __RX_MAX_LEN__) {
+            \t\t\tdev_warn_ratelimited(core->dev,
+            \t\t\t\t"discarding %u byte RX frame\\n", data_len);
+            \t\t\tcore->rx_malformed++;
+            \t\t\tkfree(frame);
+            \t\t\tframes++;
+            \t\t\tcontinue;
             \t\t}
 
             \t\tret = aic8800_protocol_rx(core, frame, data_len);
@@ -2815,9 +2926,11 @@ def gen_kernel_draft_files(data: dict) -> dict[str, str]:
         relative = template.name.removesuffix(".in").replace("__", "/")
         files.setdefault(relative, template.read_text())
 
+    # Strip the single leading space dedent leaves on continuation lines,
+    # but keep the one that kernel-style block comments need.
     for rel_path, content in files.items():
         if rel_path.endswith((".c", ".h")):
-            files[rel_path] = content.replace("\n ", "\n")
+            files[rel_path] = re.sub(r"\n (?!\*)", "\n", content)
 
     return files
 

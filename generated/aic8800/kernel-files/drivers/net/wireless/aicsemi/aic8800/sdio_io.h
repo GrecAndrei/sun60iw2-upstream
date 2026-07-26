@@ -5,15 +5,72 @@
 #ifndef AIC8800_SDIO_IO_H
 #define AIC8800_SDIO_IO_H
 
+#include <linux/bits.h>
 #include <linux/mmc/sdio_func.h>
 #include "core_types.h"
 
+/*
+ * AIC8800D80 ("V3") SDIO function register map. All of these are
+ * function-space registers reached with CMD52 single-byte access;
+ * only the two FIFO addresses take CMD53 block/byte transfers.
+ */
+#define AIC8800_SDIO_INTR_ENABLE_REG		0x00
+#define AIC8800_SDIO_INTR_PENDING_REG		0x01
+#define AIC8800_SDIO_INTR_TO_DEVICE_REG		0x02
+#define AIC8800_SDIO_FLOW_CTRL_Q1_REG		0x03
+#define AIC8800_SDIO_MISC_INT_STATUS_REG	0x04
+#define AIC8800_SDIO_BYTEMODE_LEN_REG		0x05
+#define AIC8800_SDIO_BYTEMODE_LEN_MSB_REG	0x06
+#define AIC8800_SDIO_BYTEMODE_ENABLE_REG	0x07
+#define AIC8800_SDIO_MISC_CTRL_REG		0x08
+#define AIC8800_SDIO_FLOW_CTRL_Q2_REG		0x09
+#define AIC8800_SDIO_CLK_TEST_RESULT_REG	0x0a
+#define AIC8800_SDIO_RD_FIFO_ADDR		0x0F
+#define AIC8800_SDIO_WR_FIFO_ADDR		0x10
+
+/* Value written to INTR_ENABLE_REG to arm the data interrupts. */
+#define AIC8800_SDIO_INTR_ENABLE_VAL		0x07
+/* 1 selects block mode, i.e. disables byte mode. */
+#define AIC8800_SDIO_BYTEMODE_DISABLE		0x01
+/* Set in MISC_INT_STATUS for a non-data (soft) interrupt. */
+#define AIC8800_SDIO_OTHER_INTERRUPT		BIT(7)
+/* Device-to-host soft IRQ bit inside INTR_PENDING_REG. */
+#define AIC8800_SDIO_INTR_PENDING_SOFT		BIT(0)
+
+/* MISC_INT_STATUS encodings: byte-mode markers per source. */
+#define AIC8800_SDIO_BYTEMODE_MARK_F1		120
+#define AIC8800_SDIO_BYTEMODE_MARK_F2		127
+#define AIC8800_SDIO_BLOCK_CNT_MASK_F1		0x7f
+#define AIC8800_SDIO_BLOCK_CNT_MASK_F2		0x07
+
+#define AIC8800_SDIO_BLOCK_SIZE			512
+/* Buffer granularity the firmware reports through flow control. */
+#define AIC8800_SDIO_BUFFER_SIZE		1536
+/* Keep this many firmware buffers in reserve before sending. */
+#define AIC8800_SDIO_FLOW_CTRL_THRESH		2
+#define AIC8800_SDIO_FLOW_CTRL_RETRY		50
+/* TX payloads are word aligned and terminated by a zero word. */
+#define AIC8800_SDIO_TX_ALIGNMENT		4
+#define AIC8800_SDIO_TX_TAIL_LEN		4
+#define AIC8800_SDIO_TX_HDR_LEN			4
+/* The header carries a 12-bit payload length. */
+#define AIC8800_SDIO_TX_MAX_PAYLOAD		0x0fff
+/* Largest frame the block-count encoding can describe. */
+#define AIC8800_SDIO_RX_MAX_LEN			\
+	(AIC8800_SDIO_BLOCK_CNT_MASK_F1 * AIC8800_SDIO_BLOCK_SIZE)
+
+int aic8800_sdio_readb(struct sdio_func *func, unsigned int addr,
+			 u8 *val);
+int aic8800_sdio_writeb(struct sdio_func *func, unsigned int addr,
+			 u8 val);
 int aic8800_sdio_io_init(struct sdio_func *func);
 void aic8800_sdio_io_deinit(struct sdio_func *func);
 int aic8800_sdio_tx_write(struct sdio_func *func,
 			 const u8 *data, size_t len);
 int aic8800_sdio_tx_frame(struct aic8800_core *core,
 			 const u8 *data, size_t len);
+int aic8800_sdio_flow_ctrl(struct sdio_func *func,
+			   const bool *abort);
 int aic8800_sdio_rx_drain(struct aic8800_core *core, int budget);
 u8 aic8800_sdio_crc8(const u8 *buf, size_t len);
 

@@ -47,9 +47,38 @@ u8 aic8800_sdio_crc8(const u8 *buf, size_t len)
 	return crc;
 }
 
+int aic8800_sdio_readb(struct sdio_func *func, unsigned int addr,
+			 u8 *val)
+{
+	int ret;
+
+	if (!func || !val)
+		return -EINVAL;
+
+	sdio_claim_host(func);
+	*val = sdio_readb(func, addr, &ret);
+	sdio_release_host(func);
+
+	return ret;
+}
+
+int aic8800_sdio_writeb(struct sdio_func *func, unsigned int addr,
+			 u8 val)
+{
+	int ret;
+
+	if (!func)
+		return -EINVAL;
+
+	sdio_claim_host(func);
+	sdio_writeb(func, val, addr, &ret);
+	sdio_release_host(func);
+
+	return ret;
+}
+
 int aic8800_sdio_io_init(struct sdio_func *func)
 {
-	u8 val;
 	int ret;
 
 	if (!func)
@@ -57,50 +86,49 @@ int aic8800_sdio_io_init(struct sdio_func *func)
 
 	sdio_claim_host(func);
 
+	/* The pad configuration below writes function 0 below 0xf0. */
 	func->card->quirks |= MMC_QUIRK_LENIENT_FN0;
 
-	ret = sdio_set_block_size(func, 512);
+	ret = sdio_set_block_size(func, AIC8800_SDIO_BLOCK_SIZE);
 	if (ret) {
 		sdio_release_host(func);
 		return ret;
 	}
 
 	ret = sdio_enable_func(func);
-	if (ret)
-		goto out_release;
+	if (ret) {
+		sdio_release_host(func);
+		return ret;
+	}
 
-	sdio_writeb(func, 0x01, 0x07, &ret);
-	if (ret)
-		goto out_disable;
-
-	sdio_writeb(func, 0x11, 0x02, &ret);
-	if (ret)
-		goto out_disable;
-
-	sdio_release_host(func);
-
-	msleep(10);
-
-	sdio_claim_host(func);
-	val = sdio_readb(func, 0x01, &ret);
-	sdio_release_host(func);
+	/* Device I/O pad drive and delay selection. */
+	sdio_f0_writeb(func, 0x7f, 0xf2, &ret);
 	if (ret)
 		goto err_disable;
 
-	if (!(val & 0x10)) {
+	sdio_f0_writeb(func, 0x80, 0xf1, &ret);
+	if (ret)
+		goto err_disable;
+
+	sdio_release_host(func);
+
+	/* Let the pad setting settle before the first register access. */
+	usleep_range(1000, 2000);
+
+	/* Select block mode; this driver does not use byte mode. */
+	ret = aic8800_sdio_writeb(func, AIC8800_SDIO_BYTEMODE_ENABLE_REG,
+				  AIC8800_SDIO_BYTEMODE_DISABLE);
+	if (ret) {
 		dev_err(&func->dev,
-			"chip not ready after init (sleep_reg=0x%02x)\n", val);
-		ret = -ETIMEDOUT;
+			"failed to select SDIO block mode: %d\n", ret);
+		sdio_claim_host(func);
 		goto err_disable;
 	}
 
 	return 0;
 
 err_disable:
-	sdio_claim_host(func);
-out_disable:
 	sdio_disable_func(func);
-out_release:
 	sdio_release_host(func);
 	return ret;
 }
@@ -115,43 +143,90 @@ void aic8800_sdio_io_deinit(struct sdio_func *func)
 	sdio_release_host(func);
 }
 
+int aic8800_sdio_flow_ctrl(struct sdio_func *func, const bool *abort)
+{
+	unsigned int count = 0;
+	u8 fc_reg;
+	int ret;
+
+	if (!func)
+		return -EINVAL;
+
+	for (;;) {
+		ret = aic8800_sdio_readb(func,
+					 AIC8800_SDIO_FLOW_CTRL_Q1_REG,
+					 &fc_reg);
+		if (ret)
+			return ret;
+
+		/* Buffers beyond the reserve are available to us. */
+		if (fc_reg > AIC8800_SDIO_FLOW_CTRL_THRESH)
+			return fc_reg;
+
+		if (count >= AIC8800_SDIO_FLOW_CTRL_RETRY ||
+		    (abort && *abort))
+			return -EBUSY;
+
+		/* Spin while the firmware is likely to drain quickly,
+		 * then back off to sleeping waits.
+		 */
+		if (count < 30)
+			udelay(200);
+		else if (count < 40)
+			usleep_range(2000, 3000);
+		else
+			usleep_range(10000, 11000);
+		count++;
+	}
+}
+
 int aic8800_sdio_tx_write(struct sdio_func *func,
 			 const u8 *data, size_t len)
 {
-	/* TX frame: 4-byte header + payload, padded to 512 blocks
-	 * [0-1] LE16 len (total payload bytes)
-	 * [2]   type = 0x01 (data)
-	 * [3]   CRC8 of bytes 0-2 (8800D80)
+	/*
+	 * Wire format of one frame:
+	 *   [0-1] payload length, little endian, 12 significant bits
+	 *   [2]   0x01, data
+	 *   [3]   CRC8 (polynomial 0x107) over bytes 0-2
+	 *   payload, zero padded to a 4-byte boundary
+	 *   a zero terminator word when the result is not already a
+	 *   whole number of blocks, then zero padding to the block size
 	 */
-	u8 hdr[4];
-	u16 plen = (u16)len;
+	size_t aligned_len;
 	size_t block_len;
+	u8 *buf;
 	int ret;
 
 	if (!func || !data || !len)
 		return -EINVAL;
 
-	hdr[0] = plen & 0xFF;
-	hdr[1] = (plen >> 8) & 0xFF;
-	hdr[2] = 0x01;
-	hdr[3] = aic8800_sdio_crc8(hdr, 3);
+	if (len > AIC8800_SDIO_TX_MAX_PAYLOAD)
+		return -EMSGSIZE;
 
-	block_len = roundup(sizeof(hdr) + len, 512);
+	aligned_len = ALIGN(AIC8800_SDIO_TX_HDR_LEN + len,
+			    AIC8800_SDIO_TX_ALIGNMENT);
+	if (aligned_len % AIC8800_SDIO_BLOCK_SIZE)
+		aligned_len += AIC8800_SDIO_TX_TAIL_LEN;
+	block_len = ALIGN(aligned_len, AIC8800_SDIO_BLOCK_SIZE);
 
-	{
-		u8 *buf = kzalloc(block_len, GFP_KERNEL);
+	/* kzalloc supplies both the alignment padding and the zero
+	 * terminator word the firmware uses to end the chain.
+	 */
+	buf = kzalloc(block_len, GFP_KERNEL);
+	if (!buf)
+		return -ENOMEM;
 
-		if (!buf)
-			return -ENOMEM;
+	buf[0] = len & 0xff;
+	buf[1] = (len >> 8) & 0x0f;
+	buf[2] = 0x01;
+	buf[3] = aic8800_sdio_crc8(buf, 3);
+	memcpy(buf + AIC8800_SDIO_TX_HDR_LEN, data, len);
 
-		memcpy(buf, hdr, sizeof(hdr));
-		memcpy(buf + sizeof(hdr), data, len);
-
-		sdio_claim_host(func);
-		ret = sdio_writesb(func, 0x10, buf, block_len);
-		sdio_release_host(func);
-		kfree(buf);
-	}
+	sdio_claim_host(func);
+	ret = sdio_writesb(func, AIC8800_SDIO_WR_FIFO_ADDR, buf,
+			   block_len);
+	sdio_release_host(func);
+	kfree(buf);
 
 	if (ret)
 		dev_err(&func->dev, "TX write failed: %d\n", ret);
@@ -181,48 +256,105 @@ int aic8800_sdio_rx_drain(struct aic8800_core *core, int budget)
 	while (frames < budget) {
 		u8 *frame;
 		u8 int_status;
+		u8 block_mask;
 		u32 data_len;
-		bool byte_mode;
+		bool byte_mode = false;
 
-		/* Read V3 MISC_INT_STATUS_REG to determine data size */
-		sdio_claim_host(func);
-		ret = sdio_readsb(func, &int_status, 0x04, 1);
-		sdio_release_host(func);
+		ret = aic8800_sdio_readb(func,
+					 AIC8800_SDIO_MISC_INT_STATUS_REG,
+					 &int_status);
 		if (ret) {
 			if (ret == -ENOMEDIUM)
 				break;
 			return ret;
 		}
 
-		byte_mode = (int_status == 120);
+		/* A soft interrupt is acknowledged separately, in the
+		 * pending register, and carries no payload of its own.
+		 */
+		if (int_status & AIC8800_SDIO_OTHER_INTERRUPT) {
+			u8 pending;
+
+			ret = aic8800_sdio_readb(func,
+						 AIC8800_SDIO_INTR_PENDING_REG,
+						 &pending);
+			if (ret)
+				return ret;
+
+			pending &= ~AIC8800_SDIO_INTR_PENDING_SOFT;
+			ret = aic8800_sdio_writeb(func,
+						  AIC8800_SDIO_INTR_PENDING_REG,
+						  pending);
+			if (ret)
+				return ret;
+		}
+
+		if (!int_status)
+			break;
+
+		/* The status byte encodes both the source and the size.
+		 * Forcing bit 3 set separates the function 2 range, which
+		 * uses a narrower block count. Either range has a marker
+		 * value that means the length comes from a register in
+		 * units of four bytes instead.
+		 */
+		if ((int_status | BIT(3)) > AIC8800_SDIO_BYTEMODE_MARK_F1) {
+			byte_mode = (int_status | BIT(3)) ==
+				    AIC8800_SDIO_BYTEMODE_MARK_F2;
+			block_mask = AIC8800_SDIO_BLOCK_CNT_MASK_F2;
+		} else {
+			byte_mode = int_status ==
+				    AIC8800_SDIO_BYTEMODE_MARK_F1;
+			block_mask = AIC8800_SDIO_BLOCK_CNT_MASK_F1;
+		}
+
 		if (byte_mode) {
 			u8 byte_len;
 
-			sdio_claim_host(func);
-			ret = sdio_readsb(func, &byte_len,
-					   0x05, 1);
-			sdio_release_host(func);
+			ret = aic8800_sdio_readb(func,
+						 AIC8800_SDIO_BYTEMODE_LEN_REG,
+						 &byte_len);
 			if (ret)
 				return ret;
 
 			data_len = byte_len * 4;
 		} else {
-			data_len = (int_status & 0x7F) * 512;
+			data_len = (int_status & block_mask) *
+				   AIC8800_SDIO_BLOCK_SIZE;
 		}
 
-		if (!data_len || data_len > 2304)
+		if (!data_len)
 			break;
+
+		/* Bounded by the encoding above, but check anyway: the
+		 * length comes from the device.
+		 */
+		if (data_len > AIC8800_SDIO_RX_MAX_LEN)
+			return -EPROTO;
 
 		frame = kmalloc(data_len, GFP_KERNEL);
 		if (!frame)
 			return -ENOMEM;
 
+		/* Always drain what the device announced. Leaving bytes
+		 * in the read FIFO wedges it for good.
+		 */
 		sdio_claim_host(func);
-		ret = sdio_readsb(func, frame, 0x0F, data_len);
+		ret = sdio_readsb(func, frame, AIC8800_SDIO_RD_FIFO_ADDR,
+				  data_len);
 		sdio_release_host(func);
 		if (ret) {
 			kfree(frame);
 			return ret;
+		}
+
+		if (data_len > 2304) {
+			dev_warn_ratelimited(core->dev,
+				"discarding %u byte RX frame\n", data_len);
+			core->rx_malformed++;
+			kfree(frame);
+			frames++;
+			continue;
 		}
 
 		ret = aic8800_protocol_rx(core, frame, data_len);

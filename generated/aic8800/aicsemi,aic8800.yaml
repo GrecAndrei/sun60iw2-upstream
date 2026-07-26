@@ -14,6 +14,11 @@ maintainers:
 description: |
   Binding for AICsemi AIC8800 series WiFi devices connected over SDIO.
 
+  The device is enabled by its WL_REG_ON line before the SDIO card is
+  enumerated, so that line belongs to the host's mmc-pwrseq and not to
+  this node. Bus and enable-signal pad supplies belong to the pin
+  controller banks that carry them.
+
 allOf:
   - $ref: /schemas/net/wireless/wireless-controller.yaml#
 
@@ -25,10 +30,6 @@ properties:
 
   reg:
     maxItems: 1
-
-  reset-gpios:
-    maxItems: 1
-    description: Optional reset line to the WiFi device.
 
 required:
   - compatible

@@ -7,17 +7,15 @@
 #include <linux/debugfs.h>
 #include <linux/etherdevice.h>
 #include <linux/fs.h>
-#include <linux/gpio/consumer.h>
 #include <linux/interrupt.h>
 #include <linux/jiffies.h>
 #include <linux/module.h>
 #include <linux/mutex.h>
 #include <linux/mmc/card.h>
 #include <linux/mmc/host.h>
+#include <linux/mmc/sdio.h>
 #include <linux/mmc/sdio_func.h>
 #include <linux/netdevice.h>
-#include <linux/of_irq.h>
-#include <linux/regulator/consumer.h>
 #include <linux/skbuff.h>
 #include <linux/slab.h>
 #include <linux/seq_file.h>
@@ -45,8 +43,6 @@ struct aic8800_sdio {
 	struct mutex recovery_lock;
 	bool tx_reinit_in_progress;
 	struct dentry *dbg_dir;
-	struct regulator *vddio;
-	struct gpio_desc *reset_gpio;
 	bool rx_stopping;
 	bool tx_stopping;
 };
@@ -54,8 +50,6 @@ struct aic8800_sdio {
 static int aic8800_sdio_tx_recover(struct aic8800_sdio *sdio);
 static int aic8800_sdio_reinit_transport(struct aic8800_sdio *sdio,
 					 bool force);
-static int aic8800_sdio_power_on(struct aic8800_sdio *sdio);
-static void aic8800_sdio_power_off(struct aic8800_sdio *sdio);
 static void aic8800_sdio_rx_purge(struct aic8800_sdio *sdio);
 static void aic8800_sdio_irq_handler(struct sdio_func *func);
 
@@ -210,41 +204,6 @@ static void aic8800_sdio_debugfs_deinit(struct aic8800_sdio *sdio)
 	sdio->dbg_dir = NULL;
 }
 
-static int aic8800_sdio_power_on(struct aic8800_sdio *sdio)
-{
-	int ret;
-
-	if (!sdio)
-		return -EINVAL;
-
-	if (sdio->vddio) {
-		ret = regulator_enable(sdio->vddio);
-		if (ret)
-			return ret;
-	}
-
-	if (sdio->reset_gpio) {
-		gpiod_set_value_cansleep(sdio->reset_gpio, 1);
-		msleep(20);
-		gpiod_set_value_cansleep(sdio->reset_gpio, 0);
-		msleep(20);
-	}
-
-	return 0;
-}
-
-static void aic8800_sdio_power_off(struct aic8800_sdio *sdio)
-{
-	if (!sdio)
-		return;
-
-	if (sdio->reset_gpio)
-		gpiod_set_value_cansleep(sdio->reset_gpio, 1);
-
-	if (sdio->vddio)
-		regulator_disable(sdio->vddio);
-}
-
 static void aic8800_sdio_rx_submit_work(struct work_struct *work)
 {
 	struct aic8800_sdio *sdio =
@@ -357,7 +316,7 @@ static void aic8800_sdio_tx_work(struct work_struct *work)
 		return;
 
 	while (!sdio->tx_stopping) {
-		u8 fc_reg;
+		int avail;
 		int ret;
 		int tries = 0;
 
@@ -367,38 +326,18 @@ static void aic8800_sdio_tx_work(struct work_struct *work)
 				break;
 		}
 
-		/* Flow control: read available TX buffers */
-		{
-			int fc_retries = 0;
-
-			sdio_claim_host(func);
-			ret = sdio_readsb(func, &fc_reg, 0x03, 1);
-			sdio_release_host(func);
-			if (ret)
-				break;
-
-			while (fc_reg <= 2 && fc_retries < 50 &&
-			       !sdio->tx_stopping) {
-				if (fc_retries < 30)
-					udelay(200);
-				else if (fc_retries < 40)
-					msleep(2);
-				else
-					msleep(10);
-				fc_retries++;
-				sdio_claim_host(func);
-				ret = sdio_readsb(func, &fc_reg, 0x03, 1);
-				sdio_release_host(func);
-				if (ret)
-					break;
-			}
-		}
-
-		if (ret || fc_reg <= 2) {
-			if (ret)
+		/* Wait for the firmware to advertise free TX buffers. */
+		avail = aic8800_sdio_flow_ctrl(func, &sdio->tx_stopping);
+		if (avail < 0) {
+			if (avail != -EBUSY)
 				sdio->core.tx_errors++;
 			break;
 		}
+
+		/* Do not start a frame the firmware cannot hold. */
+		if (sdio->tx_skb->len + AIC8800_SDIO_TX_HDR_LEN >
+		    (u32)avail * AIC8800_SDIO_BUFFER_SIZE)
+			break;
 
 		do {
 			ret = aic8800_sdio_tx_write(func, sdio->tx_skb->data,
@@ -570,9 +509,8 @@ static int aic8800_sdio_reinit_transport(struct aic8800_sdio *sdio,
 		goto out_finish;
 	}
 
-	sdio_claim_host(func);
-	sdio_writeb(func, 0x07, 0x00, &ret);
-	sdio_release_host(func);
+	ret = aic8800_sdio_writeb(func, AIC8800_SDIO_INTR_ENABLE_REG,
+				  AIC8800_SDIO_INTR_ENABLE_VAL);
 	if (ret) {
 		sdio_claim_host(func);
 		sdio_release_irq(func);
@@ -646,21 +584,16 @@ static void aic8800_sdio_rx_purge(struct aic8800_sdio *sdio)
 static void aic8800_sdio_irq_handler(struct sdio_func *func)
 {
 	struct aic8800_sdio *sdio = sdio_get_drvdata(func);
-	u8 pending;
-	int ret;
 
 	if (!sdio)
 		return;
 
 	sdio->core.irq_count++;
 
-	/* The SDIO core invokes this handler with the host claimed. */
-	pending = sdio_readb(func, 0x01, &ret);
-	if (!ret) {
-		pending &= ~0x01;
-		sdio_writeb(func, pending, 0x01, &ret);
-	}
-
+	/* The SDIO core calls this with the host claimed, so the
+	 * status read and the FIFO drain are left to the RX work,
+	 * which also acknowledges a soft interrupt if one is set.
+	 */
 	if (!sdio->rx_stopping)
 		schedule_work(&sdio->rx_work);
 }
@@ -715,22 +648,6 @@ static int aic8800_sdio_probe(struct sdio_func *func,
 			dev_warn_once(&func->dev,
 				"SoC match unavailable, using generic AIC8800 path\n");
 
-		sdio->vddio = devm_regulator_get_optional(&func->dev, "vddio");
-		if (IS_ERR(sdio->vddio)) {
-			if (PTR_ERR(sdio->vddio) == -ENODEV)
-				sdio->vddio = NULL;
-			else
-				return PTR_ERR(sdio->vddio);
-		}
-
-		sdio->reset_gpio = devm_gpiod_get_optional(&func->dev, "reset",
-					       GPIOD_OUT_LOW);
-		if (IS_ERR(sdio->reset_gpio))
-			return PTR_ERR(sdio->reset_gpio);
-
-		ret = aic8800_sdio_power_on(sdio);
-		if (ret)
-			return ret;
 		dev_info(&func->dev, "normal mode probe\n");
 	} else {
 		dev_info(&bound_func->dev,
@@ -756,19 +673,22 @@ static int aic8800_sdio_probe(struct sdio_func *func,
 	if (ret)
 		goto err_io;
 
-	sdio_claim_host(func);
-	sdio_writeb(func, 0x07, 0x00, &ret);
-	sdio_release_host(func);
+	if (!bootloader_mode) {
+		/* The device wants the CCCR interrupt enables written
+		 * directly once the runtime firmware is up.
+		 */
+		sdio_claim_host(func);
+		sdio_f0_writeb(func, 0x07, SDIO_CCCR_IENx, &ret);
+		sdio_release_host(func);
+		if (ret)
+			dev_warn(&func->dev,
+				"CCCR int enable returned %d\n", ret);
+	}
+
+	ret = aic8800_sdio_writeb(func, AIC8800_SDIO_INTR_ENABLE_REG,
+				  AIC8800_SDIO_INTR_ENABLE_VAL);
 	if (ret)
 		goto err_irq;
-
-	/* Enable master interrupt on CCCR func0 for 8800D80 */
-	sdio_claim_host(func);
-	sdio_f0_writeb(func, 0x07, 0x04, &ret);
-	sdio_release_host(func);
-	if (ret)
-		dev_warn(&func->dev,
-			"CCCR int enable returned %d\n", ret);
 
 	if (bootloader_mode) {
 		ret = aic8800_protocol_init(&sdio->core);
@@ -814,8 +734,6 @@ err_drvdata:
 	sdio_set_drvdata(func, NULL);
 	if (func != bound_func)
 		sdio_set_drvdata(bound_func, NULL);
-	if (!bootloader_mode)
-		aic8800_sdio_power_off(sdio);
 	return ret;
 }
 
@@ -839,7 +757,6 @@ static void aic8800_sdio_remove(struct sdio_func *func)
 	sdio->core.rx_submit = NULL;
 	aic8800_core_unregister(&sdio->core);
 	sdio_set_drvdata(func, NULL);
-	aic8800_sdio_power_off(sdio);
 }
 
 static const struct sdio_device_id aic8800_boot_sdio_ids[] = {

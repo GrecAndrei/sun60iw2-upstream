@@ -1636,14 +1636,14 @@ static struct sunxi_pinctrl_desc a733_pinctrl_data = {
 	.irq_banks = ARRAY_SIZE(a733_irq_bank_map),
 	.irq_bank_map = a733_irq_bank_map,
 	.irq_read_needs_mux = true,
-	.io_bias_cfg_variant = BIAS_VOLTAGE_PIO_POW_MODE_SEL,
+	.io_bias_cfg_variant = BIAS_VOLTAGE_PIO_POW_MODE_CTL,
 };
 
 static int a733_pinctrl_probe(struct platform_device *pdev)
 {
 	return sunxi_pinctrl_init_with_flags(pdev, &a733_pinctrl_data,
-					     SUNXI_PINCTRL_NEW_REG_LAYOUT |
-					     SUNXI_PINCTRL_ELEVEN_BANKS |
+					     SUNXI_PINCTRL_SUN60_LAYOUT |
+					     SUNXI_PINCTRL_PORTF_SWITCH |
 					     SUNXI_PINCTRL_AUTO_POWER_SWITCH);
 }
 

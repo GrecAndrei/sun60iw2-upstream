@@ -38,10 +38,10 @@
     14,
     0
   ],
-  "io_bias_cfg_variant": "pio_pow_mode_sel",
+  "io_bias_cfg_variant": "pio_pow_mode_ctl",
   "flags": [
-    "new_reg_layout",
-    "auto_power_switch",
-    "eleven_banks"
+    "sun60_layout",
+    "portf_switch",
+    "auto_power_switch"
   ]
 }

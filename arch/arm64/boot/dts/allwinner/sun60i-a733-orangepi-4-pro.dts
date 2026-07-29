@@ -12,6 +12,8 @@
 	aliases {
 		serial0 = &uart0;
 		ethernet0 = &gmac0;
+		mmc0 = &mmc0;
+		mmc1 = &mmc1;
 	};
 
 	chosen {
@@ -54,43 +56,33 @@
 	};
 
 	/*
-	 * VCC-WIFI and VCCIO-WIFI are board rails that are already up when
-	 * the kernel starts and are not switched per-card. They are modelled
-	 * as fixed regulators on purpose: the MMC core power-cycles whatever
-	 * it is handed as vmmc/vqmmc (sunxi_mmc_card_power() calls
-	 * regulator_disable() on MMC_POWER_OFF), so an AXP8191 rail must
-	 * never be wired here. On this board those rails come off shared PMIC
-	 * outputs that also feed non-Wi-Fi consumers, and cutting them powers
-	 * the board off.
+	 * Vendor: enable BLDO5/CLDO1 -> 10 ms -> assert WL_REG_ON (PM1 high) ->
+	 * 50 ms -> sunxi_mmc_rescan. Mainline equivalent is mmc-pwrseq-simple:
+	 * WL_REG_ON is an active-high enable, so model it as ACTIVE_LOW reset
+	 * (deassert drives PM1 high). The rails are shared with Bluetooth and
+	 * remain enabled, so the post-power-on delay is the vendor's exact 50 ms
+	 * REG_ON-to-rescan interval. Power-off waits 100 ms before redetection.
 	 */
-	reg_vcc3v3_wifi: regulator-vcc3v3-wifi {
-		compatible = "regulator-fixed";
-		regulator-name = "vcc3v3-wifi";
-		regulator-min-microvolt = <3300000>;
-		regulator-max-microvolt = <3300000>;
-		regulator-always-on;
-	};
-
-	reg_vcc1v8_wifi_io: regulator-vcc1v8-wifi-io {
-		compatible = "regulator-fixed";
-		regulator-name = "vccio-wifi";
-		regulator-min-microvolt = <1800000>;
-		regulator-max-microvolt = <1800000>;
-		regulator-always-on;
-	};
-
-	wifi_pwrseq: wifi-pwrseq {
+	wifi_pwrseq: pwrseq {
 		compatible = "mmc-pwrseq-simple";
-		/* WL_REG_ON is an active-high enable, hence active-low reset. */
-		reset-gpios = <&r_pio 1 1 GPIO_ACTIVE_LOW>; /* PM1 */
-		post-power-on-delay-ms = <200>;
+		reset-gpios = <&r_pio 1 1 GPIO_ACTIVE_LOW>; /* PM1 WL_REG_ON */
+		post-power-on-delay-ms = <50>;
+		power-off-delay-us = <100000>;
 	};
 };
 
 &pio {
-	/* PG carries the Wi-Fi SDIO bus and is supplied by BLDO5 at 1.8 V. */
-	vcc-pg-supply = <&reg_bldo5>;
+	/*
+	 * PF (SD card) stays on the fixed 3.3 V board rail. PG (Wi-Fi SDIO)
+	 * uses AXP BLDO5 @ 1.8 V. With SUNXI_PINCTRL_AUTO_POWER_SWITCH the
+	 * pinctrl driver never claims vcc-pg or writes PIO_POW_MOD (vendor
+	 * auto_hard); BLDO5 must stay always-on to keep the rail up, and
+	 * POW_MOD @ 0x340 is left to the bootloader/hardware auto path.
+	 * Do not put BLDO5 on the whole PIO block without a PF override —
+	 * that deferred the controller when AXP was missing.
+	 */
 	vcc-pf-supply = <&reg_vcc3v3_sd>;
+	vcc-pg-supply = <&reg_bldo5>;
 
 	uart1_pins: uart1-pins {
 		pins = "PK20", "PK21", "PK22", "PK23";
@@ -102,8 +94,10 @@
 };
 
 &r_pio {
-	/* PM0/PM1 are WL_HOST_WAKE/WL_REG_ON and are supplied by CLDO1. */
-	vcc-pm-supply = <&reg_cldo1>;
+	/*
+	 * Same rule as vcc-pg: do not defer r_pio on AXP CLDO1 or s_twi0/PMU
+	 * can never come up (and console/wifi pwrseq stay stuck).
+	 */
 	/*
 	 * vcc-pl-supply is deliberately not described: PL carries the I2C bus
 	 * to the AXP8191 that would provide it, so naming it here would be a
@@ -128,14 +122,24 @@
 
 &uart0 {
 	status = "okay";
+	/*
+	 * Console UART: drop DMA. printk/earlycon use PIO and keep working;
+	 * the tty write path uses 8250 DMA and was hanging forever here, so
+	 * PID1 appeared dead after "Run /sbin/init" with no userspace output.
+	 */
+	/delete-property/ dmas;
+	/delete-property/ dma-names;
 };
 
 &mmc0 {
 	status = "okay";
 	pinctrl-0 = <&mmc0_pins &mmc0_clk_pin>;
 	pinctrl-names = "default";
-	cd-gpios = <&pio 5 6 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>; /* PF6 */
-	cd-debounce-delay-ms = <200>;
+	/*
+	 * CD on PF6 has been unreliable in recent boots (kernel waits forever
+	 * for root while the host reader sees the card fine). Poll instead.
+	 */
+	broken-cd;
 	bus-width = <4>;
 	cap-sd-highspeed;
 	no-1-8-v;
@@ -166,35 +170,23 @@
 		 */
 		regulators {
 			/*
-			 * Shared 3.3 V system rail: PCIe 3v3 and the input of
-			 * the DC1SW1/DC1SW2 switches. Declared always-on so it
-			 * can never be switched off by a consumer; the range
-			 * matches the vendor description so no voltage is
-			 * written at probe.
+			 * Do not declare dcdc1 here. Modern regulator OF sets
+			 * apply_uV whenever min/max are present; a failed
+			 * get_voltage (-ENXIO) then aborts the entire AXP
+			 * regulator probe and BLDO5/CLDO1 never appear.
+			 * Undeclared rails keep the bootloader voltage.
 			 */
-			reg_dcdc1: dcdc1 {
-				regulator-name = "axp8191-dcdc1";
-				regulator-min-microvolt = <1000000>;
-				regulator-max-microvolt = <3800000>;
-				regulator-ramp-delay = <250>;
-				regulator-enable-ramp-delay = <1000>;
-				regulator-boot-on;
-				regulator-always-on;
-			};
 
 			/*
-			 * PG pad supply for the Wi-Fi SDIO bus, 1.8 V. The
-			 * vendor holds this rail on for the lifetime of the
-			 * Wi-Fi device; A733 pinctrl selects pad voltages
-			 * automatically (SUNXI_PINCTRL_AUTO_POWER_SWITCH) and
-			 * so never claims vcc-pg-supply, leaving no consumer
-			 * to hold it up. always-on is that guarantee.
+			 * PG pad supply for Wi-Fi SDIO @ 1.8 V. Vendor
+			 * sunxi_wlan_set_power() forces 1800 mV then enables;
+			 * keep always-on + fixed 1.8 V so pad auto_hard and
+			 * the chip see a stable rail without rfkill.
 			 */
 			reg_bldo5: bldo5 {
 				regulator-name = "axp8191-bldo5";
 				regulator-min-microvolt = <1800000>;
 				regulator-max-microvolt = <1800000>;
-				regulator-enable-ramp-delay = <1000>;
 				regulator-boot-on;
 				regulator-always-on;
 			};
@@ -204,7 +196,6 @@
 				regulator-name = "axp8191-cldo1";
 				regulator-min-microvolt = <1800000>;
 				regulator-max-microvolt = <1800000>;
-				regulator-enable-ramp-delay = <1000>;
 				regulator-boot-on;
 				regulator-always-on;
 			};
@@ -212,38 +203,27 @@
 	};
 };
 
+/*
+ * Wi-Fi SDIO on SMHC1. Vendor leaves the host in software-detect mode and
+ * only rescans after aicbsp powers the chip; mainline runs that power+settle
+ * sequence via wifi_pwrseq before the first CMD5. No vmmc/vqmmc (vendor
+ * leaves them unwired; rails are always-on above). Stay at high-speed only
+ * until CMD5 works; vendor UHS caps come later. No wifi@ child until the
+ * SDIO card enumerates.
+ */
 &mmc1 {
 	status = "okay";
 	pinctrl-0 = <&mmc1_pins &mmc1_clk_pin>;
 	pinctrl-names = "default";
-	#address-cells = <1>;
-	#size-cells = <0>;
 	bus-width = <4>;
+	non-removable;
+	mmc-pwrseq = <&wifi_pwrseq>;
+	no-mmc;
+	no-sd;
 	cap-sd-highspeed;
 	cap-sdio-irq;
 	keep-power-in-suspend;
-	ignore-pm-notify;
-	execute_tuning_in_kernel;
-	sunxi-dly-208M = <0xff 0x1 0xff 0xff 0xff 0xff>;
-	ctl-spec-caps = <0x428>;
-	mmc-pwrseq = <&wifi_pwrseq>;
-	non-removable;
 	max-frequency = <50000000>;
-	no-sd;
-	no-mmc;
-	/*
-	 * Board Wi-Fi rails, not PMIC outputs. vmmc supplies the OCR mask
-	 * (3.3 V module VBAT) and vqmmc selects 1.8 V SDIO signalling to
-	 * match the 1.8 V PG pads. Both are fixed and always-on so the MMC
-	 * power-cycle path cannot drop a rail the rest of the board shares.
-	 */
-	vmmc-supply = <&reg_vcc3v3_wifi>;
-	vqmmc-supply = <&reg_vcc1v8_wifi_io>;
-
-	wifi@1 {
-		reg = <1>;
-		compatible = "aicsemi,aic8800d80", "aicsemi,aic8800";
-	};
 };
 
 &mmc2 {

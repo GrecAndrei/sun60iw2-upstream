@@ -53,12 +53,20 @@ def pinctrl_flags(data, continuation_indent):
 
     flag_names = {
         "new_reg_layout": "SUNXI_PINCTRL_NEW_REG_LAYOUT",
+        "sun60_layout": "SUNXI_PINCTRL_SUN60_LAYOUT",
+        "portf_switch": "SUNXI_PINCTRL_PORTF_SWITCH",
         "eleven_banks": "SUNXI_PINCTRL_ELEVEN_BANKS",
         "auto_power_switch": "SUNXI_PINCTRL_AUTO_POWER_SWITCH",
     }
     values = [
         flag_names[flag]
-        for flag in ("new_reg_layout", "eleven_banks", "auto_power_switch")
+        for flag in (
+            "new_reg_layout",
+            "sun60_layout",
+            "portf_switch",
+            "eleven_banks",
+            "auto_power_switch",
+        )
         if flag in data.get("flags", [])
     ]
     return f" |\n{continuation_indent}".join(values) if values else "0"

@@ -101,6 +101,8 @@ def _parse_c_array_mode(text: str) -> dict[str, Any] | None:
     # Extract flags
     if "SUNXI_PINCTRL_NEW_REG_LAYOUT" in text:
         data.setdefault("flags", []).append("new_reg_layout")
+    if "SUNXI_PINCTRL_SUN60_LAYOUT" in text:
+        data.setdefault("flags", []).append("sun60_layout")
     if "SUNXI_PINCTRL_ELEVEN_BANKS" in text:
         data.setdefault("flags", []).append("eleven_banks")
 
@@ -176,6 +178,8 @@ def parse_c_driver(text: str) -> dict[str, Any]:
         # Extract flags
         if "SUNXI_PINCTRL_NEW_REG_LAYOUT" in text:
             data.setdefault("flags", []).append("new_reg_layout")
+        if "SUNXI_PINCTRL_SUN60_LAYOUT" in text:
+            data.setdefault("flags", []).append("sun60_layout")
         if "SUNXI_PINCTRL_ELEVEN_BANKS" in text:
             data.setdefault("flags", []).append("eleven_banks")
 
@@ -217,6 +221,8 @@ def parse_c_driver(text: str) -> dict[str, Any]:
     # Extract flags
     if "SUNXI_PINCTRL_NEW_REG_LAYOUT" in text:
         data.setdefault("flags", []).append("new_reg_layout")
+    if "SUNXI_PINCTRL_SUN60_LAYOUT" in text:
+        data.setdefault("flags", []).append("sun60_layout")
     if "SUNXI_PINCTRL_ELEVEN_BANKS" in text:
         data.setdefault("flags", []).append("eleven_banks")
 
@@ -405,12 +411,41 @@ def validate_pinctrl_structure(data: dict[str, Any]) -> list[dict[str, Any]]:
                 )
 
     # 6. Flags sanity
-    if "eleven_banks" not in flags and len(banks) != 11:
+    #
+    # SUNXI_PINCTRL_ELEVEN_BANKS only selects PIO_POW_MOD_SEL at 0x380
+    # (A523). sun60iw2/A733 TYPE_4 uses SUN60_LAYOUT with POW_MOD at 0x40
+    # (empirically confirmed), not 0x340/0x380.
+    if "eleven_banks" in flags and "auto_power_switch" in flags:
         errors.append(
             {
-                "name": "missing_eleven_banks_flag",
-                "message": (f"11 banks present but 'eleven_banks' flag missing"),
+                "name": "eleven_banks_with_auto_power",
+                "message": (
+                    "eleven_banks selects POW_MOD @ 0x380; drop eleven_banks "
+                    "on A733 (TYPE_4 / sun60_layout uses POW_MOD @ 0x40)"
+                ),
                 "severity": "warning",
+            }
+        )
+    if "sun60_layout" in flags and "new_reg_layout" in flags:
+        errors.append(
+            {
+                "name": "sun60_and_new_reg_layout",
+                "message": (
+                    "sun60_layout and new_reg_layout both set; A733 main PIO "
+                    "must use sun60_layout only (R_PIO keeps new_reg_layout)"
+                ),
+                "severity": "error",
+            }
+        )
+    if "sun60_layout" in flags and "eleven_banks" in flags:
+        errors.append(
+            {
+                "name": "sun60_with_eleven_banks",
+                "message": (
+                    "eleven_banks overrides POW_MOD to 0x380; incompatible "
+                    "with sun60_layout (POW_MOD @ 0x40)"
+                ),
+                "severity": "error",
             }
         )
 

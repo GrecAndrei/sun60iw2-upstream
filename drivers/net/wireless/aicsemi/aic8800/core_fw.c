@@ -9,9 +9,9 @@
 #include "core_types.h"
 
 static const char * const aic8800_fw_fallbacks[] = {
-	"aic8800d80/fmacfw_8800d80.bin",
 	"aic8800d80/fmacfw_8800d80_u02.bin",
 	"aic8800d80/fmacfw_8800d80_h_u02.bin",
+	"aic8800d80/fmacfw_8800d80.bin",
 };
 
 static const char *aic8800_core_fw_name(struct aic8800_core *core)

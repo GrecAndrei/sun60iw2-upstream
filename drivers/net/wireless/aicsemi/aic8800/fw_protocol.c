@@ -6,11 +6,14 @@
 #include <linux/etherdevice.h>
 #include <linux/firmware.h>
 #include <linux/ieee80211.h>
+#include <linux/if_arp.h>
 #include <linux/mutex.h>
 #include <linux/slab.h>
 #include <linux/spinlock.h>
 #include <linux/unaligned.h>
+#include <linux/workqueue.h>
 #include <net/cfg80211.h>
+#include <net/ieee80211_radiotap.h>
 #include "core_types.h"
 #include "fw_protocol.h"
 
@@ -33,6 +36,9 @@
 #define AIC_MM_KEY_ADD_CFM	AIC_MSG(AIC_TASK_MM, 37)
 #define AIC_MM_KEY_DEL_REQ	AIC_MSG(AIC_TASK_MM, 38)
 #define AIC_MM_KEY_DEL_CFM	AIC_MSG(AIC_TASK_MM, 39)
+/* Shipped aic8800_fdrv.ko rwnx_send_set_stack_start_req: id=123/124. */
+#define AIC_MM_SET_STACK_START_REQ	AIC_MSG(AIC_TASK_MM, 123)
+#define AIC_MM_SET_STACK_START_CFM	AIC_MSG(AIC_TASK_MM, 124)
 
 #define AIC_DBG_MEM_READ_REQ	AIC_MSG(AIC_TASK_DBG, 0)
 #define AIC_DBG_MEM_READ_CFM	AIC_MSG(AIC_TASK_DBG, 1)
@@ -53,6 +59,9 @@
 #define AIC_ME_CONFIG_CFM	AIC_MSG(AIC_TASK_ME, 1)
 #define AIC_ME_CHAN_CONFIG_REQ	AIC_MSG(AIC_TASK_ME, 2)
 #define AIC_ME_CHAN_CONFIG_CFM	AIC_MSG(AIC_TASK_ME, 3)
+/* Shipped aic8800_fdrv.ko: ME_CONFIG_MONITOR_REQ/CFM = 5137/5138. */
+#define AIC_ME_CONFIG_MONITOR_REQ	AIC_MSG(AIC_TASK_ME, 17)
+#define AIC_ME_CONFIG_MONITOR_CFM	AIC_MSG(AIC_TASK_ME, 18)
 #define AIC_SM_CONNECT_REQ	AIC_MSG(AIC_TASK_SM, 0)
 #define AIC_SM_CONNECT_CFM	AIC_MSG(AIC_TASK_SM, 1)
 #define AIC_SM_CONNECT_IND	AIC_MSG(AIC_TASK_SM, 2)
@@ -67,6 +76,32 @@
 #define AIC_FW_ADDR		0x00120000
 #define AIC_FW_BLOCK		1024
 #define AIC_RX_DATA_HEADER	60
+
+/* Firmware MM_* interface types (not nl80211_iftype). */
+#define AIC_MM_STA		0
+#define AIC_MM_MONITOR		4
+
+#define AIC_PHY_CHNL_BW_20	0
+#define AIC_PHY_CHNL_BW_40	1
+#define AIC_PHY_CHNL_BW_80	2
+#define AIC_PHY_CHNL_BW_160	3
+#define AIC_PHY_CHNL_BW_80P80	4
+
+/* hostdesc.flags — matches shipped aic8800_fdrv rwnx_tx.h */
+#define AIC_TXU_CNTRL_RETRY		BIT(0)
+#define AIC_TXU_CNTRL_MORE_DATA		BIT(2)
+#define AIC_TXU_CNTRL_MGMT		BIT(3)
+#define AIC_TXU_CNTRL_MGMT_NO_CCK	BIT(4)
+#define AIC_TXU_CNTRL_AMSDU		BIT(6)
+#define AIC_TXU_CNTRL_MGMT_ROBUST	BIT(7)
+#define AIC_TXU_CNTRL_USE_4ADDR		BIT(8)
+#define AIC_TXU_CNTRL_EOSP		BIT(9)
+#define AIC_TXU_CNTRL_MESH_FWD		BIT(10)
+#define AIC_TXU_CNTRL_TDLS		BIT(11)
+
+#define AIC_TX_AC_VO			3
+#define AIC_INVALID_STA			0xff
+#define AIC_INVALID_TID			0xff
 
 struct aic_mac_addr {
 	__le16 word[3];
@@ -122,6 +157,22 @@ struct aic_me_chan_config_req {
 	u8 count_2g;
 	u8 count_5g;
 };
+
+struct aic_mac_chan_op {
+	u8 band;
+	u8 type;
+	__le16 prim20_freq;
+	__le16 center1_freq;
+	__le16 center2_freq;
+	s8 tx_power;
+	u8 flags;
+} __packed;
+
+struct aic_me_config_monitor_req {
+	struct aic_mac_chan_op chan;
+	u8 chan_set;
+	u8 uf;
+} __packed;
 
 struct aic_scan_start_req {
 	struct aic_chan_def channels[AIC_SCAN_CHANNELS];
@@ -247,20 +298,65 @@ struct aic8800_protocol {
 	size_t confirmation_size;
 	int command_status;
 	struct cfg80211_scan_request *scan_request;
+	/* cfg80211_scan_done must not run under wiphy mutex — defer it. */
+	struct cfg80211_scan_request *pending_scan_done;
+	struct work_struct scan_done_work;
 	u8 vif_index;
 	u8 ap_index;
 	u8 key_hardware_index[4];
 	bool interface_open;
+	bool monitor_chan_set;
+	struct aic_mac_chan_op monitor_chan;
 };
 
 static_assert(sizeof(struct aic_mm_start_req) == 72);
 static_assert(sizeof(struct aic_me_config_req) == 112);
 static_assert(sizeof(struct aic_me_chan_config_req) == 254);
+static_assert(sizeof(struct aic_me_config_monitor_req) == 12);
 static_assert(sizeof(struct aic_scan_start_req) == 376);
 static_assert(sizeof(struct aic_scan_result_ind) == 12);
 static_assert(sizeof(struct aic_scan_vendor_ie_req) == 260);
 static_assert(sizeof(struct aic_sm_connect_req) == 320);
 static_assert(sizeof(struct aic_tx_descriptor) == 28);
+
+static void aic8800_scan_done_workfn(struct work_struct *work)
+{
+	struct aic8800_protocol *protocol =
+		container_of(work, struct aic8800_protocol, scan_done_work);
+	struct cfg80211_scan_request *request;
+	struct cfg80211_scan_info info = { .aborted = true };
+	unsigned long flags;
+
+	spin_lock_irqsave(&protocol->state_lock, flags);
+	request = protocol->pending_scan_done;
+	protocol->pending_scan_done = NULL;
+	spin_unlock_irqrestore(&protocol->state_lock, flags);
+	if (request)
+		cfg80211_scan_done(request, &info);
+}
+
+static void aic8800_abort_scan_deferred(struct aic8800_protocol *protocol)
+{
+	struct cfg80211_scan_request *request;
+	unsigned long flags;
+
+	spin_lock_irqsave(&protocol->state_lock, flags);
+	request = protocol->scan_request;
+	protocol->scan_request = NULL;
+	if (request) {
+		/*
+		 * change_virtual_intf / other cfg80211 ops hold the wiphy
+		 * mutex. cfg80211_scan_done() must not run there — queue it.
+		 */
+		if (!protocol->pending_scan_done)
+			protocol->pending_scan_done = request;
+		else
+			request = NULL;
+	}
+	spin_unlock_irqrestore(&protocol->state_lock, flags);
+	if (request)
+		schedule_work(&protocol->scan_done_work);
+}
 
 static u8 aic8800_crc8(const u8 *data, size_t len)
 {
@@ -506,7 +602,13 @@ int aic8800_protocol_init(struct aic8800_core *core)
 
 	if (!core)
 		return -EINVAL;
-	protocol = devm_kzalloc(core->dev, sizeof(*protocol), GFP_KERNEL);
+	/*
+	 * Non-devm: boot uses function-1 as transport while bound to
+	 * function-2. A managed alloc on function-1 would survive the
+	 * function-2 probe teardown and block the runtime 0x0082 bind
+	 * with "Resources present before probing".
+	 */
+	protocol = kzalloc(sizeof(*protocol), GFP_KERNEL);
 	if (!protocol)
 		return -ENOMEM;
 
@@ -516,6 +618,7 @@ int aic8800_protocol_init(struct aic8800_core *core)
 	mutex_init(&protocol->command_mutex);
 	spin_lock_init(&protocol->state_lock);
 	init_completion(&protocol->command_done);
+	INIT_WORK(&protocol->scan_done_work, aic8800_scan_done_workfn);
 	core->protocol = protocol;
 	return 0;
 }
@@ -524,22 +627,29 @@ void aic8800_protocol_deinit(struct aic8800_core *core)
 {
 	struct aic8800_protocol *protocol;
 	struct cfg80211_scan_request *request = NULL;
+	struct cfg80211_scan_request *pending = NULL;
 	struct cfg80211_scan_info info = { .aborted = true };
 	unsigned long flags;
 
 	if (!core || !core->protocol)
 		return;
 	protocol = core->protocol;
+	cancel_work_sync(&protocol->scan_done_work);
 	spin_lock_irqsave(&protocol->state_lock, flags);
 	request = protocol->scan_request;
+	pending = protocol->pending_scan_done;
 	protocol->scan_request = NULL;
+	protocol->pending_scan_done = NULL;
 	protocol->command_status = -ENODEV;
 	protocol->expected_confirmation = 0;
 	spin_unlock_irqrestore(&protocol->state_lock, flags);
 	complete_all(&protocol->command_done);
 	if (request)
 		cfg80211_scan_done(request, &info);
+	if (pending)
+		cfg80211_scan_done(pending, &info);
 	core->protocol = NULL;
+	kfree(protocol);
 }
 
 int aic8800_protocol_boot(struct aic8800_core *core)
@@ -600,8 +710,24 @@ int aic8800_protocol_runtime_config(struct aic8800_core *core)
 	struct aic8800_protocol *protocol = core->protocol;
 	struct aic_me_config_req config = {};
 	struct aic_me_chan_config_req channels = {};
+	struct {
+		u8 is_stack_start;
+		u8 efuse_valid;
+		u8 set_vendor_info;
+		u8 conf_filter_null;
+	} stack = { .is_stack_start = 1 };
 	int ret;
 
+	/*
+	 * Shipped aic8800_fdrv.ko rwnx_cfg80211_init order for D80:
+	 * set_stack_start → reset → me_config → me_chan_config.
+	 * Open then does mm_start + add_if. Skipping this leaves scan empty.
+	 */
+	ret = aic8800_command(protocol, AIC_MM_SET_STACK_START_REQ, AIC_TASK_MM,
+			      &stack, sizeof(stack), AIC_MM_SET_STACK_START_CFM,
+			      NULL, 0);
+	if (ret)
+		return ret;
 	ret = aic8800_command(protocol, AIC_MM_RESET_REQ, AIC_TASK_MM,
 			      NULL, 0, AIC_MM_RESET_CFM, NULL, 0);
 	if (ret)
@@ -618,19 +744,55 @@ int aic8800_protocol_runtime_config(struct aic8800_core *core)
 			       AIC_ME_CHAN_CONFIG_CFM, NULL, 0);
 }
 
+static u8 aic8800_chan_bw(enum nl80211_chan_width width)
+{
+	switch (width) {
+	case NL80211_CHAN_WIDTH_40:
+		return AIC_PHY_CHNL_BW_40;
+	case NL80211_CHAN_WIDTH_80:
+		return AIC_PHY_CHNL_BW_80;
+	case NL80211_CHAN_WIDTH_160:
+		return AIC_PHY_CHNL_BW_160;
+	case NL80211_CHAN_WIDTH_80P80:
+		return AIC_PHY_CHNL_BW_80P80;
+	default:
+		return AIC_PHY_CHNL_BW_20;
+	}
+}
+
+static int aic8800_send_config_monitor(struct aic8800_protocol *protocol,
+				       bool chan_set,
+				       const struct aic_mac_chan_op *chan)
+{
+	struct aic_me_config_monitor_req request = {};
+
+	if (chan_set && chan) {
+		request.chan = *chan;
+		request.chan_set = 1;
+	}
+	return aic8800_command(protocol, AIC_ME_CONFIG_MONITOR_REQ, AIC_TASK_ME,
+			       &request, sizeof(request),
+			       AIC_ME_CONFIG_MONITOR_CFM, NULL, 0);
+}
+
 int aic8800_protocol_open(struct aic8800_core *core, const u8 *mac)
 {
 	struct aic8800_protocol *protocol = core->protocol;
 	struct aic_mm_start_req start = {};
 	struct aic_mm_add_if_req request = {};
 	struct aic_mm_add_if_cfm confirmation = {};
+	enum nl80211_iftype iftype = NL80211_IFTYPE_STATION;
 	int ret;
+
+	if (core->ndev && core->ndev->ieee80211_ptr)
+		iftype = core->ndev->ieee80211_ptr->iftype;
 
 	ret = aic8800_command(protocol, AIC_MM_START_REQ, AIC_TASK_MM,
 			      &start, sizeof(start), AIC_MM_START_CFM, NULL, 0);
 	if (ret)
 		return ret;
-	request.type = 0; /* Firmware MM_STA, not enum nl80211_iftype. */
+	request.type = (iftype == NL80211_IFTYPE_MONITOR) ?
+		AIC_MM_MONITOR : AIC_MM_STA;
 	memcpy(&request.address, mac, ETH_ALEN);
 	ret = aic8800_command(protocol, AIC_MM_ADD_IF_REQ, AIC_TASK_MM,
 			      &request, sizeof(request), AIC_MM_ADD_IF_CFM,
@@ -641,7 +803,40 @@ int aic8800_protocol_open(struct aic8800_core *core, const u8 *mac)
 		return -EIO;
 	protocol->vif_index = confirmation.instance;
 	protocol->interface_open = true;
+	if (iftype == NL80211_IFTYPE_MONITOR && protocol->monitor_chan_set) {
+		ret = aic8800_send_config_monitor(protocol, true,
+						  &protocol->monitor_chan);
+		if (ret)
+			return ret;
+	}
 	return 0;
+}
+
+int aic8800_protocol_set_monitor_channel(struct aic8800_core *core,
+					 struct cfg80211_chan_def *chandef)
+{
+	struct aic8800_protocol *protocol = core->protocol;
+	struct aic_mac_chan_op chan = {};
+	s8 tx_power;
+
+	if (!protocol || !chandef || !chandef->chan)
+		return -EINVAL;
+
+	tx_power = chandef->chan->max_power;
+	if (tx_power > 127)
+		tx_power = 127;
+	chan.band = chandef->chan->band;
+	chan.type = aic8800_chan_bw(chandef->width);
+	chan.prim20_freq = cpu_to_le16(chandef->chan->center_freq);
+	chan.center1_freq = cpu_to_le16(chandef->center_freq1);
+	chan.center2_freq = cpu_to_le16(chandef->center_freq2);
+	chan.tx_power = tx_power;
+	protocol->monitor_chan = chan;
+	protocol->monitor_chan_set = true;
+
+	if (!protocol->interface_open)
+		return 0;
+	return aic8800_send_config_monitor(protocol, true, &chan);
 }
 
 int aic8800_protocol_close(struct aic8800_core *core)
@@ -661,6 +856,73 @@ int aic8800_protocol_close(struct aic8800_core *core)
 	return ret;
 }
 
+/*
+ * Shipped aic8800_fdrv change_iface: if the VIF is already up, cancel scan,
+ * REMOVE_IF, then ADD_IF with the new type — do not refuse with -EBUSY.
+ */
+int aic8800_protocol_change_vif_type(struct aic8800_core *core,
+				     enum nl80211_iftype iftype)
+{
+	struct aic8800_protocol *protocol = core->protocol;
+	struct aic_mm_add_if_req request = {};
+	struct aic_mm_add_if_cfm confirmation = {};
+	const u8 *mac;
+	u8 instance;
+	int ret;
+
+	if (!protocol)
+		return -ENODEV;
+	if (iftype != NL80211_IFTYPE_STATION &&
+	    iftype != NL80211_IFTYPE_MONITOR)
+		return -EOPNOTSUPP;
+	if (!protocol->interface_open)
+		return 0;
+
+	/* Never cfg80211_scan_done() here — we hold the wiphy mutex. */
+	aic8800_abort_scan_deferred(protocol);
+
+	if (core->ndev) {
+		netif_tx_stop_all_queues(core->ndev);
+		netif_carrier_off(core->ndev);
+	}
+
+	instance = protocol->vif_index;
+	ret = aic8800_command(protocol, AIC_MM_REMOVE_IF_REQ, AIC_TASK_MM,
+			      &instance, sizeof(instance),
+			      AIC_MM_REMOVE_IF_CFM, NULL, 0);
+	protocol->interface_open = false;
+	protocol->vif_index = 0xff;
+	protocol->ap_index = 0xff;
+	core->link_up = false;
+	if (ret)
+		return ret;
+
+	if (!core->ndev)
+		return -ENODEV;
+	mac = core->ndev->dev_addr;
+	request.type = (iftype == NL80211_IFTYPE_MONITOR) ?
+		AIC_MM_MONITOR : AIC_MM_STA;
+	memcpy(&request.address, mac, ETH_ALEN);
+	ret = aic8800_command(protocol, AIC_MM_ADD_IF_REQ, AIC_TASK_MM,
+			      &request, sizeof(request), AIC_MM_ADD_IF_CFM,
+			      &confirmation, sizeof(confirmation));
+	if (ret)
+		return ret;
+	if (confirmation.status)
+		return -EIO;
+
+	protocol->vif_index = confirmation.instance;
+	protocol->interface_open = true;
+	if (iftype == NL80211_IFTYPE_MONITOR && protocol->monitor_chan_set) {
+		ret = aic8800_send_config_monitor(protocol, true,
+						  &protocol->monitor_chan);
+		if (ret)
+			return ret;
+	}
+	netif_tx_start_all_queues(core->ndev);
+	return 0;
+}
+
 int aic8800_protocol_scan(struct aic8800_core *core,
 			  struct cfg80211_scan_request *scan)
 {
@@ -672,6 +934,9 @@ int aic8800_protocol_scan(struct aic8800_core *core,
 
 	if (!protocol->interface_open || scan->n_ssids > AIC_SCAN_SSIDS ||
 	    scan->n_channels > AIC_SCAN_CHANNELS || scan->ie_len > 256)
+		return -EOPNOTSUPP;
+	if (core->ndev && core->ndev->ieee80211_ptr &&
+	    core->ndev->ieee80211_ptr->iftype == NL80211_IFTYPE_MONITOR)
 		return -EOPNOTSUPP;
 	if (scan->ie_len) {
 		struct aic_scan_vendor_ie_req vendor_ie = {
@@ -995,6 +1260,35 @@ static int aic8800_rx_command(struct aic8800_protocol *protocol,
 	return 0;
 }
 
+static int aic8800_rx_monitor(struct aic8800_core *core, const u8 *frame,
+			      size_t length)
+{
+	struct ieee80211_radiotap_header *rtap;
+	struct sk_buff *skb;
+	size_t rtap_len = sizeof(*rtap);
+
+	if (!core->ndev || length < sizeof(struct ieee80211_hdr_3addr))
+		return -EINVAL;
+	skb = netdev_alloc_skb(core->ndev, rtap_len + length);
+	if (!skb)
+		return -ENOMEM;
+	skb_reserve(skb, rtap_len);
+	skb_put_data(skb, frame, length);
+	rtap = skb_push(skb, rtap_len);
+	memset(rtap, 0, rtap_len);
+	rtap->it_len = cpu_to_le16(rtap_len);
+	skb_reset_mac_header(skb);
+	skb->dev = core->ndev;
+	skb->ip_summed = CHECKSUM_UNNECESSARY;
+	skb->pkt_type = PACKET_OTHERHOST;
+	skb->protocol = htons(ETH_P_802_2);
+	core->ndev->stats.rx_packets++;
+	core->ndev->stats.rx_bytes += skb->len;
+	core->rx_frames++;
+	netif_rx(skb);
+	return 0;
+}
+
 static int aic8800_rx_data(struct aic8800_core *core, const u8 *frame,
 			   size_t length)
 {
@@ -1002,6 +1296,9 @@ static int aic8800_rx_data(struct aic8800_core *core, const u8 *frame,
 
 	if (!core->ndev || length < sizeof(struct ieee80211_hdr))
 		return -EINVAL;
+	if (core->ndev->ieee80211_ptr &&
+	    core->ndev->ieee80211_ptr->iftype == NL80211_IFTYPE_MONITOR)
+		return aic8800_rx_monitor(core, frame, length);
 	skb = netdev_alloc_skb_ip_align(core->ndev, length);
 	if (!skb)
 		return -ENOMEM;
@@ -1058,38 +1355,137 @@ int aic8800_protocol_rx(struct aic8800_core *core, const u8 *buffer, size_t len)
 	return handled;
 }
 
+static int aic8800_build_host_tx(struct aic8800_core *core,
+				 const u8 *payload, size_t payload_len,
+				 u16 flags, u8 tid, u8 station_index,
+				 const u8 *da, const u8 *sa, __be16 ethertype,
+				 u8 access_category, u8 **out, size_t *out_len)
+{
+	struct aic_tx_descriptor *descriptor;
+	size_t packet_len;
+	u8 *buffer;
+
+	if (!core || !core->protocol || !payload || !payload_len ||
+	    payload_len > U16_MAX)
+		return -EINVAL;
+
+	packet_len = sizeof(*descriptor) + payload_len;
+	buffer = kzalloc(packet_len, GFP_ATOMIC);
+	if (!buffer)
+		return -ENOMEM;
+
+	descriptor = (void *)buffer;
+	descriptor->packet_len = cpu_to_le16(payload_len);
+	descriptor->host_id = 0;
+	if (da)
+		memcpy(&descriptor->destination, da, ETH_ALEN);
+	if (sa)
+		memcpy(&descriptor->source, sa, ETH_ALEN);
+	descriptor->ethertype = ethertype;
+	descriptor->access_category = access_category;
+	descriptor->tid = tid;
+	descriptor->vif_index = core->protocol->vif_index;
+	descriptor->station_index = station_index;
+	descriptor->flags = cpu_to_le16(flags);
+	memcpy(buffer + sizeof(*descriptor), payload, payload_len);
+
+	*out = buffer;
+	*out_len = packet_len;
+	return 0;
+}
+
+static int aic8800_submit_host_tx(struct aic8800_core *core, u8 *buffer,
+				  size_t buffer_len)
+{
+	int ret;
+
+	if (!core->tx_frame) {
+		kfree(buffer);
+		return -EOPNOTSUPP;
+	}
+
+	ret = core->tx_frame(core, buffer, buffer_len);
+	kfree(buffer);
+	return ret;
+}
+
 int aic8800_protocol_wrap_tx(struct aic8800_core *core, const u8 *frame,
 			     size_t frame_len, u8 **out, size_t *out_len)
 {
 	const struct ethhdr *ethernet = (const void *)frame;
-	struct aic_tx_descriptor *descriptor;
-	size_t payload_len;
-	size_t packet_len;
-	u8 *buffer;
 
-	if (frame_len < ETH_HLEN || frame_len > U16_MAX)
+	if (frame_len < ETH_HLEN)
 		return -EINVAL;
-	payload_len = frame_len - ETH_HLEN;
-	packet_len = sizeof(*descriptor) + payload_len;
-	buffer = kzalloc(4 + packet_len, GFP_KERNEL);
-	if (!buffer)
-		return -ENOMEM;
-	put_unaligned_le16(packet_len, buffer);
-	buffer[2] = 0x01;
-	buffer[3] = aic8800_crc8(buffer, 3);
-	descriptor = (void *)(buffer + 4);
-	descriptor->packet_len = cpu_to_le16(payload_len);
-	memcpy(&descriptor->destination, ethernet->h_dest, ETH_ALEN);
-	memcpy(&descriptor->source, ethernet->h_source, ETH_ALEN);
-	descriptor->ethertype = ethernet->h_proto;
-	descriptor->access_category = 1;
-	descriptor->tid = 0;
-	descriptor->vif_index = core->protocol->vif_index;
-	descriptor->station_index = core->protocol->ap_index;
-	memcpy(buffer + 4 + sizeof(*descriptor), frame + ETH_HLEN, payload_len);
-	*out = buffer;
-	*out_len = 4 + packet_len;
-	return 0;
+
+	return aic8800_build_host_tx(core, frame + ETH_HLEN,
+				     frame_len - ETH_HLEN, 0, 0,
+				     core->protocol->ap_index,
+				     ethernet->h_dest, ethernet->h_source,
+				     ethernet->h_proto, 1, out, out_len);
+}
+
+int aic8800_protocol_mgmt_tx(struct aic8800_core *core, const u8 *frame,
+			     size_t frame_len, bool no_cck, bool robust)
+{
+	struct ieee80211_hdr *hdr = (void *)frame;
+	u8 *buffer;
+	size_t buffer_len;
+	u16 flags = AIC_TXU_CNTRL_MGMT;
+	int ret;
+
+	if (!frame || frame_len < sizeof(*hdr))
+		return -EINVAL;
+	if (!ieee80211_is_mgmt(hdr->frame_control))
+		return -EINVAL;
+
+	if (no_cck)
+		flags |= AIC_TXU_CNTRL_MGMT_NO_CCK;
+	if (robust)
+		flags |= AIC_TXU_CNTRL_MGMT_ROBUST;
+
+	ret = aic8800_build_host_tx(core, frame, frame_len, flags,
+				    AIC_INVALID_TID, AIC_INVALID_STA,
+				    ieee80211_get_DA(hdr),
+				    ieee80211_get_SA(hdr),
+				    0, AIC_TX_AC_VO, &buffer, &buffer_len);
+	if (ret)
+		return ret;
+
+	return aic8800_submit_host_tx(core, buffer, buffer_len);
+}
+
+/*
+ * Probe path: ship an arbitrary 802.11 MPDU with TXU_CNTRL_MGMT set.
+ * Firmware treats that flag as "host-built MPDU" (vendor raw_frame stub
+ * did the same). Use this from monitor inject to test non-mgmt FC values.
+ */
+int aic8800_protocol_mpdu_tx(struct aic8800_core *core, const u8 *mpdu,
+			     size_t mpdu_len, bool no_cck)
+{
+	struct ieee80211_hdr *hdr = (void *)mpdu;
+	u8 *buffer;
+	size_t buffer_len;
+	u16 flags = AIC_TXU_CNTRL_MGMT;
+	int ret;
+
+	if (!mpdu || mpdu_len < sizeof(*hdr))
+		return -EINVAL;
+
+	if (no_cck)
+		flags |= AIC_TXU_CNTRL_MGMT_NO_CCK;
+
+	dev_dbg(core->dev, "mpdu_tx fc=0x%04x len=%zu flags=0x%x\n",
+		le16_to_cpu(hdr->frame_control), mpdu_len, flags);
+
+	ret = aic8800_build_host_tx(core, mpdu, mpdu_len, flags,
+				    AIC_INVALID_TID, AIC_INVALID_STA,
+				    ieee80211_get_DA(hdr),
+				    ieee80211_get_SA(hdr),
+				    0, AIC_TX_AC_VO, &buffer, &buffer_len);
+	if (ret)
+		return ret;
+
+	return aic8800_submit_host_tx(core, buffer, buffer_len);
 }
 
 EXPORT_SYMBOL_GPL(aic8800_protocol_init);

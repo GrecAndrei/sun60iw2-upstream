@@ -13,6 +13,7 @@
 struct wiphy;
 struct net_device;
 struct sk_buff;
+struct sdio_func;
 struct aic8800_core;
 struct aic8800_protocol;
 
@@ -32,6 +33,8 @@ typedef int (*aic8800_rx_submit_t)(struct aic8800_core *core,
 
 struct aic8800_core {
 	struct device *dev;
+	/* SDIO transport function; may differ from dev (boot F2/F1). */
+	struct sdio_func *sdio_func;
 	const char *fw_name;
 	const struct firmware *fw_data;
 	struct wiphy *wiphy;

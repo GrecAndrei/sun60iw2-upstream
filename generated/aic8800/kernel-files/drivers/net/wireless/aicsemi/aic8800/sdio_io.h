@@ -69,6 +69,8 @@ int aic8800_sdio_tx_write(struct sdio_func *func,
 			 const u8 *data, size_t len);
 int aic8800_sdio_tx_frame(struct aic8800_core *core,
 			 const u8 *data, size_t len);
+int aic8800_sdio_tx_command(struct aic8800_core *core,
+			   const u8 *data, size_t len);
 int aic8800_sdio_flow_ctrl(struct sdio_func *func,
 			   const bool *abort);
 int aic8800_sdio_rx_drain(struct aic8800_core *core, int budget);

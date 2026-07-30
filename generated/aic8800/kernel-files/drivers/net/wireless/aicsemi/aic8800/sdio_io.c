@@ -160,7 +160,7 @@ int aic8800_sdio_flow_ctrl(struct sdio_func *func, const bool *abort)
 			return ret;
 
 		/* Buffers beyond the reserve are available to us. */
-		if (fc_reg > AIC8800_SDIO_FLOW_CTRL_THRESH)
+		if (fc_reg)
 			return fc_reg;
 
 		if (count >= AIC8800_SDIO_FLOW_CTRL_RETRY ||
@@ -240,7 +240,7 @@ int aic8800_sdio_rx_drain(struct aic8800_core *core, int budget)
 	int frames = 0;
 	int ret = 0;
 
-	if (!core || !core->dev)
+	if (!core || !core->sdio_func)
 		return -EINVAL;
 
 	if (!core->protocol)
@@ -249,9 +249,7 @@ int aic8800_sdio_rx_drain(struct aic8800_core *core, int budget)
 	if (budget <= 0)
 		budget = 1;
 
-	func = dev_to_sdio_func(core->dev);
-	if (!func)
-		return -ENODEV;
+	func = core->sdio_func;
 
 	while (frames < budget) {
 		u8 *frame;
@@ -348,7 +346,7 @@ int aic8800_sdio_rx_drain(struct aic8800_core *core, int budget)
 			return ret;
 		}
 
-		if (data_len > 2304) {
+		if (data_len > 8192) {
 			dev_warn_ratelimited(core->dev,
 				"discarding %u byte RX frame\n", data_len);
 			core->rx_malformed++;

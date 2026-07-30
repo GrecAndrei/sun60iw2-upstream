@@ -18,7 +18,7 @@
   ],
   "bt_max_speed": 1500000,
   "firmware_dir": "/lib/firmware/aic8800d80/",
-  "wifi_fw_probe_name": "aic8800d80/fmacfw_8800d80.bin",
+  "wifi_fw_probe_name": "aic8800d80/fmacfw_8800d80_u02.bin",
   "wifi_fw_download_addr": "0x00120000",
   "wifi_tx_port_addr": "0x10",
   "wifi_rx_len_port_addr": "0x05",
@@ -27,7 +27,7 @@
   "wifi_rx_work_max_batches": 32,
   "wifi_rx_queue_limit": 256,
   "wifi_rx_submit_budget": 128,
-  "wifi_rx_max_frame_len": 2304,
+  "wifi_rx_max_frame_len": 8192,
   "wifi_rx_use_meta_header": false,
   "wifi_rx_meta_len": 4,
   "wifi_rx_meta_len_offset": 0,
@@ -41,9 +41,9 @@
   "wifi_tx_reinit_stall_threshold": 3,
   "wifi_tx_reinit_cooldown_ms": 5000,
   "wifi_fw_fallback_names": [
-    "aic8800d80/fmacfw_8800d80.bin",
     "aic8800d80/fmacfw_8800d80_u02.bin",
-    "aic8800d80/fmacfw_8800d80_h_u02.bin"
+    "aic8800d80/fmacfw_8800d80_h_u02.bin",
+    "aic8800d80/fmacfw_8800d80.bin"
   ],
   "bt_patch_table_fallback_names": [
     "aic8800d80/fw_patch_table_8800d80_u02.bin",

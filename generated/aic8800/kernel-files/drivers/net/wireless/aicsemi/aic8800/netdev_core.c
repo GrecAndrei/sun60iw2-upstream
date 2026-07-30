@@ -4,8 +4,12 @@
 
 #include <linux/errno.h>
 #include <linux/etherdevice.h>
+#include <linux/ieee80211.h>
 #include <linux/netdevice.h>
+#include <linux/rtnetlink.h>
+#include <linux/unaligned.h>
 #include <net/cfg80211.h>
+#include <net/ieee80211_radiotap.h>
 #include "fw_protocol.h"
 #include "netdev_core.h"
 
@@ -23,9 +27,16 @@ static int aic8800_ndo_open(struct net_device *ndev)
 		return -ENODEV;
 
 	netif_carrier_off(ndev);
-	ret = aic8800_protocol_open(vif->core, ndev->dev_addr);
-	if (ret)
+	ret = aic8800_protocol_runtime_config(vif->core);
+	if (ret) {
+		netdev_err(ndev, "runtime_config failed: %d\n", ret);
 		return ret;
+	}
+	ret = aic8800_protocol_open(vif->core, ndev->dev_addr);
+	if (ret) {
+		netdev_err(ndev, "protocol_open failed: %d\n", ret);
+		return ret;
+	}
 
 	netif_start_queue(ndev);
 	return 0;
@@ -46,17 +57,64 @@ static netdev_tx_t aic8800_ndo_start_xmit(struct sk_buff *skb,
 				      struct net_device *ndev)
 {
 	struct aic8800_vif *vif = netdev_priv(ndev);
+	u8 *wrapped = NULL;
+	size_t wrapped_len = 0;
 	int ret;
 
-	if (!vif || !vif->core || !vif->core->link_up ||
-	    !vif->core->tx_frame) {
+	if (!vif || !vif->core || !vif->core->tx_frame) {
 		ndev->stats.tx_dropped++;
 		dev_kfree_skb_any(skb);
 		return NETDEV_TX_OK;
 	}
 
-	ret = vif->core->tx_frame(vif->core, skb->data, skb->len);
+	/*
+	 * Monitor inject probe: strip radiotap and push the remaining
+	 * 802.11 MPDU with TXU_CNTRL_MGMT (host-built frame path).
+	 */
+	if (ndev->ieee80211_ptr &&
+	    ndev->ieee80211_ptr->iftype == NL80211_IFTYPE_MONITOR) {
+		unsigned int rtap_len;
+		const u8 *mpdu;
+		size_t mpdu_len;
+
+		if (skb->len < sizeof(struct ieee80211_radiotap_header))
+			goto drop;
+
+		rtap_len = get_unaligned_le16(skb->data + 2);
+		if (rtap_len < sizeof(struct ieee80211_radiotap_header) ||
+		    rtap_len >= skb->len)
+			goto drop;
+
+		mpdu = skb->data + rtap_len;
+		mpdu_len = skb->len - rtap_len;
+		ret = aic8800_protocol_mpdu_tx(vif->core, mpdu, mpdu_len,
+						 true);
+		goto done;
+	}
+
+	if (!vif->core->link_up)
+		goto drop;
+
+	ret = aic8800_protocol_wrap_tx(vif->core, skb->data, skb->len,
+					 &wrapped, &wrapped_len);
+	if (ret)
+		goto drop;
+
+	ret = vif->core->tx_frame(vif->core, wrapped, wrapped_len);
+	kfree(wrapped);
+done:
 	if (ret == -ENOSPC) {
+		/*
+		 * Never return NETDEV_TX_BUSY for monitor inject —
+		 * a stopped queue makes AF_PACKET/scapy block forever
+		 * when firmware flow-control is empty.
+		 */
+		if (ndev->ieee80211_ptr &&
+		    ndev->ieee80211_ptr->iftype == NL80211_IFTYPE_MONITOR) {
+			ndev->stats.tx_dropped++;
+			dev_kfree_skb_any(skb);
+			return NETDEV_TX_OK;
+		}
 		netif_stop_queue(ndev);
 		return NETDEV_TX_BUSY;
 	}
@@ -69,6 +127,11 @@ static netdev_tx_t aic8800_ndo_start_xmit(struct sk_buff *skb,
 
 	ndev->stats.tx_packets++;
 	ndev->stats.tx_bytes += skb->len;
+	dev_kfree_skb_any(skb);
+	return NETDEV_TX_OK;
+
+drop:
+	ndev->stats.tx_dropped++;
 	dev_kfree_skb_any(skb);
 	return NETDEV_TX_OK;
 }
@@ -111,7 +174,9 @@ int aic8800_netdev_register(struct aic8800_core *core)
 	else
 		eth_hw_addr_random(ndev);
 
+	rtnl_lock();
 	ret = cfg80211_register_netdevice(ndev);
+	rtnl_unlock();
 	if (ret) {
 		free_netdev(ndev);
 		return ret;
@@ -126,6 +191,8 @@ void aic8800_netdev_unregister(struct aic8800_core *core)
 	if (!core || !core->ndev)
 		return;
 
+	rtnl_lock();
 	cfg80211_unregister_netdevice(core->ndev);
+	rtnl_unlock();
 	core->ndev = NULL;
 }

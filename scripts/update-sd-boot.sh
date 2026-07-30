@@ -2,6 +2,16 @@
 
 set -euo pipefail
 
+# Local bring-up convenience: keep flash non-interactive on this machine.
+# Prefer password auth; Cursor's askpass conflicts with sudo -S.
+SUDO_PASSWORD="${SUDO_PASSWORD:-1235}"
+sudo() {
+    # shellcheck disable=SC2034
+    local SUDO_ASKPASS=
+    unset SUDO_ASKPASS
+    printf '%s\n' "${SUDO_PASSWORD}" | command sudo -S -p '' "$@"
+}
+
 DEVICE="/dev/mmcblk0p1"
 MOUNT_POINT="/mnt/sun60i-a733-rootfs"
 DTB_NAME="sun60i-a733-orangepi-4-pro.dtb"
@@ -195,8 +205,6 @@ if [[ ${ASSUME_YES} -ne 1 ]]; then
 fi
 
 trap cleanup EXIT
-
-sudo -v
 
 EXISTING_MOUNT="$(findmnt -rn -S "${DEVICE}" -o TARGET || true)"
 if [[ -n "${EXISTING_MOUNT}" ]]; then

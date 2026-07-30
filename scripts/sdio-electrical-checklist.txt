@@ -1,0 +1,20 @@
+A733 SDIO electrical checklist (only if CMD5 still RTO after mmc0 shared clocks + mmc1 re-enabled)
+
+Preconditions
+- Image/DTB with mmc0 store/mbus/msi_lite clocks and mmc1 okay
+- UART shows: pwrseq reset logical=0 raw/physical=1, then a733-sdio CMD5 RTO
+- Do NOT change drive phases or UHS caps yet
+
+Probes (one power cycle, capture with UART timestamps)
+1. BLDO5 (PG IO 1.8 V) — steady 1.8 V before and during first CMD5
+2. CLDO1 (PM IO 1.8 V) — steady 1.8 V before and during first CMD5
+3. PM1 WL_REG_ON — high before first CMD5 (matches pwrseq log)
+4. PG0 SDIO CLK — 400 kHz square during CMD5 attempt (host mclk 800 kHz / 2)
+5. PG1 SDIO CMD — host drives command; look for any slave pull/response edge
+
+Pass/fail
+- Rails OK + REG_ON high + CLK present + no CMD response => chip/bus silence (not SW clock programming)
+- No CLK on PG0 => pinctrl/clock still wrong despite driver logs
+- REG_ON low during CMD5 => pwrseq/GPIO ownership bug
+
+Keep software frozen while measuring; paste scope notes + matching UART slice.

@@ -1,0 +1,14 @@
+[Unit]
+Description=AIC8800 SDIO Wi-Fi bring-up
+After=systemd-modules-load.service local-fs.target
+Wants=systemd-modules-load.service
+# Loads the driver if needed and brings wlan0 up. Must not block boot.
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/local/sbin/aic8800-wifi-bringup.sh
+TimeoutStartSec=60
+
+[Install]
+WantedBy=multi-user.target

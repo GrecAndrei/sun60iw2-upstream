@@ -18,15 +18,16 @@ binding/data/generator output together and run factory validation.
 
 ## Workspace boundaries
 
-The source repository is separate from two local kernel trees:
+The source repository is separate from local kernel trees:
 
-- `../../kernels/mainline-v7/` is the mainline v7.0 integration tree.
+- `../../kernels/a733-v7.1.3/` is the primary integration build and flash
+  target for Orange Pi 4 Pro bring-up (Wi-Fi, thermals, systemd rootfs).
+- `../../kernels/mainline-v7/` is the mainline v7.0 comparison / export tree.
   `scripts/apply-patches.sh` applies only Git-format patch files and installs
   the two defconfigs.
-- `../../kernels/a733-debug/` is a detached local debug worktree with
-  experimental changes absent from this repository. Do not treat it as
-  reviewable source until the changes have been reproduced here and exported
-  as patches.
+- `../../kernels/a733-debug/` is a detached experimental worktree. Do not
+  treat it as reviewable source until changes are reproduced here and
+  exported as patches.
 
 `../../references/orangepi-vendor-linux-6.6/` and
 `../../references/aic8800-bsp-snapshot/` are reference-only. Any new

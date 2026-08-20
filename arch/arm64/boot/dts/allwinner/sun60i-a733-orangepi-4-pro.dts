@@ -4,6 +4,7 @@
 
 #include <dt-bindings/gpio/gpio.h>
 #include "sun60i-a733.dtsi"
+#include "sun60i-a733-cpu-opp.dtsi"
 
 / {
 	model = "Orange Pi 4 Pro";
@@ -177,6 +178,28 @@
 			 * Undeclared rails keep the bootloader voltage.
 			 */
 
+			/* Big-cluster CPU rail (A76). */
+			reg_dcdc3: dcdc3 {
+				regulator-name = "axp8191-dcdc3";
+				regulator-min-microvolt = <500000>;
+				regulator-max-microvolt = <1540000>;
+				regulator-ramp-delay = <250>;
+				regulator-enable-ramp-delay = <1000>;
+				regulator-boot-on;
+				regulator-always-on;
+			};
+
+			/* Little-cluster CPU rail (A55). */
+			reg_dcdc5: dcdc5 {
+				regulator-name = "axp8191-dcdc5";
+				regulator-min-microvolt = <500000>;
+				regulator-max-microvolt = <1540000>;
+				regulator-ramp-delay = <250>;
+				regulator-enable-ramp-delay = <1000>;
+				regulator-boot-on;
+				regulator-always-on;
+			};
+
 			/*
 			 * PG pad supply for Wi-Fi SDIO @ 1.8 V. Vendor
 			 * sunxi_wlan_set_power() forces 1800 mV then enables;
@@ -201,6 +224,38 @@
 			};
 		};
 	};
+};
+
+&cpu0 {
+	cpu-supply = <&reg_dcdc5>;
+};
+
+&cpu1 {
+	cpu-supply = <&reg_dcdc5>;
+};
+
+&cpu2 {
+	cpu-supply = <&reg_dcdc5>;
+};
+
+&cpu3 {
+	cpu-supply = <&reg_dcdc5>;
+};
+
+&cpu4 {
+	cpu-supply = <&reg_dcdc5>;
+};
+
+&cpu5 {
+	cpu-supply = <&reg_dcdc5>;
+};
+
+&cpu6 {
+	cpu-supply = <&reg_dcdc3>;
+};
+
+&cpu7 {
+	cpu-supply = <&reg_dcdc3>;
 };
 
 /*

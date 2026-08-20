@@ -25,7 +25,7 @@
 			device_type = "cpu";
 			reg = <0x000>;
 			enable-method = "psci";
-			clocks = <&cpupll_ccu CLK_PLL_CPU_L>;
+			clocks = <&cpupll_ccu CLK_CPU_L>;
 			#cooling-cells = <2>;
 		};
 
@@ -34,7 +34,7 @@
 			device_type = "cpu";
 			reg = <0x100>;
 			enable-method = "psci";
-			clocks = <&cpupll_ccu CLK_PLL_CPU_L>;
+			clocks = <&cpupll_ccu CLK_CPU_L>;
 			#cooling-cells = <2>;
 		};
 
@@ -43,7 +43,7 @@
 			device_type = "cpu";
 			reg = <0x200>;
 			enable-method = "psci";
-			clocks = <&cpupll_ccu CLK_PLL_CPU_L>;
+			clocks = <&cpupll_ccu CLK_CPU_L>;
 			#cooling-cells = <2>;
 		};
 
@@ -52,7 +52,7 @@
 			device_type = "cpu";
 			reg = <0x300>;
 			enable-method = "psci";
-			clocks = <&cpupll_ccu CLK_PLL_CPU_L>;
+			clocks = <&cpupll_ccu CLK_CPU_L>;
 			#cooling-cells = <2>;
 		};
 
@@ -61,7 +61,7 @@
 			device_type = "cpu";
 			reg = <0x400>;
 			enable-method = "psci";
-			clocks = <&cpupll_ccu CLK_PLL_CPU_L>;
+			clocks = <&cpupll_ccu CLK_CPU_L>;
 			#cooling-cells = <2>;
 		};
 
@@ -70,7 +70,7 @@
 			device_type = "cpu";
 			reg = <0x500>;
 			enable-method = "psci";
-			clocks = <&cpupll_ccu CLK_PLL_CPU_L>;
+			clocks = <&cpupll_ccu CLK_CPU_L>;
 			#cooling-cells = <2>;
 		};
 
@@ -79,7 +79,7 @@
 			device_type = "cpu";
 			reg = <0x600>;
 			enable-method = "psci";
-			clocks = <&cpupll_ccu CLK_PLL_CPU_B>;
+			clocks = <&cpupll_ccu CLK_CPU_B>;
 			#cooling-cells = <2>;
 		};
 
@@ -88,7 +88,7 @@
 			device_type = "cpu";
 			reg = <0x700>;
 			enable-method = "psci";
-			clocks = <&cpupll_ccu CLK_PLL_CPU_B>;
+			clocks = <&cpupll_ccu CLK_CPU_B>;
 			#cooling-cells = <2>;
 		};
 	};
@@ -384,6 +384,8 @@
 			clocks = <&ccu CLK_THS0>, <&ccu CLK_GPADC0_24M>;
 			clock-names = "bus", "mod";
 			resets = <&ccu RST_BUS_THS0>;
+			nvmem-cells = <&ths_calibration>;
+			nvmem-cell-names = "calibration";
 			#thermal-sensor-cells = <1>;
 		};
 
@@ -729,21 +731,21 @@
 
 	thermal-zones {
 		cpu-l-thermal {
-			polling-delay-passive = <500>;
+			polling-delay-passive = <100>;
 			polling-delay = <1000>;
 			thermal-sensors = <&ths 3>;
 			sustainable-power = <756>;
 
 			trips {
 				cpu_l_threshold: cpu-l-trip-0 {
-					temperature = <60000>;
-					type = "passive";
-					hysteresis = <0>;
-				};
-				cpu_l_target: cpu-l-trip-1 {
 					temperature = <70000>;
 					type = "passive";
-					hysteresis = <0>;
+					hysteresis = <2000>;
+				};
+				cpu_l_target: cpu-l-trip-1 {
+					temperature = <90000>;
+					type = "passive";
+					hysteresis = <2000>;
 				};
 				cpu_l_crit: cpu-l-trip-2 {
 					temperature = <110000>;
@@ -761,26 +763,27 @@
 							 <&cpu3 THERMAL_NO_LIMIT THERMAL_NO_LIMIT>,
 							 <&cpu4 THERMAL_NO_LIMIT THERMAL_NO_LIMIT>,
 							 <&cpu5 THERMAL_NO_LIMIT THERMAL_NO_LIMIT>;
+					contribution = <1024>;
 				};
 			};
 		};
 
 		cpu-b-thermal {
-			polling-delay-passive = <500>;
+			polling-delay-passive = <100>;
 			polling-delay = <1000>;
 			thermal-sensors = <&ths 0>;
 			sustainable-power = <914>;
 
 			trips {
 				cpu_b_threshold: cpu-b-trip-0 {
-					temperature = <60000>;
-					type = "passive";
-					hysteresis = <0>;
-				};
-				cpu_b_target: cpu-b-trip-1 {
 					temperature = <70000>;
 					type = "passive";
-					hysteresis = <0>;
+					hysteresis = <2000>;
+				};
+				cpu_b_target: cpu-b-trip-1 {
+					temperature = <90000>;
+					type = "passive";
+					hysteresis = <2000>;
 				};
 				cpu_b_crit: cpu-b-trip-2 {
 					temperature = <110000>;
@@ -794,6 +797,7 @@
 					trip = <&cpu_b_target>;
 					cooling-device = <&cpu6 THERMAL_NO_LIMIT THERMAL_NO_LIMIT>,
 							 <&cpu7 THERMAL_NO_LIMIT THERMAL_NO_LIMIT>;
+					contribution = <1024>;
 				};
 			};
 		};

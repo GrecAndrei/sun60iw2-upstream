@@ -38,7 +38,18 @@ DEFCONFIG_SPEC = {
         "CONFIG_CPU_FREQ_GOV_ONDEMAND": "y",
         "CONFIG_CPU_FREQ_GOV_CONSERVATIVE": "y",
         "CONFIG_CPU_FREQ_GOV_SCHEDUTIL": "y",
+        "CONFIG_CPUFREQ_DT": "y",
+        "CONFIG_CPUFREQ_DT_PLATDEV": "y",
         "CONFIG_ARM_SUN50I_CPUFREQ_NVMEM": "y",
+    },
+    "thermal": {
+        "CONFIG_THERMAL": "y",
+        "CONFIG_THERMAL_OF": "y",
+        "CONFIG_THERMAL_GOV_STEP_WISE": "y",
+        "CONFIG_CPU_THERMAL": "y",
+        "CONFIG_SUN8I_THERMAL": "y",
+        "CONFIG_NVMEM": "y",
+        "CONFIG_NVMEM_SUNXI_SID": "y",
     },
     "serial": {
         "CONFIG_SERIAL_8250": "y",

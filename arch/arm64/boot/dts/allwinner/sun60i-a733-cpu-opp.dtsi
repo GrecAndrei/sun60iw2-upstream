@@ -1,0 +1,220 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
+/*
+ * Allwinner A733 CPU OPP tables.
+ *
+ * Frequencies come from the vendor VF table. Voltages are the maximum
+ * non-zero bin entry for each OPP so DVFS is safe without sun50i-cpufreq-nvmem
+ * speed-bin selection (A733 is not wired into that driver yet).
+ */
+
+/ {
+	cluster0_opp_table: opp-table-cluster0 {
+		compatible = "operating-points-v2";
+		opp-shared;
+
+		opp-408000000 {
+			opp-hz = /bits/ 64 <408000000>;
+			opp-microvolt = <800000>;
+			clock-latency-ns = <244144>;
+		};
+
+		opp-720000000 {
+			opp-hz = /bits/ 64 <720000000>;
+			opp-microvolt = <800000>;
+			clock-latency-ns = <244144>;
+		};
+
+		opp-792000000 {
+			opp-hz = /bits/ 64 <792000000>;
+			opp-microvolt = <800000>;
+			clock-latency-ns = <244144>;
+		};
+
+		opp-1008000000 {
+			opp-hz = /bits/ 64 <1008000000>;
+			opp-microvolt = <800000>;
+			clock-latency-ns = <244144>;
+		};
+
+		opp-1104000000 {
+			opp-hz = /bits/ 64 <1104000000>;
+			opp-microvolt = <800000>;
+			clock-latency-ns = <244144>;
+		};
+
+		opp-1200000000 {
+			opp-hz = /bits/ 64 <1200000000>;
+			opp-microvolt = <850000>;
+			clock-latency-ns = <244144>;
+		};
+
+		opp-1296000000 {
+			opp-hz = /bits/ 64 <1296000000>;
+			opp-microvolt = <900000>;
+			clock-latency-ns = <244144>;
+		};
+
+		opp-1392000000 {
+			opp-hz = /bits/ 64 <1392000000>;
+			opp-microvolt = <950000>;
+			clock-latency-ns = <244144>;
+		};
+
+		opp-1416000000 {
+			opp-hz = /bits/ 64 <1416000000>;
+			opp-microvolt = <800000>;
+			clock-latency-ns = <244144>;
+		};
+
+		opp-1512000000 {
+			opp-hz = /bits/ 64 <1512000000>;
+			opp-microvolt = <1000000>;
+			clock-latency-ns = <244144>;
+		};
+
+		opp-1608000000 {
+			opp-hz = /bits/ 64 <1608000000>;
+			opp-microvolt = <1050000>;
+			clock-latency-ns = <244144>;
+		};
+
+		opp-1704000000 {
+			opp-hz = /bits/ 64 <1704000000>;
+			opp-microvolt = <1000000>;
+			clock-latency-ns = <244144>;
+		};
+
+		opp-1800000000 {
+			opp-hz = /bits/ 64 <1800000000>;
+			opp-microvolt = <1050000>;
+			clock-latency-ns = <244144>;
+		};
+	};
+
+	cluster1_opp_table: opp-table-cluster1 {
+		compatible = "operating-points-v2";
+		opp-shared;
+
+		opp-408000000 {
+			opp-hz = /bits/ 64 <408000000>;
+			opp-microvolt = <800000>;
+			clock-latency-ns = <244144>;
+		};
+
+		opp-720000000 {
+			opp-hz = /bits/ 64 <720000000>;
+			opp-microvolt = <800000>;
+			clock-latency-ns = <244144>;
+		};
+
+		opp-792000000 {
+			opp-hz = /bits/ 64 <792000000>;
+			opp-microvolt = <800000>;
+			clock-latency-ns = <244144>;
+		};
+
+		opp-1008000000 {
+			opp-hz = /bits/ 64 <1008000000>;
+			opp-microvolt = <800000>;
+			clock-latency-ns = <244144>;
+		};
+
+		opp-1200000000 {
+			opp-hz = /bits/ 64 <1200000000>;
+			opp-microvolt = <800000>;
+			clock-latency-ns = <244144>;
+		};
+
+		opp-1296000000 {
+			opp-hz = /bits/ 64 <1296000000>;
+			opp-microvolt = <800000>;
+			clock-latency-ns = <244144>;
+		};
+
+		opp-1392000000 {
+			opp-hz = /bits/ 64 <1392000000>;
+			opp-microvolt = <850000>;
+			clock-latency-ns = <244144>;
+		};
+
+		opp-1512000000 {
+			opp-hz = /bits/ 64 <1512000000>;
+			opp-microvolt = <900000>;
+			clock-latency-ns = <244144>;
+		};
+
+		opp-1608000000 {
+			opp-hz = /bits/ 64 <1608000000>;
+			opp-microvolt = <950000>;
+			clock-latency-ns = <244144>;
+		};
+
+		opp-1704000000 {
+			opp-hz = /bits/ 64 <1704000000>;
+			opp-microvolt = <1000000>;
+			clock-latency-ns = <244144>;
+		};
+
+		opp-1800000000 {
+			opp-hz = /bits/ 64 <1800000000>;
+			opp-microvolt = <1050000>;
+			clock-latency-ns = <244144>;
+		};
+
+		opp-1896000000 {
+			opp-hz = /bits/ 64 <1896000000>;
+			opp-microvolt = <1000000>;
+			clock-latency-ns = <244144>;
+		};
+
+		opp-1920000000 {
+			opp-hz = /bits/ 64 <1920000000>;
+			opp-microvolt = <1000000>;
+			clock-latency-ns = <244144>;
+		};
+
+		opp-1944000000 {
+			opp-hz = /bits/ 64 <1944000000>;
+			opp-microvolt = <1000000>;
+			clock-latency-ns = <244144>;
+		};
+
+		opp-1992000000 {
+			opp-hz = /bits/ 64 <1992000000>;
+			opp-microvolt = <1050000>;
+			clock-latency-ns = <244144>;
+		};
+	};
+};
+
+&cpu0 {
+	operating-points-v2 = <&cluster0_opp_table>;
+};
+
+&cpu1 {
+	operating-points-v2 = <&cluster0_opp_table>;
+};
+
+&cpu2 {
+	operating-points-v2 = <&cluster0_opp_table>;
+};
+
+&cpu3 {
+	operating-points-v2 = <&cluster0_opp_table>;
+};
+
+&cpu4 {
+	operating-points-v2 = <&cluster0_opp_table>;
+};
+
+&cpu5 {
+	operating-points-v2 = <&cluster0_opp_table>;
+};
+
+&cpu6 {
+	operating-points-v2 = <&cluster1_opp_table>;
+};
+
+&cpu7 {
+	operating-points-v2 = <&cluster1_opp_table>;
+};

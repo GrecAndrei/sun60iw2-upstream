@@ -154,6 +154,8 @@ EOF
 
 install -m 0755 "$SCRIPT_DIR/aic8800-wifi-bringup.sh" \
 	"$MNT/usr/local/sbin/aic8800-wifi-bringup.sh"
+install -m 0755 "$SCRIPT_DIR/a733-sdio-clock.sh" \
+	"$MNT/usr/local/sbin/a733-sdio-clock.sh"
 install -m 0644 "$SCRIPT_DIR/aic8800-wifi.service" \
 	"$MNT/etc/systemd/system/aic8800-wifi.service"
 ln -sfn /etc/systemd/system/aic8800-wifi.service \

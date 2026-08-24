@@ -41,6 +41,12 @@ fi
 i=0
 while [ "$i" -lt 30 ]; do
 	if [ -d /sys/class/net/wlan0 ]; then
+		# The high SDIO clock is safe once runtime firmware has brought wlan0
+		# into existence. Do not perform this write during MMC enumeration.
+		if [ -x /usr/local/sbin/a733-sdio-clock.sh ]; then
+			/usr/local/sbin/a733-sdio-clock.sh ||
+				klog "WARNING: retained conservative SMHC1 clock"
+		fi
 		ip link set wlan0 up 2>/dev/null || true
 		klog "wlan0 UP"
 		ip -br link show wlan0 2>/dev/null || true

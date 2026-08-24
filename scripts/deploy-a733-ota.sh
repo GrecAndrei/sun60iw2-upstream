@@ -85,9 +85,11 @@ IMAGE=$KERNEL_DIR/arch/arm64/boot/Image
 DTB=$KERNEL_DIR/arch/arm64/boot/dts/allwinner/sun60i-a733-orangepi-4-pro.dtb
 CORE=$KERNEL_DIR/drivers/net/wireless/aicsemi/aic8800/aic8800_core.ko
 SDIO=$KERNEL_DIR/drivers/net/wireless/aicsemi/aic8800/aic8800_sdio.ko
+CLOCK_HELPER=$PROJECT_DIR/scripts/a733-sdio-clock.sh
+WIFI_BRINGUP=$PROJECT_DIR/scripts/aic8800-wifi-bringup.sh
 REL=$(<"$KERNEL_DIR/include/config/kernel.release")
 
-for artifact in "$IMAGE" "$DTB" "$CORE" "$SDIO"; do
+for artifact in "$IMAGE" "$DTB" "$CORE" "$SDIO" "$CLOCK_HELPER" "$WIFI_BRINGUP"; do
 	[[ -f $artifact ]] || {
 		echo "missing artifact: $artifact" >&2
 		exit 1
@@ -124,7 +126,7 @@ trap cleanup EXIT
 
 echo "Staging update on $TARGET"
 "${SSH[@]}" "$TARGET" "umask 077 && mkdir -p '$REMOTE_STAGE'"
-"${SCP[@]}" "$IMAGE" "$DTB" "$CORE" "$SDIO" "$TARGET:$REMOTE_STAGE/"
+"${SCP[@]}" "$IMAGE" "$DTB" "$CORE" "$SDIO" "$CLOCK_HELPER" "$WIFI_BRINGUP" "$TARGET:$REMOTE_STAGE/"
 
 verify_remote() {
 	local file=$1
@@ -143,6 +145,8 @@ verify_remote "$IMAGE"
 verify_remote "$DTB"
 verify_remote "$CORE"
 verify_remote "$SDIO"
+verify_remote "$CLOCK_HELPER"
+verify_remote "$WIFI_BRINGUP"
 
 echo "Checksums match; installing boot set"
 "${SSH[@]}" "$TARGET" sh -s -- "$REMOTE_STAGE" "$REL" "$REBOOT" <<'REMOTE'
@@ -171,6 +175,8 @@ for module_dir in "/lib/modules/$release/extra" /root/aic8800; do
 	install_atomic "$stage/aic8800_core.ko" "$module_dir/aic8800_core.ko"
 	install_atomic "$stage/aic8800_sdio.ko" "$module_dir/aic8800_sdio.ko"
 done
+install -m 0755 "$stage/a733-sdio-clock.sh" /usr/local/sbin/a733-sdio-clock.sh
+install -m 0755 "$stage/aic8800-wifi-bringup.sh" /usr/local/sbin/aic8800-wifi-bringup.sh
 
 if command -v depmod >/dev/null 2>&1; then
 	depmod -a "$release"

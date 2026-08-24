@@ -23,6 +23,16 @@
   "wifi_tx_port_addr": "0x10",
   "wifi_rx_len_port_addr": "0x05",
   "wifi_rx_data_port_addr": "0x0F",
+  "wifi_ht_cap_flags": [
+    "IEEE80211_HT_CAP_LDPC_CODING",
+    "IEEE80211_HT_CAP_SUP_WIDTH_20_40",
+    "IEEE80211_HT_CAP_SGI_20",
+    "IEEE80211_HT_CAP_SGI_40",
+    "IEEE80211_HT_CAP_MAX_AMSDU"
+  ],
+  "wifi_ht_mcs32": true,
+  "wifi_ht_rx_highest_mbps": 150,
+  "wifi_max_bandwidth": "AIC_PHY_CHNL_BW_40",
   "wifi_rx_budget": 8,
   "wifi_rx_work_max_batches": 32,
   "wifi_rx_queue_limit": 256,

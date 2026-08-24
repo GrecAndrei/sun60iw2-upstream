@@ -72,6 +72,10 @@ while (($#)); do
 done
 
 if ((BUILD)); then
+	# Export first: it can make the integration tree dirty, which is part of
+	# the kernel release string embedded in both Image and module vermagic.
+	"$PROJECT_DIR/scripts/generate-aic8800-upstream.sh"
+	"$PROJECT_DIR/scripts/export-aic8800-kernel-skeleton.sh" "$KERNEL_DIR"
 	make -C "$KERNEL_DIR" -j"$(nproc)" ARCH=arm64 \
 		CROSS_COMPILE=aarch64-linux-gnu- Image dtbs
 	"$PROJECT_DIR/scripts/check-aic8800-skeleton.sh" "$KERNEL_DIR"

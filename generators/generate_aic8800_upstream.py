@@ -199,6 +199,10 @@ def gen_kernel_draft_files(data: dict) -> dict[str, str]:
     tx_port_addr = data.get("wifi_tx_port_addr", "0x00000000")
     rx_len_port_addr = data.get("wifi_rx_len_port_addr", "0x00000000")
     rx_data_port_addr = data.get("wifi_rx_data_port_addr", "0x00000000")
+    ht_cap_flags = " | ".join(data.get("wifi_ht_cap_flags", [])) or "0"
+    ht_mcs32 = "0x01" if data.get("wifi_ht_mcs32", False) else "0"
+    ht_rx_highest = str(data.get("wifi_ht_rx_highest_mbps", 65))
+    max_bandwidth = data.get("wifi_max_bandwidth", "AIC_PHY_CHNL_BW_20")
     rx_budget = str(data.get("wifi_rx_budget", 8))
     rx_work_max_batches = str(data.get("wifi_rx_work_max_batches", 32))
     rx_queue_limit = str(data.get("wifi_rx_queue_limit", 256))
@@ -920,12 +924,12 @@ def gen_kernel_draft_files(data: dict) -> dict[str, str]:
             \t.n_bitrates = ARRAY_SIZE(aic8800_rates_2ghz),
             \t.ht_cap = {
             \t\t.ht_supported = true,
-            \t\t.cap = 0,
+            \t\t.cap = __HT_CAP_FLAGS__,
             \t\t.ampdu_factor = IEEE80211_HT_MAX_AMPDU_64K,
             \t\t.ampdu_density = IEEE80211_HT_MPDU_DENSITY_16,
             \t\t.mcs = {
-            \t\t\t.rx_mask = { 0xff, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-            \t\t\t.rx_highest = cpu_to_le16(65),
+            \t\t\t.rx_mask = { 0xff, 0, 0, 0, __HT_MCS32__, 0, 0, 0, 0, 0 },
+            \t\t\t.rx_highest = cpu_to_le16(__HT_RX_HIGHEST__),
             \t\t\t.tx_params = IEEE80211_HT_MCS_TX_DEFINED,
             \t\t},
             \t},
@@ -938,12 +942,12 @@ def gen_kernel_draft_files(data: dict) -> dict[str, str]:
             \t.n_bitrates = ARRAY_SIZE(aic8800_rates_5ghz),
             \t.ht_cap = {
             \t\t.ht_supported = true,
-            \t\t.cap = 0,
+            \t\t.cap = __HT_CAP_FLAGS__,
             \t\t.ampdu_factor = IEEE80211_HT_MAX_AMPDU_64K,
             \t\t.ampdu_density = IEEE80211_HT_MPDU_DENSITY_16,
             \t\t.mcs = {
-            \t\t\t.rx_mask = { 0xff, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-            \t\t\t.rx_highest = cpu_to_le16(65),
+            \t\t\t.rx_mask = { 0xff, 0, 0, 0, __HT_MCS32__, 0, 0, 0, 0, 0 },
+            \t\t\t.rx_highest = cpu_to_le16(__HT_RX_HIGHEST__),
             \t\t\t.tx_params = IEEE80211_HT_MCS_TX_DEFINED,
             \t\t},
             \t},
@@ -1280,7 +1284,11 @@ def gen_kernel_draft_files(data: dict) -> dict[str, str]:
             \tcore->wiphy = NULL;
             }
             """
-        ).replace("\n \t", "\n\t"),
+        )
+        .replace("__HT_CAP_FLAGS__", ht_cap_flags)
+        .replace("__HT_MCS32__", ht_mcs32)
+        .replace("__HT_RX_HIGHEST__", ht_rx_highest)
+        .replace("\n \t", "\n\t"),
         "drivers/net/wireless/aicsemi/aic8800/netdev_core.c": dedent(
             """\
             // SPDX-License-Identifier: GPL-2.0-only
@@ -3354,9 +3362,18 @@ def gen_kernel_draft_files(data: dict) -> dict[str, str]:
     # fw_protocol.{c,h} are template-only artifacts.  Other artifacts are
     # rendered above from the JSON contract; never overwrite one of those
     # rendered results with a template copy.
+    template_replacements = {
+        "__HT_CAP_FLAGS__": ht_cap_flags,
+        "__HT_MCS32__": ht_mcs32,
+        "__HT_RX_HIGHEST__": ht_rx_highest,
+        "__WIFI_MAX_BANDWIDTH__": max_bandwidth,
+    }
     for template in sorted(TEMPLATE_ROOT.glob("*.in")):
         relative = template.name.removesuffix(".in").replace("__", "/")
-        files.setdefault(relative, template.read_text())
+        content = template.read_text()
+        for marker, replacement in template_replacements.items():
+            content = content.replace(marker, replacement)
+        files.setdefault(relative, content)
 
     # Strip the single leading space dedent leaves on continuation lines,
     # but keep the one that kernel-style block comments need.

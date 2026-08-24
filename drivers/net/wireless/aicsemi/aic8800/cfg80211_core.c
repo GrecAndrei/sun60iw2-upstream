@@ -94,12 +94,12 @@ static struct ieee80211_supported_band aic8800_band_2ghz = {
 	.n_bitrates = ARRAY_SIZE(aic8800_rates_2ghz),
 	.ht_cap = {
 		.ht_supported = true,
-		.cap = 0,
+		.cap = IEEE80211_HT_CAP_LDPC_CODING | IEEE80211_HT_CAP_SUP_WIDTH_20_40 | IEEE80211_HT_CAP_SGI_20 | IEEE80211_HT_CAP_SGI_40 | IEEE80211_HT_CAP_MAX_AMSDU,
 		.ampdu_factor = IEEE80211_HT_MAX_AMPDU_64K,
 		.ampdu_density = IEEE80211_HT_MPDU_DENSITY_16,
 		.mcs = {
-			.rx_mask = { 0xff, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-			.rx_highest = cpu_to_le16(65),
+			.rx_mask = { 0xff, 0, 0, 0, 0x01, 0, 0, 0, 0, 0 },
+			.rx_highest = cpu_to_le16(150),
 			.tx_params = IEEE80211_HT_MCS_TX_DEFINED,
 		},
 	},
@@ -112,12 +112,12 @@ static struct ieee80211_supported_band aic8800_band_5ghz = {
 	.n_bitrates = ARRAY_SIZE(aic8800_rates_5ghz),
 	.ht_cap = {
 		.ht_supported = true,
-		.cap = 0,
+		.cap = IEEE80211_HT_CAP_LDPC_CODING | IEEE80211_HT_CAP_SUP_WIDTH_20_40 | IEEE80211_HT_CAP_SGI_20 | IEEE80211_HT_CAP_SGI_40 | IEEE80211_HT_CAP_MAX_AMSDU,
 		.ampdu_factor = IEEE80211_HT_MAX_AMPDU_64K,
 		.ampdu_density = IEEE80211_HT_MPDU_DENSITY_16,
 		.mcs = {
-			.rx_mask = { 0xff, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-			.rx_highest = cpu_to_le16(65),
+			.rx_mask = { 0xff, 0, 0, 0, 0x01, 0, 0, 0, 0, 0 },
+			.rx_highest = cpu_to_le16(150),
 			.tx_params = IEEE80211_HT_MCS_TX_DEFINED,
 		},
 	},

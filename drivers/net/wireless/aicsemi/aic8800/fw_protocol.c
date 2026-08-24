@@ -155,6 +155,24 @@ struct aic_me_config_req {
 	bool dynamic_power_save;
 } __aligned(4);
 
+/*
+ * D80 firmware expects this packed MAC HT capability payload in ME_CONFIG.
+ * Keep it aligned with the cfg80211 profile generated from the board data.
+ */
+static void aic8800_fill_ht_config(struct aic_me_config_req *config)
+{
+	put_unaligned_le16(IEEE80211_HT_CAP_LDPC_CODING | IEEE80211_HT_CAP_SUP_WIDTH_20_40 | IEEE80211_HT_CAP_SGI_20 | IEEE80211_HT_CAP_SGI_40 | IEEE80211_HT_CAP_MAX_AMSDU, &config->ht_capability[0]);
+	config->ht_capability[2] = IEEE80211_HT_MAX_AMPDU_64K |
+		(IEEE80211_HT_MPDU_DENSITY_16 <<
+		 IEEE80211_HT_AMPDU_PARM_DENSITY_SHIFT);
+	config->ht_capability[3] = 0xff;
+	config->ht_capability[7] = 0x01;
+	put_unaligned_le16(150, &config->ht_capability[13]);
+	config->ht_capability[15] = IEEE80211_HT_MCS_TX_DEFINED;
+	config->max_bandwidth = AIC_PHY_CHNL_BW_40;
+	config->ht_supported = true;
+}
+
 struct aic_me_chan_config_req {
 	struct aic_chan_def channels_2g[14];
 	struct aic_chan_def channels_5g[28];
@@ -781,6 +799,7 @@ int aic8800_protocol_runtime_config(struct aic8800_core *core)
 	if (ret)
 		return ret;
 	config.tx_lifetime = cpu_to_le16(0xffff);
+	aic8800_fill_ht_config(&config);
 	ret = aic8800_command(protocol, AIC_ME_CONFIG_REQ, AIC_TASK_ME,
 			      &config, sizeof(config), AIC_ME_CONFIG_CFM,
 			      NULL, 0);

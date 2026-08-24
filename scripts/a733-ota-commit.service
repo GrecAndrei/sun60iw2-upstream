@@ -1,0 +1,13 @@
+# SPDX-License-Identifier: GPL-2.0-only
+[Unit]
+Description=Promote a healthy A733 OTA trial
+After=local-fs.target
+ConditionPathExists=/boot/a733-ota/pending
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/a733-ota-commit.sh
+TimeoutStartSec=180
+
+[Install]
+WantedBy=multi-user.target

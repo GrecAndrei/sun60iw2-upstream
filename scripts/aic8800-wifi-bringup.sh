@@ -4,7 +4,9 @@ set -u
 klog() { echo "aic8800-wifi: $*" > /dev/kmsg 2>/dev/null || true; echo "aic8800-wifi: $*"; }
 REL=$(uname -r)
 MODDIR=
-for cand in /root/aic8800 "/lib/modules/$REL/extra" "/lib/modules/$REL/kernel/drivers/net/wireless/aicsemi/aic8800"; do
+# Prefer modules matching the running kernel.  /root/aic8800 is a legacy
+# fallback and must not shadow modules staged for an OTA trial.
+for cand in "/lib/modules/$REL/extra" "/lib/modules/$REL/kernel/drivers/net/wireless/aicsemi/aic8800" /root/aic8800; do
 	[ -f "$cand/aic8800_sdio.ko" ] && MODDIR=$cand && break
 done
 sdio_present() {

@@ -1,0 +1,39 @@
+# SPDX-License-Identifier: GPL-2.0-only
+#
+# One-shot trial boot helper for the A733 OTA workflow.
+#
+# The parent boot script sources this only after it has prepared bootargs.
+# A pending trial is allowed exactly once: U-Boot writes "attempted" before
+# loading it. A reset after a failed trial therefore reaches the rollback
+# Image/DTB without relying on Linux having run at all.
+
+if test -e ${devtype} ${devnum} ${prefix}a733-ota/pending; then
+	if test -e ${devtype} ${devnum} ${prefix}a733-ota/attempted; then
+		echo "A733 OTA: prior trial did not commit; loading rollback boot set"
+		if load ${devtype} ${devnum} ${kernel_addr_r} ${prefix}a733-ota/rollback/Image; then
+			if load ${devtype} ${devnum} ${fdt_addr_r} ${prefix}a733-ota/rollback/sun60i-a733-orangepi-4-pro.dtb; then
+				setenv bootargs "${bootargs} a733.ota_rollback=1"
+				fdt addr ${fdt_addr_r}
+				fdt resize 65536
+				booti ${kernel_addr_r} - ${fdt_addr_r}
+			fi
+		fi
+		echo "A733 OTA: rollback files unavailable; continuing normal boot"
+	else
+		echo "A733 OTA: marking and booting trial set"
+		mw.b ${load_addr} 0 1
+		if ext4write mmc 0:1 ${load_addr} /a733-ota/attempted 1; then
+			if load ${devtype} ${devnum} ${kernel_addr_r} ${prefix}a733-ota/trial/Image; then
+				if load ${devtype} ${devnum} ${fdt_addr_r} ${prefix}a733-ota/trial/sun60i-a733-orangepi-4-pro.dtb; then
+					setenv bootargs "${bootargs} a733.ota_trial=1"
+					fdt addr ${fdt_addr_r}
+					fdt resize 65536
+					booti ${kernel_addr_r} - ${fdt_addr_r}
+				fi
+			fi
+			echo "A733 OTA: trial files unavailable; continuing normal boot"
+		else
+			echo "A733 OTA: cannot persist trial guard; continuing normal boot"
+		fi
+	fi
+fi

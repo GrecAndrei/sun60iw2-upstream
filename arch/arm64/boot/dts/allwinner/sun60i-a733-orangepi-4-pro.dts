@@ -72,6 +72,11 @@
 	};
 };
 
+/* The board's HOSC is 26 MHz; PLL_REF normalizes it to 24 MHz. */
+&osc24M {
+	clock-frequency = <26000000>;
+};
+
 &pio {
 	/*
 	 * PF (SD card) stays on the fixed 3.3 V board rail. PG (Wi-Fi SDIO)

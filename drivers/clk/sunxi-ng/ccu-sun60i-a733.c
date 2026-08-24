@@ -112,17 +112,16 @@ static const struct clk_ops sun60i_key_gate_ops = {
 	.recalc_rate	= sun60i_key_gate_recalc_rate,
 };
 
-static struct ccu_nm pll_ref_clk = {
-	.enable		= BIT(31),
+static struct ccu_nkmp pll_ref_clk = {
+	.enable		= BIT(27),
 	.lock		= BIT(28),
-	.n		= _SUNXI_CCU_MULT_OFFSET_MIN_MAX(8, 8, 0, 80, 116),
+	.n		= _SUNXI_CCU_MULT_OFFSET_MIN_MAX(8, 8, 1, 1, 0),
 	.m		= _SUNXI_CCU_DIV(16, 7),
-	.min_rate	= 15000000,
-	.max_rate	= 2800000000,
+	.p		= _SUNXI_CCU_DIV(1, 1),
 	.common		= {
 		.reg		= 0x000,
-		.hw.init	= CLK_HW_INIT("pll-ref", "dcxo", &ccu_nm_ops,
-					      CLK_SET_RATE_UNGATE | CLK_IGNORE_UNUSED),
+		.hw.init	= CLK_HW_INIT("pll-ref", "hosc", &ccu_nkmp_ops,
+					      CLK_SET_RATE_GATE),
 	},
 };
 
@@ -141,28 +140,24 @@ static struct ccu_nm pll_ddr_clk = {
 static struct ccu_nm pll_peri0_clk = {
 	.enable		= BIT(31),
 	.lock		= BIT(28),
-	.n		= _SUNXI_CCU_MULT_OFFSET_MIN_MAX(8, 8, 0, 53, 105),
-	.m		= _SUNXI_CCU_DIV(0, 0),
-	.min_rate	= 1272000000,
-	.max_rate	= 2520000000,
+	.n		= _SUNXI_CCU_MULT_OFFSET_MIN_MAX(8, 8, 1, 11, 0),
+	.m		= _SUNXI_CCU_DIV(1, 1),
 	.common		= {
 		.reg		= 0x0a0,
 		.hw.init	= CLK_HW_INIT("pll-peri0", "pll-ref", &ccu_nm_ops,
-					      CLK_SET_RATE_UNGATE | CLK_IGNORE_UNUSED),
+					      CLK_SET_RATE_GATE),
 	},
 };
 
 static struct ccu_nm pll_peri1_clk = {
 	.enable		= BIT(31),
 	.lock		= BIT(28),
-	.n		= _SUNXI_CCU_MULT_OFFSET_MIN_MAX(8, 8, 0, 53, 105),
-	.m		= _SUNXI_CCU_DIV(0, 0),
-	.min_rate	= 1272000000,
-	.max_rate	= 2520000000,
+	.n		= _SUNXI_CCU_MULT_OFFSET_MIN_MAX(8, 8, 1, 11, 0),
+	.m		= _SUNXI_CCU_DIV(1, 1),
 	.common		= {
 		.reg		= 0x0c0,
 		.hw.init	= CLK_HW_INIT("pll-peri1", "pll-ref", &ccu_nm_ops,
-					      CLK_SET_RATE_UNGATE | CLK_IGNORE_UNUSED),
+					      CLK_SET_RATE_GATE),
 	},
 };
 

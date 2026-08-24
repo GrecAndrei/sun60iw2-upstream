@@ -212,6 +212,11 @@ def merge_data(primary: Dict, extracted: Dict, binding_ids: Set[str]) -> Dict:
         out = dict(item)
         canon = primary_by_name.get(name)
         if canon:
+            # The extracted input records the raw BSP shape.  The primary
+            # data is the reviewed model, and must override it when a clock
+            # needs a different CCF representation (for example NKMP rather
+            # than NM for PLL_REF).
+            out.update(canon)
             if "id" in canon:
                 out["id"] = canon["id"]
                 out["_id_source"] = "canonical"
@@ -770,7 +775,12 @@ static const struct clk_ops sun60i_fixed_rate_gate_ops = {
             fields.append(f"\t.n\t\t= {n_expr},")
             if "n_shift" in c:
                 fields.append(
-                    f"\t.p\t\t= _SUNXI_CCU_DIV({c['p_shift']}, {c['p_width']}),"
+                    f"\t.m\t\t= _SUNXI_CCU_DIV({c.get('m_shift', 0)}, "
+                    f"{c.get('m_width', 0)}),"
+                )
+                fields.append(
+                    f"\t.p\t\t= _SUNXI_CCU_DIV({c.get('p_shift', 0)}, "
+                    f"{c.get('p_width', 0)}),"
                 )
             else:
                 fields.append("\t.m\t\t= _SUNXI_CCU_DIV(1, 1),")

@@ -202,6 +202,9 @@ def gen_kernel_draft_files(data: dict) -> dict[str, str]:
     ht_cap_flags = " | ".join(data.get("wifi_ht_cap_flags", [])) or "0"
     ht_mcs32 = "0x01" if data.get("wifi_ht_mcs32", False) else "0"
     ht_rx_highest = str(data.get("wifi_ht_rx_highest_mbps", 65))
+    vht_cap_flags = " | ".join(data.get("wifi_vht_cap_flags", [])) or "0"
+    vht_mcs_map = data.get("wifi_vht_mcs_map", "0xffff")
+    vht_rx_highest = str(data.get("wifi_vht_rx_highest_mbps", 0))
     max_bandwidth = data.get("wifi_max_bandwidth", "AIC_PHY_CHNL_BW_20")
     rx_budget = str(data.get("wifi_rx_budget", 8))
     rx_work_max_batches = str(data.get("wifi_rx_work_max_batches", 32))
@@ -951,6 +954,16 @@ def gen_kernel_draft_files(data: dict) -> dict[str, str]:
             \t\t\t.tx_params = IEEE80211_HT_MCS_TX_DEFINED,
             \t\t},
             \t},
+            \t.vht_cap = {
+            \t\t.vht_supported = true,
+            \t\t.cap = __VHT_CAP_FLAGS__,
+            \t\t.vht_mcs = {
+            \t\t\t.rx_mcs_map = cpu_to_le16(__VHT_MCS_MAP__),
+            \t\t\t.rx_highest = cpu_to_le16(__VHT_RX_HIGHEST__),
+            \t\t\t.tx_mcs_map = cpu_to_le16(__VHT_MCS_MAP__),
+            \t\t\t.tx_highest = cpu_to_le16(__VHT_RX_HIGHEST__),
+            \t\t},
+            \t},
             };
 
             static const u32 aic8800_cipher_suites[] = {
@@ -1288,6 +1301,9 @@ def gen_kernel_draft_files(data: dict) -> dict[str, str]:
         .replace("__HT_CAP_FLAGS__", ht_cap_flags)
         .replace("__HT_MCS32__", ht_mcs32)
         .replace("__HT_RX_HIGHEST__", ht_rx_highest)
+        .replace("__VHT_CAP_FLAGS__", vht_cap_flags)
+        .replace("__VHT_MCS_MAP__", vht_mcs_map)
+        .replace("__VHT_RX_HIGHEST__", vht_rx_highest)
         .replace("\n \t", "\n\t"),
         "drivers/net/wireless/aicsemi/aic8800/netdev_core.c": dedent(
             """\
@@ -3366,6 +3382,9 @@ def gen_kernel_draft_files(data: dict) -> dict[str, str]:
         "__HT_CAP_FLAGS__": ht_cap_flags,
         "__HT_MCS32__": ht_mcs32,
         "__HT_RX_HIGHEST__": ht_rx_highest,
+        "__VHT_CAP_FLAGS__": vht_cap_flags,
+        "__VHT_MCS_MAP__": vht_mcs_map,
+        "__VHT_RX_HIGHEST__": vht_rx_highest,
         "__WIFI_MAX_BANDWIDTH__": max_bandwidth,
     }
     for template in sorted(TEMPLATE_ROOT.glob("*.in")):

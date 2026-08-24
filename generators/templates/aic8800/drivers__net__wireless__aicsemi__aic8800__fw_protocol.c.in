@@ -169,8 +169,14 @@ static void aic8800_fill_ht_config(struct aic_me_config_req *config)
 	config->ht_capability[7] = __HT_MCS32__;
 	put_unaligned_le16(__HT_RX_HIGHEST__, &config->ht_capability[13]);
 	config->ht_capability[15] = IEEE80211_HT_MCS_TX_DEFINED;
+	put_unaligned_le32(__VHT_CAP_FLAGS__, &config->vht_capability[0]);
+	put_unaligned_le16(__VHT_MCS_MAP__, &config->vht_capability[4]);
+	put_unaligned_le16(__VHT_RX_HIGHEST__, &config->vht_capability[6]);
+	put_unaligned_le16(__VHT_MCS_MAP__, &config->vht_capability[8]);
+	put_unaligned_le16(__VHT_RX_HIGHEST__, &config->vht_capability[10]);
 	config->max_bandwidth = __WIFI_MAX_BANDWIDTH__;
 	config->ht_supported = true;
+	config->vht_supported = true;
 }
 
 struct aic_me_chan_config_req {

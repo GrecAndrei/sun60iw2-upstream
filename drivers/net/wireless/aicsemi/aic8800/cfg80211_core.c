@@ -121,6 +121,16 @@ static struct ieee80211_supported_band aic8800_band_5ghz = {
 			.tx_params = IEEE80211_HT_MCS_TX_DEFINED,
 		},
 	},
+	.vht_cap = {
+		.vht_supported = true,
+		.cap = (7 << IEEE80211_VHT_CAP_MAX_A_MPDU_LENGTH_EXPONENT_SHIFT) | IEEE80211_VHT_CAP_SHORT_GI_80 | IEEE80211_VHT_CAP_RXSTBC_1 | IEEE80211_VHT_CAP_RXLDPC,
+		.vht_mcs = {
+			.rx_mcs_map = cpu_to_le16(0xfffe),
+			.rx_highest = cpu_to_le16(390),
+			.tx_mcs_map = cpu_to_le16(0xfffe),
+			.tx_highest = cpu_to_le16(390),
+		},
+	},
 };
 
 static const u32 aic8800_cipher_suites[] = {

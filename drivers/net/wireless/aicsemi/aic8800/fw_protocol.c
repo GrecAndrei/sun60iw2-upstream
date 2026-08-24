@@ -169,8 +169,14 @@ static void aic8800_fill_ht_config(struct aic_me_config_req *config)
 	config->ht_capability[7] = 0x01;
 	put_unaligned_le16(150, &config->ht_capability[13]);
 	config->ht_capability[15] = IEEE80211_HT_MCS_TX_DEFINED;
-	config->max_bandwidth = AIC_PHY_CHNL_BW_40;
+	put_unaligned_le32((7 << IEEE80211_VHT_CAP_MAX_A_MPDU_LENGTH_EXPONENT_SHIFT) | IEEE80211_VHT_CAP_SHORT_GI_80 | IEEE80211_VHT_CAP_RXSTBC_1 | IEEE80211_VHT_CAP_RXLDPC, &config->vht_capability[0]);
+	put_unaligned_le16(0xfffe, &config->vht_capability[4]);
+	put_unaligned_le16(390, &config->vht_capability[6]);
+	put_unaligned_le16(0xfffe, &config->vht_capability[8]);
+	put_unaligned_le16(390, &config->vht_capability[10]);
+	config->max_bandwidth = AIC_PHY_CHNL_BW_80;
 	config->ht_supported = true;
+	config->vht_supported = true;
 }
 
 struct aic_me_chan_config_req {

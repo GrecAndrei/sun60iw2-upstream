@@ -32,7 +32,15 @@
   ],
   "wifi_ht_mcs32": true,
   "wifi_ht_rx_highest_mbps": 150,
-  "wifi_max_bandwidth": "AIC_PHY_CHNL_BW_40",
+  "wifi_vht_cap_flags": [
+    "(7 << IEEE80211_VHT_CAP_MAX_A_MPDU_LENGTH_EXPONENT_SHIFT)",
+    "IEEE80211_VHT_CAP_SHORT_GI_80",
+    "IEEE80211_VHT_CAP_RXSTBC_1",
+    "IEEE80211_VHT_CAP_RXLDPC"
+  ],
+  "wifi_vht_mcs_map": "0xfffe",
+  "wifi_vht_rx_highest_mbps": 390,
+  "wifi_max_bandwidth": "AIC_PHY_CHNL_BW_80",
   "wifi_rx_budget": 8,
   "wifi_rx_work_max_batches": 32,
   "wifi_rx_queue_limit": 256,

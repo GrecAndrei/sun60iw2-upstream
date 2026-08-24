@@ -9,6 +9,9 @@ BOOT=/boot
 OTA=$BOOT/a733-ota
 DTB=sun60i-a733-orangepi-4-pro.dtb
 TIMEOUT=${A733_OTA_HEALTH_TIMEOUT:-150}
+MARKER_DEVICE=/dev/mmcblk0
+MARKER_PARTITION=/sys/class/block/mmcblk0/mmcblk0p1/start
+MARKER_SECTOR=65520
 
 log()
 {
@@ -30,6 +33,13 @@ rollback()
 	systemctl reboot --message='A733 OTA trial health check failed' || reboot
 }
 
+clear_marker()
+{
+	[ "$(cat "$MARKER_PARTITION")" = 65536 ] || return 1
+	dd if=/dev/zero of="$MARKER_DEVICE" bs=512 seek="$MARKER_SECTOR" count=1 \
+		conv=fsync,notrunc status=none
+}
+
 promote()
 {
 	install -m 0644 "$OTA/trial/Image" "$BOOT/.Image.a733-ota-new"
@@ -40,14 +50,16 @@ promote()
 		mv -f "${destination}.a733-ota-new" "$destination"
 	done
 
-	rm -f "$OTA/pending" "$OTA/attempted"
+	clear_marker
+	rm -f "$OTA/pending"
 	sync
 	log "trial promoted successfully"
 }
 
 case " $(cat /proc/cmdline 2>/dev/null) " in
 *' a733.ota_rollback=1 '*)
-	rm -f "$OTA/pending" "$OTA/attempted"
+	clear_marker
+	rm -f "$OTA/pending"
 	sync
 	log "rollback boot completed; cleared failed trial state"
 	exit 0
@@ -58,7 +70,7 @@ case " $(cat /proc/cmdline 2>/dev/null) " in
 	;;
 esac
 
-[ -f "$OTA/pending" ] && [ -f "$OTA/attempted" ] || exit 0
+[ -f "$OTA/pending" ] || exit 0
 
 log "waiting up to ${TIMEOUT}s for Wi-Fi health"
 elapsed=0

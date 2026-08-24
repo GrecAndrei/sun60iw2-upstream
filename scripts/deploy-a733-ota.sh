@@ -222,6 +222,9 @@ reboot_after=$3
 self_test=$4
 dtb=sun60i-a733-orangepi-4-pro.dtb
 ota=/boot/a733-ota
+marker_device=/dev/mmcblk0
+marker_partition=/sys/class/block/mmcblk0/mmcblk0p1/start
+marker_sector=65520
 
 install_atomic() {
 	source=$1
@@ -234,10 +237,32 @@ install_atomic() {
 	mv -f "$temporary" "$destination"
 }
 
+read_marker() {
+	dd if="$marker_device" bs=512 skip="$marker_sector" count=1 status=none |
+		od -An -tu1 -N4 | tr -s ' ' | sed 's/^ //'
+}
+
+write_pending_marker() {
+	marker_file="$ota/.raw-marker"
+	dd if=/dev/zero of="$marker_file" bs=512 count=1 status=none
+	printf '\247\063\001\132' | dd of="$marker_file" conv=notrunc status=none
+	dd if="$marker_file" of="$marker_device" bs=512 seek="$marker_sector" count=1 \
+		conv=fsync,notrunc status=none
+	rm -f "$marker_file"
+}
+
 if [ -e "$ota/pending" ]; then
 	echo "an A733 OTA trial is already pending; refusing to replace it" >&2
 	exit 1
 fi
+[ "$(cat "$marker_partition")" = 65536 ] || {
+	echo "unexpected A733 root partition start; refusing raw trial marker" >&2
+	exit 1
+}
+[ "$(read_marker)" = '0 0 0 0' ] || {
+	echo "raw A733 trial marker is not clear; refusing to replace it" >&2
+	exit 1
+}
 
 install_atomic /boot/boot.cmd "$ota/rollback/boot.cmd"
 install_atomic /boot/boot.scr "$ota/rollback/boot.scr"
@@ -270,7 +295,11 @@ if command -v depmod >/dev/null 2>&1; then
 	depmod -a "$release"
 fi
 printf '1' > "$ota/pending"
-rm -f "$ota/attempted"
+if ! write_pending_marker; then
+	rm -f "$ota/pending"
+	echo "failed to write raw A733 trial marker" >&2
+	exit 1
+fi
 sync
 echo "A733 OTA trial staged: $release"
 

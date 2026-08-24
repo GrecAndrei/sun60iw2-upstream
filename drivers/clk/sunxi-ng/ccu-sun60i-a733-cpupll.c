@@ -27,53 +27,66 @@
 #include "ccu_mux.h"
 
 static struct ccu_nm pll_cpu_back_clk = {
-	.enable		= BIT(27),
+	.enable		= BIT(31),
 	.lock		= BIT(28),
-	.n		= _SUNXI_CCU_MULT_MIN(8, 8, 11),
-	.m		= _SUNXI_CCU_DIV(1, 1),
+	.n		= _SUNXI_CCU_MULT_OFFSET_MIN_MAX(8, 8, 0, 53, 105),
+	.m		= _SUNXI_CCU_DIV(0, 4),
+	.min_rate	= 159000000,
+	.max_rate	= 2520000000,
 	.common		= {
 		.reg		= 0x000,
+		.features	= CCU_FEATURE_CLEAR_MOD,
+		.clear		= BIT(26),
 		.hw.init	= CLK_HW_INIT("pll-cpu-back", "dcxo", &ccu_nm_ops,
-					      CLK_SET_RATE_GATE),
+					      CLK_SET_RATE_UNGATE | CLK_IS_CRITICAL),
 	},
 };
 
 static struct ccu_nkmp pll_cpu_l_clk = {
-	.enable		= BIT(27),
+	.enable		= BIT(31),
 	.lock		= BIT(28),
-	.n		= _SUNXI_CCU_MULT_MIN(8, 8, 11),
-	.m		= _SUNXI_CCU_DIV(1, 1),
-	.p		= _SUNXI_CCU_DIV(0, 1),
+	.p_reg		= 0x101c,
+	.n		= _SUNXI_CCU_MULT_OFFSET_MIN_MAX(8, 8, 0, 28, 94),
+	.p		= _SUNXI_CCU_DIV(16, 2),
+	.max_rate	= 2256000000,
 	.common		= {
 		.reg		= 0x1000,
+		.features	= CCU_FEATURE_CLEAR_MOD,
+		.clear		= BIT(26),
 		.hw.init	= CLK_HW_INIT("pll-cpu-l", "dcxo", &ccu_nkmp_ops,
-					      CLK_SET_RATE_GATE),
+					      CLK_SET_RATE_UNGATE | CLK_IS_CRITICAL),
 	},
 };
 
 static struct ccu_nkmp pll_cpu_b_clk = {
-	.enable		= BIT(27),
+	.enable		= BIT(31),
 	.lock		= BIT(28),
-	.n		= _SUNXI_CCU_MULT_MIN(8, 8, 11),
-	.m		= _SUNXI_CCU_DIV(1, 1),
-	.p		= _SUNXI_CCU_DIV(0, 1),
+	.p_reg		= 0x201c,
+	.n		= _SUNXI_CCU_MULT_OFFSET_MIN_MAX(8, 8, 0, 28, 94),
+	.p		= _SUNXI_CCU_DIV(16, 2),
+	.max_rate	= 2256000000,
 	.common		= {
 		.reg		= 0x2000,
+		.features	= CCU_FEATURE_CLEAR_MOD,
+		.clear		= BIT(26),
 		.hw.init	= CLK_HW_INIT("pll-cpu-b", "dcxo", &ccu_nkmp_ops,
-					      CLK_SET_RATE_GATE),
+					      CLK_SET_RATE_UNGATE | CLK_IS_CRITICAL),
 	},
 };
 
 static struct ccu_nkmp pll_cpu_dsu_clk = {
-	.enable		= BIT(27),
+	.enable		= BIT(31),
 	.lock		= BIT(28),
-	.n		= _SUNXI_CCU_MULT_MIN(8, 8, 11),
-	.m		= _SUNXI_CCU_DIV(1, 1),
-	.p		= _SUNXI_CCU_DIV(0, 1),
+	.p_reg		= 0x301c,
+	.n		= _SUNXI_CCU_MULT_OFFSET_MIN_MAX(8, 8, 0, 28, 94),
+	.p		= _SUNXI_CCU_DIV(16, 2),
+	.max_rate	= 2256000000,
 	.common		= {
 		.reg		= 0x3000,
+		.features	= CCU_FEATURE_CLEAR_MOD,
+		.clear		= BIT(26),
 		.hw.init	= CLK_HW_INIT("pll-cpu-dsu", "dcxo", &ccu_nkmp_ops,
-					      CLK_SET_RATE_GATE),
+					      CLK_SET_RATE_UNGATE | CLK_IS_CRITICAL),
 	},
 };
 

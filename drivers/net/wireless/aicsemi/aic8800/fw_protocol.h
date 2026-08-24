@@ -29,6 +29,7 @@ int aic8800_protocol_scan(struct aic8800_core *core,
 int aic8800_protocol_connect(struct aic8800_core *core,
 			     struct cfg80211_connect_params *sme);
 int aic8800_protocol_disconnect(struct aic8800_core *core, u16 reason);
+int aic8800_protocol_set_control_port(struct aic8800_core *core, bool opened);
 int aic8800_protocol_add_key(struct aic8800_core *core, u8 key_index,
 			     bool pairwise, const u8 *mac_addr,
 			     struct key_params *params);

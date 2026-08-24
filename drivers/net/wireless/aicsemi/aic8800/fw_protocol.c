@@ -39,6 +39,8 @@
 /* Shipped aic8800_fdrv.ko rwnx_send_set_stack_start_req: id=123/124. */
 #define AIC_MM_SET_STACK_START_REQ	AIC_MSG(AIC_TASK_MM, 123)
 #define AIC_MM_SET_STACK_START_CFM	AIC_MSG(AIC_TASK_MM, 124)
+#define AIC_MM_SET_RF_CALIB_REQ		AIC_MSG(AIC_TASK_MM, 105)
+#define AIC_MM_SET_RF_CALIB_CFM		AIC_MSG(AIC_TASK_MM, 106)
 
 #define AIC_DBG_MEM_READ_REQ	AIC_MSG(AIC_TASK_DBG, 0)
 #define AIC_DBG_MEM_READ_CFM	AIC_MSG(AIC_TASK_DBG, 1)
@@ -59,6 +61,8 @@
 #define AIC_ME_CONFIG_CFM	AIC_MSG(AIC_TASK_ME, 1)
 #define AIC_ME_CHAN_CONFIG_REQ	AIC_MSG(AIC_TASK_ME, 2)
 #define AIC_ME_CHAN_CONFIG_CFM	AIC_MSG(AIC_TASK_ME, 3)
+#define AIC_ME_SET_CONTROL_PORT_REQ	AIC_MSG(AIC_TASK_ME, 4)
+#define AIC_ME_SET_CONTROL_PORT_CFM	AIC_MSG(AIC_TASK_ME, 5)
 /* Shipped aic8800_fdrv.ko: ME_CONFIG_MONITOR_REQ/CFM = 5137/5138. */
 #define AIC_ME_CONFIG_MONITOR_REQ	AIC_MSG(AIC_TASK_ME, 17)
 #define AIC_ME_CONFIG_MONITOR_CFM	AIC_MSG(AIC_TASK_ME, 18)
@@ -204,10 +208,22 @@ struct aic_scan_vendor_ie_req {
 	u8 data[256];
 };
 
+/*
+ * Layout matches vendor sm_connect_req (lmac_msg.h) exactly. Field order
+ * after flags is ctrl_port_ethertype, ie_len, listen_interval — swapping
+ * ctrl_port_ethertype with listen_interval stops the firmware from
+ * recognising the EAPOL control-port Ethertype and the 4-way handshake
+ * never completes.
+ */
 struct aic_sm_connect_req {
 	struct aic_mac_ssid ssid;
+	u8 pad0;
 	struct aic_mac_addr bssid;
-	struct aic_chan_def channel;
+	__le16 channel_frequency;
+	u8 channel_band;
+	u8 channel_flags;
+	s8 channel_tx_power;
+	u8 reserved[3];
 	__le32 flags;
 	__be16 control_port_ethertype;
 	__le16 ie_len;
@@ -216,6 +232,7 @@ struct aic_sm_connect_req {
 	u8 auth_type;
 	u8 uapsd_queues;
 	u8 vif_index;
+	u8 pad1[2];
 	__le32 ie_buffer[64];
 };
 
@@ -252,20 +269,29 @@ struct aic_sm_disconnect_ind {
 	u8 reassociation;
 };
 
-struct aic_key_material {
-	u8 length;
-	__le32 value[8];
-};
+struct aic_me_set_control_port_req {
+	u8 station_index;
+	bool control_port_open;
+} __packed;
 
+/*
+ * Layout matches vendor rwnx_send_key_add (aic8800_fdrv.ko) exactly:
+ *   [0] key_index, [1] station_index, [4] key_length,
+ *   [8..40] key material, [40] cipher, [41] instance (vif index),
+ *   [43] pairwise. 44 bytes total.
+ */
 struct aic_mm_key_add_req {
 	u8 key_index;
 	u8 station_index;
-	struct aic_key_material key;
+	u8 reserved[2];
+	u8 key_length;
+	u8 reserved2[3];
+	u8 key_value[32];
 	u8 cipher;
 	u8 instance;
-	u8 spp;
-	bool pairwise;
-};
+	u8 reserved3;
+	u8 pairwise;
+} __packed;
 
 struct aic_mm_key_add_cfm {
 	u8 status;
@@ -317,6 +343,10 @@ static_assert(sizeof(struct aic_scan_start_req) == 376);
 static_assert(sizeof(struct aic_scan_result_ind) == 12);
 static_assert(sizeof(struct aic_scan_vendor_ie_req) == 260);
 static_assert(sizeof(struct aic_sm_connect_req) == 320);
+static_assert(offsetof(struct aic_sm_connect_req, flags) == 48);
+static_assert(offsetof(struct aic_sm_connect_req, control_port_ethertype) == 52);
+static_assert(offsetof(struct aic_sm_connect_req, ie_len) == 54);
+static_assert(offsetof(struct aic_sm_connect_req, listen_interval) == 56);
 static_assert(sizeof(struct aic_tx_descriptor) == 28);
 
 static void aic8800_scan_done_workfn(struct work_struct *work)
@@ -715,16 +745,34 @@ int aic8800_protocol_runtime_config(struct aic8800_core *core)
 		u8 efuse_valid;
 		u8 set_vendor_info;
 		u8 conf_filter_null;
-	} stack = { .is_stack_start = 1 };
+	} stack = { .is_stack_start = 1, .set_vendor_info = 0x20 };
+	struct {
+		__le64 calib_mask;
+		__le64 calib_param;
+		__le32 calib_flags;
+		__le16 xtal_cap;
+		__le16 reserved;
+	} rf_calib = {
+		.calib_mask = cpu_to_le64(0x00000f0f00000f8fULL),
+		.calib_param = cpu_to_le64(204783624ULL),
+		.calib_flags = cpu_to_le32(2507267),
+		.xtal_cap = 0,
+		.reserved = 0,
+	};
 	int ret;
 
 	/*
 	 * Shipped aic8800_fdrv.ko rwnx_cfg80211_init order for D80:
-	 * set_stack_start → reset → me_config → me_chan_config.
-	 * Open then does mm_start + add_if. Skipping this leaves scan empty.
+	 * set_stack_start(vendor_info=0x20) → rf_calib → reset → me_config → me_chan_config.
+	 * Open then does mm_start + add_if.
 	 */
 	ret = aic8800_command(protocol, AIC_MM_SET_STACK_START_REQ, AIC_TASK_MM,
 			      &stack, sizeof(stack), AIC_MM_SET_STACK_START_CFM,
+			      NULL, 0);
+	if (ret)
+		return ret;
+	ret = aic8800_command(protocol, AIC_MM_SET_RF_CALIB_REQ, AIC_TASK_MM,
+			      &rf_calib, sizeof(rf_calib), AIC_MM_SET_RF_CALIB_CFM,
 			      NULL, 0);
 	if (ret)
 		return ret;
@@ -998,6 +1046,7 @@ int aic8800_protocol_connect(struct aic8800_core *core,
 	struct aic_sm_connect_req request = {};
 	u8 status = 0;
 	int index;
+	int ret;
 
 	if (!protocol->interface_open || sme->ssid_len > IEEE80211_MAX_SSID_LEN ||
 	    sme->ie_len > sizeof(request.ie_buffer))
@@ -1009,16 +1058,16 @@ int aic8800_protocol_connect(struct aic8800_core *core,
 	else
 		memset(&request.bssid, 0xff, ETH_ALEN);
 	if (sme->channel) {
-		request.channel.frequency = cpu_to_le16(sme->channel->center_freq);
-		request.channel.band = sme->channel->band;
+		request.channel_frequency = cpu_to_le16(sme->channel->center_freq);
+		request.channel_band = sme->channel->band;
 		if (sme->channel->flags & IEEE80211_CHAN_NO_IR)
-			request.channel.flags |= BIT(0);
+			request.channel_flags |= BIT(0);
 		if (sme->channel->flags & IEEE80211_CHAN_DISABLED)
-			request.channel.flags |= BIT(1);
+			request.channel_flags |= BIT(1);
 		if (sme->channel->flags & IEEE80211_CHAN_RADAR)
-			request.channel.flags |= BIT(2);
+			request.channel_flags |= BIT(2);
 	} else {
-		request.channel.frequency = cpu_to_le16(U16_MAX);
+		request.channel_frequency = cpu_to_le16(U16_MAX);
 	}
 	for (index = 0; index < sme->crypto.n_ciphers_pairwise; index++)
 		if (sme->crypto.ciphers_pairwise[index] == WLAN_CIPHER_SUITE_WEP40 ||
@@ -1059,9 +1108,13 @@ int aic8800_protocol_connect(struct aic8800_core *core,
 	}
 	request.vif_index = protocol->vif_index;
 	memcpy(request.ie_buffer, sme->ie, sme->ie_len);
-	return aic8800_command(protocol, AIC_SM_CONNECT_REQ, AIC_TASK_SM,
-			       &request, sizeof(request), AIC_SM_CONNECT_CFM,
-			       &status, sizeof(status)) ?: (status ? -EIO : 0);
+	core->connect_requests++;
+	ret = aic8800_command(protocol, AIC_SM_CONNECT_REQ, AIC_TASK_SM,
+			  &request, sizeof(request), AIC_SM_CONNECT_CFM,
+			  &status, sizeof(status));
+	if (ret || status)
+		core->connect_cfm_failures++;
+	return ret ?: (status ? -EIO : 0);
 }
 
 int aic8800_protocol_disconnect(struct aic8800_core *core, u16 reason)
@@ -1075,6 +1128,27 @@ int aic8800_protocol_disconnect(struct aic8800_core *core, u16 reason)
 	return aic8800_command(protocol, AIC_SM_DISCONNECT_REQ, AIC_TASK_SM,
 			       &request, sizeof(request), AIC_SM_DISCONNECT_CFM,
 			       NULL, 0);
+}
+
+int aic8800_protocol_set_control_port(struct aic8800_core *core, bool opened)
+{
+	struct aic8800_protocol *protocol = core->protocol;
+	struct aic_me_set_control_port_req request = {
+		.station_index = protocol->ap_index,
+		.control_port_open = opened,
+	};
+	int ret;
+
+	if (!protocol->interface_open || protocol->ap_index == AIC_INVALID_STA)
+		return -ENOTCONN;
+
+	core->control_port_requests++;
+	ret = aic8800_command(protocol, AIC_ME_SET_CONTROL_PORT_REQ, AIC_TASK_ME,
+				  &request, sizeof(request),
+				  AIC_ME_SET_CONTROL_PORT_CFM, NULL, 0);
+	if (ret)
+		core->control_port_failures++;
+	return ret;
 }
 
 static int aic8800_cipher(u32 cipher)
@@ -1100,22 +1174,27 @@ int aic8800_protocol_add_key(struct aic8800_core *core, u8 key_index,
 	int ret;
 
 	if (cipher < 0 || key_index >= ARRAY_SIZE(protocol->key_hardware_index) ||
-	    params->key_len > sizeof(request.key.value))
+	    params->key_len > sizeof(request.key_value))
 		return cipher < 0 ? cipher : -EINVAL;
 	request.key_index = key_index;
 	request.station_index = pairwise ? protocol->ap_index : 0xff;
-	request.key.length = params->key_len;
-	memcpy(request.key.value, params->key, params->key_len);
+	request.key_length = params->key_len;
+	memcpy(request.key_value, params->key, params->key_len);
 	request.cipher = cipher;
 	request.instance = protocol->vif_index;
 	request.pairwise = pairwise;
+	core->key_add_requests++;
 	ret = aic8800_command(protocol, AIC_MM_KEY_ADD_REQ, AIC_TASK_MM,
 			      &request, sizeof(request), AIC_MM_KEY_ADD_CFM,
 			      &confirmation, sizeof(confirmation));
-	if (ret)
+	if (ret) {
+		core->key_add_failures++;
 		return ret;
-	if (confirmation.status)
+	}
+	if (confirmation.status) {
+		core->key_add_failures++;
 		return -EIO;
+	}
 	protocol->key_hardware_index[key_index] = confirmation.hardware_index;
 	return 0;
 }
@@ -1186,6 +1265,7 @@ static void aic8800_connect_indication(struct aic8800_protocol *protocol,
 
 	if (length < offsetof(struct aic_sm_connect_ind, assoc_ie_buffer))
 		return;
+	core->connect_indications++;
 	request_len = le16_to_cpu(indication->request_ie_len);
 	response_len = le16_to_cpu(indication->response_ie_len);
 	ies = (const u8 *)indication->assoc_ie_buffer;
@@ -1199,6 +1279,8 @@ static void aic8800_connect_indication(struct aic8800_protocol *protocol,
 		memcpy(core->bssid, &indication->bssid, ETH_ALEN);
 		core->link_up = true;
 		netif_carrier_on(core->ndev);
+	} else {
+		core->connect_failures++;
 	}
 	cfg80211_connect_result(core->ndev, (const u8 *)&indication->bssid,
 				ies, request_len, ies + request_len, response_len,
@@ -1213,6 +1295,7 @@ static void aic8800_disconnect_indication(struct aic8800_protocol *protocol,
 
 	if (length < sizeof(*indication))
 		return;
+	core->disconnect_indications++;
 	core->link_up = false;
 	protocol->ap_index = 0xff;
 	netif_carrier_off(core->ndev);
@@ -1303,11 +1386,23 @@ static int aic8800_rx_data(struct aic8800_core *core, const u8 *frame,
 	if (!skb)
 		return -ENOMEM;
 	skb_put_data(skb, frame, length);
-	if (ieee80211_data_to_8023(skb, core->ndev->dev_addr,
-				   NL80211_IFTYPE_STATION)) {
-		dev_kfree_skb_any(skb);
-		return -EINVAL;
+	{
+		struct ieee80211_hdr *hdr = (struct ieee80211_hdr *)skb->data;
+		u8 data_offset = 0;
+		if (ieee80211_has_protected(hdr->frame_control))
+			data_offset = 8;
+		if (ieee80211_data_to_8023_exthdr(skb, NULL,
+						 core->ndev->dev_addr,
+						 NL80211_IFTYPE_STATION,
+						 data_offset, false)) {
+			core->rx_decap_failures++;
+			dev_kfree_skb_any(skb);
+			return -EINVAL;
+		}
 	}
+	if (skb->len >= ETH_HLEN &&
+	    get_unaligned_be16(skb->data + 12) == ETH_P_PAE)
+		core->eapol_rx++;
 	skb->dev = core->ndev;
 	skb->protocol = eth_type_trans(skb, core->ndev);
 	core->ndev->stats.rx_packets++;
@@ -1329,6 +1424,12 @@ int aic8800_protocol_rx(struct aic8800_core *core, const u8 *buffer, size_t len)
 		u8 type = frame[2] & 0x7f;
 		size_t advance;
 		int ret;
+
+		/* SDIO transfers are block-sized and the firmware terminates an
+		 * aggregate with a zero length header before the trailing padding.
+		 */
+		if (!packet_len)
+			break;
 
 		if (type == 0x11 || type == 0x12 || type == 0x13) {
 			advance = ALIGN(packet_len, 4) + 4;
@@ -1416,7 +1517,12 @@ int aic8800_protocol_wrap_tx(struct aic8800_core *core, const u8 *frame,
 
 	if (frame_len < ETH_HLEN)
 		return -EINVAL;
+	if (ethernet->h_proto == htons(ETH_P_PAE))
+		core->eapol_tx++;
 
+	/* Firmware hardware-queue mapping is BK=0, BE=1, VI=2, VO=3. TID 0
+	 * therefore uses best-effort queue 1, matching the station data path.
+	 */
 	return aic8800_build_host_tx(core, frame + ETH_HLEN,
 				     frame_len - ETH_HLEN, 0, 0,
 				     core->protocol->ap_index,

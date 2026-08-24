@@ -5,7 +5,19 @@
       "name": "pll-ref",
       "type": "nm",
       "reg": "0x000",
-      "parent": "dcxo"
+      "parent": "dcxo",
+      "n_shift": 8,
+      "n_width": 8,
+      "n_offset": 0,
+      "n_min": 80,
+      "n_max": 116,
+      "m_shift": 16,
+      "m_width": 7,
+      "enable": "BIT(31)",
+      "lock": "BIT(28)",
+      "min_rate": 15000000,
+      "max_rate": 2800000000,
+      "flags": "CLK_SET_RATE_UNGATE | CLK_IGNORE_UNUSED"
     },
     {
       "name": "pll-ddr",
@@ -19,7 +31,19 @@
       "type": "nm",
       "reg": "0x0a0",
       "parent": "pll-ref",
-      "id": "PLL_PERI0"
+      "id": "PLL_PERI0",
+      "n_shift": 8,
+      "n_width": 8,
+      "n_offset": 0,
+      "n_min": 53,
+      "n_max": 105,
+      "m_shift": 0,
+      "m_width": 0,
+      "enable": "BIT(31)",
+      "lock": "BIT(28)",
+      "min_rate": 1272000000,
+      "max_rate": 2520000000,
+      "flags": "CLK_SET_RATE_UNGATE | CLK_IGNORE_UNUSED"
     },
     {
       "name": "pll-peri0-600m",
@@ -74,7 +98,19 @@
       "type": "nm",
       "reg": "0x0c0",
       "parent": "pll-ref",
-      "id": "PLL_PERI1"
+      "id": "PLL_PERI1",
+      "n_shift": 8,
+      "n_width": 8,
+      "n_offset": 0,
+      "n_min": 53,
+      "n_max": 105,
+      "m_shift": 0,
+      "m_width": 0,
+      "enable": "BIT(31)",
+      "lock": "BIT(28)",
+      "min_rate": 1272000000,
+      "max_rate": 2520000000,
+      "flags": "CLK_SET_RATE_UNGATE | CLK_IGNORE_UNUSED"
     },
     {
       "name": "pll-peri1-600m",

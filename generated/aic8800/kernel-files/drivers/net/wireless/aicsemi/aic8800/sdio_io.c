@@ -346,15 +346,6 @@ int aic8800_sdio_rx_drain(struct aic8800_core *core, int budget)
 			return ret;
 		}
 
-		if (data_len > 8192) {
-			dev_warn_ratelimited(core->dev,
-				"discarding %u byte RX frame\n", data_len);
-			core->rx_malformed++;
-			kfree(frame);
-			frames++;
-			continue;
-		}
-
 		ret = aic8800_protocol_rx(core, frame, data_len);
 		kfree(frame);
 		if (ret < 0)

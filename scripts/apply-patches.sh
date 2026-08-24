@@ -4,8 +4,9 @@
 set -e
 
 LINUX_TREE="${1:-}"
-PATCH_DIR="$(dirname "$0")/../patches"
-CONFIG_DIR="$(dirname "$0")/../configs"
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+PATCH_DIR="$SCRIPT_DIR/../patches"
+CONFIG_DIR="$SCRIPT_DIR/../configs"
 
 if [ -z "$LINUX_TREE" ]; then
     echo "Usage: $0 <path-to-linux-tree>"

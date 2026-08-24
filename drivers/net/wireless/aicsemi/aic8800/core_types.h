@@ -66,6 +66,18 @@ struct aic8800_core {
 	u64 tx_stall_events;
 	u64 tx_recoveries;
 	u64 tx_reinit_events;
+	u64 connect_requests;
+	u64 connect_cfm_failures;
+	u64 connect_indications;
+	u64 connect_failures;
+	u64 disconnect_indications;
+	u64 key_add_requests;
+	u64 key_add_failures;
+	u64 control_port_requests;
+	u64 control_port_failures;
+	u64 eapol_tx;
+	u64 eapol_rx;
+	u64 rx_decap_failures;
 	bool link_up;
 	u8 bssid[ETH_ALEN];
 };

@@ -43,6 +43,18 @@ int aic8800_core_register(struct aic8800_core *core)
 	core->tx_stall_events = 0;
 	core->tx_recoveries = 0;
 	core->tx_reinit_events = 0;
+	core->connect_requests = 0;
+	core->connect_cfm_failures = 0;
+	core->connect_indications = 0;
+	core->connect_failures = 0;
+	core->disconnect_indications = 0;
+	core->key_add_requests = 0;
+	core->key_add_failures = 0;
+	core->control_port_requests = 0;
+	core->control_port_failures = 0;
+	core->eapol_tx = 0;
+	core->eapol_rx = 0;
+	core->rx_decap_failures = 0;
 	core->link_up = false;
 	memset(core->bssid, 0, sizeof(core->bssid));
 

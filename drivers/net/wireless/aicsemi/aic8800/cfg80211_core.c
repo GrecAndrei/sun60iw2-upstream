@@ -61,22 +61,22 @@ static struct ieee80211_channel aic8800_channels_5ghz[] = {
 	{ .center_freq = 5200, .hw_value = 40, .max_power = 20 },
 	{ .center_freq = 5220, .hw_value = 44, .max_power = 20 },
 	{ .center_freq = 5240, .hw_value = 48, .max_power = 20 },
-	{ .center_freq = 5260, .hw_value = 52, .max_power = 20 },
-	{ .center_freq = 5280, .hw_value = 56, .max_power = 20 },
-	{ .center_freq = 5300, .hw_value = 60, .max_power = 20 },
-	{ .center_freq = 5320, .hw_value = 64, .max_power = 20 },
-	{ .center_freq = 5500, .hw_value = 100, .max_power = 20 },
-	{ .center_freq = 5520, .hw_value = 104, .max_power = 20 },
-	{ .center_freq = 5540, .hw_value = 108, .max_power = 20 },
-	{ .center_freq = 5560, .hw_value = 112, .max_power = 20 },
-	{ .center_freq = 5580, .hw_value = 116, .max_power = 20 },
-	{ .center_freq = 5600, .hw_value = 120, .max_power = 20 },
-	{ .center_freq = 5620, .hw_value = 124, .max_power = 20 },
-	{ .center_freq = 5640, .hw_value = 128, .max_power = 20 },
-	{ .center_freq = 5660, .hw_value = 132, .max_power = 20 },
-	{ .center_freq = 5680, .hw_value = 136, .max_power = 20 },
-	{ .center_freq = 5700, .hw_value = 140, .max_power = 20 },
-	{ .center_freq = 5720, .hw_value = 144, .max_power = 20 },
+	{ .center_freq = 5260, .hw_value = 52, .max_power = 20, .flags = IEEE80211_CHAN_RADAR },
+	{ .center_freq = 5280, .hw_value = 56, .max_power = 20, .flags = IEEE80211_CHAN_RADAR },
+	{ .center_freq = 5300, .hw_value = 60, .max_power = 20, .flags = IEEE80211_CHAN_RADAR },
+	{ .center_freq = 5320, .hw_value = 64, .max_power = 20, .flags = IEEE80211_CHAN_RADAR },
+	{ .center_freq = 5500, .hw_value = 100, .max_power = 20, .flags = IEEE80211_CHAN_RADAR },
+	{ .center_freq = 5520, .hw_value = 104, .max_power = 20, .flags = IEEE80211_CHAN_RADAR },
+	{ .center_freq = 5540, .hw_value = 108, .max_power = 20, .flags = IEEE80211_CHAN_RADAR },
+	{ .center_freq = 5560, .hw_value = 112, .max_power = 20, .flags = IEEE80211_CHAN_RADAR },
+	{ .center_freq = 5580, .hw_value = 116, .max_power = 20, .flags = IEEE80211_CHAN_RADAR },
+	{ .center_freq = 5600, .hw_value = 120, .max_power = 20, .flags = IEEE80211_CHAN_RADAR },
+	{ .center_freq = 5620, .hw_value = 124, .max_power = 20, .flags = IEEE80211_CHAN_RADAR },
+	{ .center_freq = 5640, .hw_value = 128, .max_power = 20, .flags = IEEE80211_CHAN_RADAR },
+	{ .center_freq = 5660, .hw_value = 132, .max_power = 20, .flags = IEEE80211_CHAN_RADAR },
+	{ .center_freq = 5680, .hw_value = 136, .max_power = 20, .flags = IEEE80211_CHAN_RADAR },
+	{ .center_freq = 5700, .hw_value = 140, .max_power = 20, .flags = IEEE80211_CHAN_RADAR },
+	{ .center_freq = 5720, .hw_value = 144, .max_power = 20, .flags = IEEE80211_CHAN_RADAR },
 	{ .center_freq = 5745, .hw_value = 149, .max_power = 20 },
 	{ .center_freq = 5765, .hw_value = 153, .max_power = 20 },
 	{ .center_freq = 5785, .hw_value = 157, .max_power = 20 },
@@ -92,6 +92,17 @@ static struct ieee80211_supported_band aic8800_band_2ghz = {
 	.n_channels = ARRAY_SIZE(aic8800_channels_2ghz),
 	.bitrates = aic8800_rates_2ghz,
 	.n_bitrates = ARRAY_SIZE(aic8800_rates_2ghz),
+	.ht_cap = {
+		.ht_supported = true,
+		.cap = 0,
+		.ampdu_factor = IEEE80211_HT_MAX_AMPDU_64K,
+		.ampdu_density = IEEE80211_HT_MPDU_DENSITY_16,
+		.mcs = {
+			.rx_mask = { 0xff, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			.rx_highest = cpu_to_le16(65),
+			.tx_params = IEEE80211_HT_MCS_TX_DEFINED,
+		},
+	},
 };
 
 static struct ieee80211_supported_band aic8800_band_5ghz = {
@@ -99,6 +110,17 @@ static struct ieee80211_supported_band aic8800_band_5ghz = {
 	.n_channels = ARRAY_SIZE(aic8800_channels_5ghz),
 	.bitrates = aic8800_rates_5ghz,
 	.n_bitrates = ARRAY_SIZE(aic8800_rates_5ghz),
+	.ht_cap = {
+		.ht_supported = true,
+		.cap = 0,
+		.ampdu_factor = IEEE80211_HT_MAX_AMPDU_64K,
+		.ampdu_density = IEEE80211_HT_MPDU_DENSITY_16,
+		.mcs = {
+			.rx_mask = { 0xff, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			.rx_highest = cpu_to_le16(65),
+			.tx_params = IEEE80211_HT_MCS_TX_DEFINED,
+		},
+	},
 };
 
 static const u32 aic8800_cipher_suites[] = {
@@ -234,6 +256,32 @@ static int aic8800_cfg80211_set_default_key(struct wiphy *wiphy,
 	return 0;
 }
 
+static int aic8800_cfg80211_change_station(struct wiphy *wiphy,
+							   struct wireless_dev *wdev,
+							   const u8 *mac,
+							   struct station_parameters *params)
+{
+	struct aic8800_core *core;
+	int ret;
+
+	if (!wdev || !wdev->netdev || !mac || !params)
+		return -EINVAL;
+	if (!(params->sta_flags_mask & BIT(NL80211_STA_FLAG_AUTHORIZED)))
+		return 0;
+
+	ret = aic8800_cfg80211_get_core(wiphy, wdev->netdev, &core);
+	if (ret)
+		return ret;
+	if (!core->link_up || !ether_addr_equal(mac, core->bssid))
+		return -ENOTCONN;
+
+	/* wpa_supplicant makes this call after the 4-way handshake.
+	 * The firmware otherwise permits only the EAPOL control port.
+	 */
+	return aic8800_protocol_set_control_port(core,
+		(params->sta_flags_set & BIT(NL80211_STA_FLAG_AUTHORIZED)) != 0);
+}
+
 static int aic8800_cfg80211_change_virtual_intf(struct wiphy *wiphy,
 						     struct net_device *dev,
 						     enum nl80211_iftype type,
@@ -354,6 +402,7 @@ static const struct cfg80211_ops aic8800_cfg80211_ops = {
 	.add_key = aic8800_cfg80211_add_key,
 	.del_key = aic8800_cfg80211_del_key,
 	.set_default_key = aic8800_cfg80211_set_default_key,
+	.change_station = aic8800_cfg80211_change_station,
 	.change_virtual_intf = aic8800_cfg80211_change_virtual_intf,
 	.set_monitor_channel = aic8800_cfg80211_set_monitor_channel,
 	.mgmt_tx = aic8800_cfg80211_mgmt_tx,

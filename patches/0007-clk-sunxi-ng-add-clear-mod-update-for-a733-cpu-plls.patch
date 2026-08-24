@@ -1,0 +1,100 @@
+From 71aa71af32de132bc53ab9dae07e8fadc73b9934 Mon Sep 17 00:00:00 2001
+From: GrecAndrei <alex092lap@duck.com>
+Date: Thu, 20 Aug 2026 17:23:44 +0300
+Subject: [PATCH] clk: sunxi-ng: add clear-mod update support for A733 CPU PLLs
+
+A733 CPU PLLs apply N/M/P changes through a clear-mod handshake: set the clear bit, poll it back to zero, then check lock. Add CCU_FEATURE_CLEAR_MOD, a clear field on ccu_common and ccu_helper_wait_for_clear(), and invoke the handshake from ccu_nm_set_rate() and ccu_nkmp_set_rate().
+---
+ drivers/clk/sunxi-ng/ccu_common.c | 17 +++++++++++++++++
+ drivers/clk/sunxi-ng/ccu_common.h |  3 +++
+ drivers/clk/sunxi-ng/ccu_nkmp.c   |  3 +++
+ drivers/clk/sunxi-ng/ccu_nm.c     |  3 +++
+ 4 files changed, 26 insertions(+)
+
+diff --git a/drivers/clk/sunxi-ng/ccu_common.c b/drivers/clk/sunxi-ng/ccu_common.c
+index 1c083b4d0..543400c00 100644
+--- a/drivers/clk/sunxi-ng/ccu_common.c
++++ b/drivers/clk/sunxi-ng/ccu_common.c
+@@ -39,6 +39,23 @@ void ccu_helper_wait_for_lock(struct ccu_common *common, u32 lock)
+ }
+ EXPORT_SYMBOL_NS_GPL(ccu_helper_wait_for_lock, "SUNXI_CCU");
+ 
++void ccu_helper_wait_for_clear(struct ccu_common *common, u32 clear)
++{
++	u32 reg;
++
++	if (!clear)
++		return;
++
++	reg = readl(common->base + common->reg);
++	reg |= clear;
++	writel(reg, common->base + common->reg);
++
++	WARN_ON(readl_relaxed_poll_timeout_atomic(common->base + common->reg,
++						  reg, !(reg & clear),
++						  100, 10000));
++}
++EXPORT_SYMBOL_NS_GPL(ccu_helper_wait_for_clear, "SUNXI_CCU");
++
+ bool ccu_is_better_rate(struct ccu_common *common,
+ 			unsigned long target_rate,
+ 			unsigned long current_rate,
+diff --git a/drivers/clk/sunxi-ng/ccu_common.h b/drivers/clk/sunxi-ng/ccu_common.h
+index bbec283b9..e05c30d8b 100644
+--- a/drivers/clk/sunxi-ng/ccu_common.h
++++ b/drivers/clk/sunxi-ng/ccu_common.h
+@@ -21,6 +21,7 @@
+ #define CCU_FEATURE_CLOSEST_RATE	BIT(9)
+ #define CCU_FEATURE_DUAL_DIV		BIT(10)
+ #define CCU_FEATURE_UPDATE_BIT		BIT(11)
++#define CCU_FEATURE_CLEAR_MOD		BIT(12)
+ 
+ /* MMC timing mode switch bit */
+ #define CCU_MMC_NEW_TIMING_MODE		BIT(30)
+@@ -35,6 +36,7 @@ struct ccu_common {
+ 	u16		reg;
+ 	u16		lock_reg;
+ 	u32		prediv;
++	u32		clear;
+ 
+ 	unsigned long	min_rate;
+ 	unsigned long	max_rate;
+@@ -60,6 +62,7 @@ struct sunxi_ccu_desc {
+ };
+ 
+ void ccu_helper_wait_for_lock(struct ccu_common *common, u32 lock);
++void ccu_helper_wait_for_clear(struct ccu_common *common, u32 clear);
+ 
+ bool ccu_is_better_rate(struct ccu_common *common,
+ 			unsigned long target_rate,
+diff --git a/drivers/clk/sunxi-ng/ccu_nkmp.c b/drivers/clk/sunxi-ng/ccu_nkmp.c
+index 813e999f1..9f9040180 100644
+--- a/drivers/clk/sunxi-ng/ccu_nkmp.c
++++ b/drivers/clk/sunxi-ng/ccu_nkmp.c
+@@ -230,6 +230,9 @@ static int ccu_nkmp_set_rate(struct clk_hw *hw, unsigned long rate,
+ 		writel(preg, nkmp->common.base + nkmp->p_reg);
+ 	}
+ 
++	if (nkmp->common.features & CCU_FEATURE_CLEAR_MOD)
++		ccu_helper_wait_for_clear(&nkmp->common, nkmp->common.clear);
++
+ 	spin_unlock_irqrestore(nkmp->common.lock, flags);
+ 
+ 	ccu_helper_wait_for_lock(&nkmp->common, nkmp->lock);
+diff --git a/drivers/clk/sunxi-ng/ccu_nm.c b/drivers/clk/sunxi-ng/ccu_nm.c
+index df01ed3b3..916329149 100644
+--- a/drivers/clk/sunxi-ng/ccu_nm.c
++++ b/drivers/clk/sunxi-ng/ccu_nm.c
+@@ -221,6 +221,9 @@ static int ccu_nm_set_rate(struct clk_hw *hw, unsigned long rate,
+ 	reg |= (_nm.m - nm->m.offset) << nm->m.shift;
+ 	writel(reg, nm->common.base + nm->common.reg);
+ 
++	if (nm->common.features & CCU_FEATURE_CLEAR_MOD)
++		ccu_helper_wait_for_clear(&nm->common, nm->common.clear);
++
+ 	spin_unlock_irqrestore(nm->common.lock, flags);
+ 
+ 	ccu_helper_wait_for_lock(&nm->common, nm->lock);
+-- 
+2.55.0
+

@@ -24,12 +24,15 @@ while [ "$i" -lt 25 ]; do
 done
 modprobe cfg80211 2>/dev/null || true
 if ! lsmod 2>/dev/null | grep -q '^aic8800_sdio'; then
-	if modprobe aic8800_sdio 2>/dev/null; then
-		klog "modprobe aic8800_sdio ok"
-	elif [ -n "$MODDIR" ]; then
-		klog "insmod from $MODDIR"
+	if [ -n "$MODDIR" ]; then
+		# The card can retain an older duplicate in its normal kernel module
+		# tree.  Load the selected pair directly so a fresh board install is
+		# actually the module that reaches the hardware.
+		klog "insmod pinned modules from $MODDIR"
 		insmod "$MODDIR/aic8800_core.ko" 2>/dev/null || true
 		insmod "$MODDIR/aic8800_sdio.ko" || { klog "insmod failed"; exit 1; }
+	elif modprobe aic8800_sdio 2>/dev/null; then
+		klog "modprobe aic8800_sdio fallback ok"
 	else
 		klog "ERROR: aic8800_sdio not found"
 		exit 1

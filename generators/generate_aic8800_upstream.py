@@ -357,6 +357,18 @@ def gen_kernel_draft_files(data: dict) -> dict[str, str]:
             \tu64 tx_stall_events;
             \tu64 tx_recoveries;
             \tu64 tx_reinit_events;
+            \tu64 connect_requests;
+            \tu64 connect_cfm_failures;
+            \tu64 connect_indications;
+            \tu64 connect_failures;
+            \tu64 disconnect_indications;
+            \tu64 key_add_requests;
+            \tu64 key_add_failures;
+            \tu64 control_port_requests;
+            \tu64 control_port_failures;
+            \tu64 eapol_tx;
+            \tu64 eapol_rx;
+            \tu64 rx_decap_failures;
             \tbool link_up;
             \tu8 bssid[ETH_ALEN];
             };
@@ -455,6 +467,18 @@ def gen_kernel_draft_files(data: dict) -> dict[str, str]:
             \tcore->tx_stall_events = 0;
             \tcore->tx_recoveries = 0;
             \tcore->tx_reinit_events = 0;
+            \tcore->connect_requests = 0;
+            \tcore->connect_cfm_failures = 0;
+            \tcore->connect_indications = 0;
+            \tcore->connect_failures = 0;
+            \tcore->disconnect_indications = 0;
+            \tcore->key_add_requests = 0;
+            \tcore->key_add_failures = 0;
+            \tcore->control_port_requests = 0;
+            \tcore->control_port_failures = 0;
+            \tcore->eapol_tx = 0;
+            \tcore->eapol_rx = 0;
+            \tcore->rx_decap_failures = 0;
             \tcore->link_up = false;
             \tmemset(core->bssid, 0, sizeof(core->bssid));
 
@@ -863,22 +887,22 @@ def gen_kernel_draft_files(data: dict) -> dict[str, str]:
             \t{ .center_freq = 5200, .hw_value = 40, .max_power = 20 },
             \t{ .center_freq = 5220, .hw_value = 44, .max_power = 20 },
             \t{ .center_freq = 5240, .hw_value = 48, .max_power = 20 },
-            \t{ .center_freq = 5260, .hw_value = 52, .max_power = 20 },
-            \t{ .center_freq = 5280, .hw_value = 56, .max_power = 20 },
-            \t{ .center_freq = 5300, .hw_value = 60, .max_power = 20 },
-            \t{ .center_freq = 5320, .hw_value = 64, .max_power = 20 },
-            \t{ .center_freq = 5500, .hw_value = 100, .max_power = 20 },
-            \t{ .center_freq = 5520, .hw_value = 104, .max_power = 20 },
-            \t{ .center_freq = 5540, .hw_value = 108, .max_power = 20 },
-            \t{ .center_freq = 5560, .hw_value = 112, .max_power = 20 },
-            \t{ .center_freq = 5580, .hw_value = 116, .max_power = 20 },
-            \t{ .center_freq = 5600, .hw_value = 120, .max_power = 20 },
-            \t{ .center_freq = 5620, .hw_value = 124, .max_power = 20 },
-            \t{ .center_freq = 5640, .hw_value = 128, .max_power = 20 },
-            \t{ .center_freq = 5660, .hw_value = 132, .max_power = 20 },
-            \t{ .center_freq = 5680, .hw_value = 136, .max_power = 20 },
-            \t{ .center_freq = 5700, .hw_value = 140, .max_power = 20 },
-            \t{ .center_freq = 5720, .hw_value = 144, .max_power = 20 },
+            \t{ .center_freq = 5260, .hw_value = 52, .max_power = 20, .flags = IEEE80211_CHAN_RADAR },
+            \t{ .center_freq = 5280, .hw_value = 56, .max_power = 20, .flags = IEEE80211_CHAN_RADAR },
+            \t{ .center_freq = 5300, .hw_value = 60, .max_power = 20, .flags = IEEE80211_CHAN_RADAR },
+            \t{ .center_freq = 5320, .hw_value = 64, .max_power = 20, .flags = IEEE80211_CHAN_RADAR },
+            \t{ .center_freq = 5500, .hw_value = 100, .max_power = 20, .flags = IEEE80211_CHAN_RADAR },
+            \t{ .center_freq = 5520, .hw_value = 104, .max_power = 20, .flags = IEEE80211_CHAN_RADAR },
+            \t{ .center_freq = 5540, .hw_value = 108, .max_power = 20, .flags = IEEE80211_CHAN_RADAR },
+            \t{ .center_freq = 5560, .hw_value = 112, .max_power = 20, .flags = IEEE80211_CHAN_RADAR },
+            \t{ .center_freq = 5580, .hw_value = 116, .max_power = 20, .flags = IEEE80211_CHAN_RADAR },
+            \t{ .center_freq = 5600, .hw_value = 120, .max_power = 20, .flags = IEEE80211_CHAN_RADAR },
+            \t{ .center_freq = 5620, .hw_value = 124, .max_power = 20, .flags = IEEE80211_CHAN_RADAR },
+            \t{ .center_freq = 5640, .hw_value = 128, .max_power = 20, .flags = IEEE80211_CHAN_RADAR },
+            \t{ .center_freq = 5660, .hw_value = 132, .max_power = 20, .flags = IEEE80211_CHAN_RADAR },
+            \t{ .center_freq = 5680, .hw_value = 136, .max_power = 20, .flags = IEEE80211_CHAN_RADAR },
+            \t{ .center_freq = 5700, .hw_value = 140, .max_power = 20, .flags = IEEE80211_CHAN_RADAR },
+            \t{ .center_freq = 5720, .hw_value = 144, .max_power = 20, .flags = IEEE80211_CHAN_RADAR },
             \t{ .center_freq = 5745, .hw_value = 149, .max_power = 20 },
             \t{ .center_freq = 5765, .hw_value = 153, .max_power = 20 },
             \t{ .center_freq = 5785, .hw_value = 157, .max_power = 20 },
@@ -894,6 +918,17 @@ def gen_kernel_draft_files(data: dict) -> dict[str, str]:
             \t.n_channels = ARRAY_SIZE(aic8800_channels_2ghz),
             \t.bitrates = aic8800_rates_2ghz,
             \t.n_bitrates = ARRAY_SIZE(aic8800_rates_2ghz),
+            \t.ht_cap = {
+            \t\t.ht_supported = true,
+            \t\t.cap = 0,
+            \t\t.ampdu_factor = IEEE80211_HT_MAX_AMPDU_64K,
+            \t\t.ampdu_density = IEEE80211_HT_MPDU_DENSITY_16,
+            \t\t.mcs = {
+            \t\t\t.rx_mask = { 0xff, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+            \t\t\t.rx_highest = cpu_to_le16(65),
+            \t\t\t.tx_params = IEEE80211_HT_MCS_TX_DEFINED,
+            \t\t},
+            \t},
             };
 
             static struct ieee80211_supported_band aic8800_band_5ghz = {
@@ -901,6 +936,17 @@ def gen_kernel_draft_files(data: dict) -> dict[str, str]:
             \t.n_channels = ARRAY_SIZE(aic8800_channels_5ghz),
             \t.bitrates = aic8800_rates_5ghz,
             \t.n_bitrates = ARRAY_SIZE(aic8800_rates_5ghz),
+            \t.ht_cap = {
+            \t\t.ht_supported = true,
+            \t\t.cap = 0,
+            \t\t.ampdu_factor = IEEE80211_HT_MAX_AMPDU_64K,
+            \t\t.ampdu_density = IEEE80211_HT_MPDU_DENSITY_16,
+            \t\t.mcs = {
+            \t\t\t.rx_mask = { 0xff, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+            \t\t\t.rx_highest = cpu_to_le16(65),
+            \t\t\t.tx_params = IEEE80211_HT_MCS_TX_DEFINED,
+            \t\t},
+            \t},
             };
 
             static const u32 aic8800_cipher_suites[] = {
@@ -1033,7 +1079,33 @@ def gen_kernel_draft_files(data: dict) -> dict[str, str]:
             \t/* Draft: pairwise/group default selection is tracked in FW
             \t * via add_key; keep the ops pair complete for wiphy_new().
             \t */
-            \treturn 0;
+           \treturn 0;
+            }
+
+            static int aic8800_cfg80211_change_station(struct wiphy *wiphy,
+            \t\t\t\t\t\t\t   struct wireless_dev *wdev,
+            \t\t\t\t\t\t\t   const u8 *mac,
+            \t\t\t\t\t\t\t   struct station_parameters *params)
+            {
+            \tstruct aic8800_core *core;
+            \tint ret;
+
+            \tif (!wdev || !wdev->netdev || !mac || !params)
+            \t\treturn -EINVAL;
+            \tif (!(params->sta_flags_mask & BIT(NL80211_STA_FLAG_AUTHORIZED)))
+            \t\treturn 0;
+
+            \tret = aic8800_cfg80211_get_core(wiphy, wdev->netdev, &core);
+            \tif (ret)
+            \t\treturn ret;
+            \tif (!core->link_up || !ether_addr_equal(mac, core->bssid))
+            \t\treturn -ENOTCONN;
+
+            \t/* wpa_supplicant makes this call after the 4-way handshake.
+            \t * The firmware otherwise permits only the EAPOL control port.
+            \t */
+            \treturn aic8800_protocol_set_control_port(core,
+            \t\t(params->sta_flags_set & BIT(NL80211_STA_FLAG_AUTHORIZED)) != 0);
             }
 
             static int aic8800_cfg80211_change_virtual_intf(struct wiphy *wiphy,
@@ -1156,6 +1228,7 @@ def gen_kernel_draft_files(data: dict) -> dict[str, str]:
             \t.add_key = aic8800_cfg80211_add_key,
             \t.del_key = aic8800_cfg80211_del_key,
             \t.set_default_key = aic8800_cfg80211_set_default_key,
+            \t.change_station = aic8800_cfg80211_change_station,
             \t.change_virtual_intf = aic8800_cfg80211_change_virtual_intf,
             \t.set_monitor_channel = aic8800_cfg80211_set_monitor_channel,
             \t.mgmt_tx = aic8800_cfg80211_mgmt_tx,
@@ -1607,6 +1680,18 @@ def gen_kernel_draft_files(data: dict) -> dict[str, str]:
             \tseq_printf(m, "tx_reinit_in_progress=%u\\n", reinit_in_progress ? 1 : 0);
             \tseq_printf(m, "tx_reinit_cooldown_ms_left=%u\\n", cooldown_left_ms);
             \tseq_printf(m, "tx_errors=%llu\\n", (unsigned long long)core->tx_errors);
+            \tseq_printf(m, "connect_requests=%llu\\n", (unsigned long long)core->connect_requests);
+            \tseq_printf(m, "connect_cfm_failures=%llu\\n", (unsigned long long)core->connect_cfm_failures);
+            \tseq_printf(m, "connect_indications=%llu\\n", (unsigned long long)core->connect_indications);
+            \tseq_printf(m, "connect_failures=%llu\\n", (unsigned long long)core->connect_failures);
+            \tseq_printf(m, "disconnect_indications=%llu\\n", (unsigned long long)core->disconnect_indications);
+            \tseq_printf(m, "key_add_requests=%llu\\n", (unsigned long long)core->key_add_requests);
+            \tseq_printf(m, "key_add_failures=%llu\\n", (unsigned long long)core->key_add_failures);
+            \tseq_printf(m, "control_port_requests=%llu\\n", (unsigned long long)core->control_port_requests);
+            \tseq_printf(m, "control_port_failures=%llu\\n", (unsigned long long)core->control_port_failures);
+            \tseq_printf(m, "eapol_tx=%llu\\n", (unsigned long long)core->eapol_tx);
+            \tseq_printf(m, "eapol_rx=%llu\\n", (unsigned long long)core->eapol_rx);
+            \tseq_printf(m, "rx_decap_failures=%llu\\n", (unsigned long long)core->rx_decap_failures);
             \tseq_printf(m, "rx_queue_len=%u\\n", skb_queue_len(&sdio->rxq));
             \tseq_printf(m, "tx_queue_len=%u\\n", skb_queue_len(&sdio->txq));
             \tseq_printf(m, "fw_active=%s\\n",
@@ -2838,15 +2923,6 @@ def gen_kernel_draft_files(data: dict) -> dict[str, str]:
             \t\tif (ret) {
             \t\t\tkfree(frame);
             \t\t\treturn ret;
-            \t\t}
-
-            \t\tif (data_len > __RX_MAX_LEN__) {
-            \t\t\tdev_warn_ratelimited(core->dev,
-            \t\t\t\t"discarding %u byte RX frame\\n", data_len);
-            \t\t\tcore->rx_malformed++;
-            \t\t\tkfree(frame);
-            \t\t\tframes++;
-            \t\t\tcontinue;
             \t\t}
 
             \t\tret = aic8800_protocol_rx(core, frame, data_len);

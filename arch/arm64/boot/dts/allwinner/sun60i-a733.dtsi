@@ -203,6 +203,8 @@
 		rtc_ccu: clock-controller@7090000 {
 			compatible = "allwinner,sun60i-a733-rtc-ccu";
 			reg = <0x07090000 0x400>;
+			clocks = <&dcxo24M>, <&dcxo19_2M>, <&dcxo26M>;
+			clock-names = "dcxo24M", "dcxo19_2M", "dcxo26M";
 			#clock-cells = <1>;
 			#reset-cells = <1>;
 		};

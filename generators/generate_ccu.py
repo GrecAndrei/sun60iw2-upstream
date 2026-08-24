@@ -738,40 +738,73 @@ static const struct clk_ops sun60i_fixed_rate_gate_ops = {
         name = c_name(c["name"])
         reg = reg_hex(c["reg"])
         parent = c.get("parent", "dcxo")
+        is_nkmp = c.get("type") == "nkmp"
 
         self.emitted_common.append(c["name"])
         self.emitted_hw.append(c["name"])
         self.defined_names.add(c["name"])
 
-        if c.get("type") == "nkmp":
-            return f"""static struct ccu_nkmp {name}_clk = {{
-	.enable		= BIT(27),
-	.lock		= BIT(28),
-	.n		= _SUNXI_CCU_MULT_MIN(8, 8, 11),
-	.m		= _SUNXI_CCU_DIV(1, 1),
-	.p		= _SUNXI_CCU_DIV(0, 1),
-	.common		= {{
-		.reg		= {reg},
-		.hw.init	= CLK_HW_INIT("{c["name"]}", "{parent}", &ccu_nkmp_ops,
-					      CLK_SET_RATE_GATE),
-	}},
-}};
+        # Data-driven entries carry the full SoC register layout; legacy
+        # entries keep the historical generic defaults.
+        if "n_shift" in c:
+            n_expr = (
+                f"_SUNXI_CCU_MULT_OFFSET_MIN_MAX({c['n_shift']}, "
+                f"{c['n_width']}, {c.get('n_offset', 0)}, "
+                f"{c['n_min']}, {c['n_max']})"
+            )
+            enable = c.get("enable", "BIT(27)")
+            lock = c.get("lock", "BIT(28)")
+            clear = c.get("clear")
+            flags = flag_expr(c.get("flags")) or "CLK_SET_RATE_GATE"
+        else:
+            n_expr = "_SUNXI_CCU_MULT_MIN(8, 8, 11)"
+            enable = "BIT(27)"
+            lock = "BIT(28)"
+            clear = None
+            flags = "CLK_SET_RATE_GATE"
 
-"""
+        fields = [f"\t.enable\t\t= {enable},", f"\t.lock\t\t= {lock},"]
+        if is_nkmp:
+            if "n_shift" in c and c.get("p_reg"):
+                fields.append(f"\t.p_reg\t\t= {reg_hex(c['p_reg'])},")
+            fields.append(f"\t.n\t\t= {n_expr},")
+            if "n_shift" in c:
+                fields.append(
+                    f"\t.p\t\t= _SUNXI_CCU_DIV({c['p_shift']}, {c['p_width']}),"
+                )
+            else:
+                fields.append("\t.m\t\t= _SUNXI_CCU_DIV(1, 1),")
+                fields.append("\t.p\t\t= _SUNXI_CCU_DIV(0, 1),")
+        else:
+            fields.append(f"\t.n\t\t= {n_expr},")
+            if "n_shift" in c:
+                fields.append(
+                    f"\t.m\t\t= _SUNXI_CCU_DIV({c['m_shift']}, {c['m_width']}),"
+                )
+            else:
+                fields.append("\t.m\t\t= _SUNXI_CCU_DIV(1, 1),")
 
-        return f"""static struct ccu_nm {name}_clk = {{
-	.enable		= BIT(27),
-	.lock		= BIT(28),
-	.n		= _SUNXI_CCU_MULT_MIN(8, 8, 11),
-	.m		= _SUNXI_CCU_DIV(1, 1),
-	.common		= {{
-		.reg		= {reg},
-		.hw.init	= CLK_HW_INIT("{c["name"]}", "{parent}", &ccu_nm_ops,
-					      CLK_SET_RATE_GATE),
-	}},
-}};
+        if c.get("min_rate"):
+            fields.append(f"\t.min_rate\t= {c['min_rate']},")
+        if c.get("max_rate"):
+            fields.append(f"\t.max_rate\t= {c['max_rate']},")
 
-"""
+        ops = "ccu_nkmp_ops" if is_nkmp else "ccu_nm_ops"
+        fields.append("\t.common\t\t= {")
+        fields.append(f"\t\t.reg\t\t= {reg},")
+        if clear:
+            fields.append("\t\t.features\t= CCU_FEATURE_CLEAR_MOD,")
+            fields.append(f"\t\t.clear\t\t= {clear},")
+        fields.append(
+            f'\t\t.hw.init\t= CLK_HW_INIT("{c["name"]}", "{parent}", '
+            f"&{ops},\n\t\t\t\t\t      {flags}),"
+        )
+        fields.append("\t},")
+        fields.append("};")
+
+        struct = "ccu_nkmp" if is_nkmp else "ccu_nm"
+        return f"static struct {struct} {name}_clk = {{\n" + "\n".join(fields) + "\n\n"
+
 
     def emit_parent_arrays(self) -> str:
         out = []
@@ -941,10 +974,11 @@ static const struct clk_ops sun60i_fixed_rate_gate_ops = {
         self.emitted_common.append(c["name"])
         self.emitted_hw.append(c["name"])
         self.defined_names.add(c["name"])
+        flags = flag_expr(c.get("flags"))
         return (
             f'static SUNXI_CCU_MP_DATA_WITH_MUX_GATE_FEAT({name}_clk, "{c["name"]}", {c["parents_array"]},'
             f" {reg_hex(c['reg'])}, {c['m_shift']}, {c['m_width']}, {c['n_shift']}, {c['n_width']},"
-            f" {c['mux_shift']}, {c['mux_width']}, BIT({c['gate_bit']}), 0, CCU_FEATURE_DUAL_DIV);\n\n"
+            f" {c['mux_shift']}, {c['mux_width']}, BIT({c['gate_bit']}), {flags}, CCU_FEATURE_DUAL_DIV);\n\n"
         )
 
     def emit_mux_divider(self, c: Dict, with_gate: bool = False) -> str:

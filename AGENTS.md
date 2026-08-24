@@ -7,6 +7,20 @@ Pro upstream port. The workspace debug worktree is
 `../../kernels/a733-debug/`; do not silently copy its changes into this
 repository or describe them as integrated support.
 
+### Legacy patch-series boundary
+
+`patches/0001-*` through `patches/0006-*` are historical Linux v7.0-era
+artifacts, not the current boot baseline. They have not been rebased to Linux
+v7.1.3: `0001` has malformed hunk counts and does not apply to a clean v7.1.3
+tree. `0007-*` is in-progress work, not evidence that the sequence is fixed.
+
+The currently integrated reference is `../../kernels/a733-v7.1.3/` on
+`debug/a733-v7.1.3`, whose committed v7.1.3 baseline starts at `9568f851f`.
+Use it for comparison and integration builds. Do not use
+`scripts/apply-patches.sh` to create a bootable baseline until the *entire*
+series has been regenerated from a clean v7.1.3 tree and verified by applying
+and building it there. Keep that rebase separate from the AIC8800 skeleton.
+
 ## Generated-source rule
 
 Never hand-edit a file marked `GENERATED FILE`.

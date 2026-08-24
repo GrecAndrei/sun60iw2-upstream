@@ -15,5 +15,8 @@
   "templates": {
     "ccu-sun60i-a733.c": "83fa75f38ef9e4c85112953989da6f981efe0ce2c801f6e5d15b30111b75d9a1",
     "ccu-sun60i-a733-r.c": "be6ad9446e4d350f6d87d763cdb401ceea9c7a7384406feacff74ab31a9d28df"
-  }
+  },
+  "local_deltas": [
+    "Preserve the bootloader-selected PLL_REF state during the Orange Pi 4 Pro console handoff."
+  ]
 }

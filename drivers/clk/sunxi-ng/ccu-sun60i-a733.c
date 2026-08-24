@@ -2325,8 +2325,17 @@ static int sun60i_a733_ccu_probe(struct platform_device *pdev)
 	 * not support a separate enable and gate bit. We present the
 	 * gate bit(27) as the enable bit, but then have to set the
 	 * PLL Enable, LDO Enable, and Lock Enable bits on all PLLs here.
+	 *
+	 * Do not enable PLL_REF here.  On the Orange Pi 4 Pro, the bootloader
+	 * hands the live UART its direct DCXO path; enabling PLL_REF switches
+	 * sys-24M underneath that console before its divisor has been
+	 * reprogrammed.  Keep the firmware-selected state until the clock
+	 * handoff is explicitly sequenced.
 	 */
 	for (i = 0; i < ARRAY_SIZE(pll_regs); i++) {
+		if (pll_regs[i] == SUN60I_A733_PLL_REF_REG)
+			continue;
+
 		val = readl(reg + pll_regs[i]);
 		val |= BIT(31) | BIT(30) | BIT(29);
 		writel(val, reg + pll_regs[i]);

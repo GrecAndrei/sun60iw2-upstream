@@ -1261,6 +1261,16 @@ def main() -> int:
         action="store_true",
         help="Do not print generated C output",
     )
+    parser.add_argument(
+        "--write",
+        action="store_true",
+        help="Write generated C to the configured domain output",
+    )
+    parser.add_argument(
+        "--output-file",
+        type=Path,
+        help="Write generated C to this path (requires --write)",
+    )
     args = parser.parse_args()
 
     domain = DOMAINS[args.domain]
@@ -1286,6 +1296,15 @@ def main() -> int:
             + " */\n"
             + source[first_newline + 1 :]
         )
+
+        if args.output_file and not args.write:
+            print("Error: --output-file requires --write", file=sys.stderr)
+            return 1
+
+        if args.write:
+            output_path = args.output_file or domain["output_file"]
+            output_path.parent.mkdir(parents=True, exist_ok=True)
+            output_path.write_text(rendered)
 
         if not args.no_output:
             print(rendered, end="")

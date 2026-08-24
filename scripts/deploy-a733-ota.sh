@@ -71,9 +71,9 @@ while (($#)); do
 done
 
 if ((BUILD)); then
-	"$PROJECT_DIR/scripts/check-aic8800-skeleton.sh" "$KERNEL_DIR"
 	make -C "$KERNEL_DIR" -j"$(nproc)" ARCH=arm64 \
 		CROSS_COMPILE=aarch64-linux-gnu- Image dtbs
+	"$PROJECT_DIR/scripts/check-aic8800-skeleton.sh" "$KERNEL_DIR"
 fi
 
 IMAGE=$KERNEL_DIR/arch/arm64/boot/Image
@@ -85,6 +85,17 @@ REL=$(<"$KERNEL_DIR/include/config/kernel.release")
 for artifact in "$IMAGE" "$DTB" "$CORE" "$SDIO"; do
 	[[ -f $artifact ]] || {
 		echo "missing artifact: $artifact" >&2
+		exit 1
+	}
+done
+
+for module in "$CORE" "$SDIO"; do
+	vermagic=$(modinfo -F vermagic "$module")
+	[[ $vermagic == "$REL "* ]] || {
+		echo "module/image release mismatch: ${module##*/}" >&2
+		echo "  Image release:  $REL" >&2
+		echo "  Module vermagic: $vermagic" >&2
+		echo "Rebuild with --build before deploying." >&2
 		exit 1
 	}
 done

@@ -773,18 +773,16 @@ static const struct clk_ops sun60i_fixed_rate_gate_ops = {
             if "n_shift" in c and c.get("p_reg"):
                 fields.append(f"\t.p_reg\t\t= {reg_hex(c['p_reg'])},")
             fields.append(f"\t.n\t\t= {n_expr},")
-            if "n_shift" in c:
+            if "m_shift" in c:
                 fields.append(
                     f"\t.m\t\t= _SUNXI_CCU_DIV({c.get('m_shift', 0)}, "
                     f"{c.get('m_width', 0)}),"
                 )
+            if "p_shift" in c:
                 fields.append(
                     f"\t.p\t\t= _SUNXI_CCU_DIV({c.get('p_shift', 0)}, "
                     f"{c.get('p_width', 0)}),"
                 )
-            else:
-                fields.append("\t.m\t\t= _SUNXI_CCU_DIV(1, 1),")
-                fields.append("\t.p\t\t= _SUNXI_CCU_DIV(0, 1),")
         else:
             fields.append(f"\t.n\t\t= {n_expr},")
             if "n_shift" in c:

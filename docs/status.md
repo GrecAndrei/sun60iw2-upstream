@@ -24,7 +24,7 @@ The source checkout's revision and Git-change list are intentionally omitted: co
 
 ## Integration build artifacts (`a733-v7.1.3`)
 
-- `kernels/a733-v7.1.3/arch/arm64/boot/Image`: 13,398,528 bytes; modified 2026-08-24T20:11+03:00
+- `kernels/a733-v7.1.3/arch/arm64/boot/Image`: 13,398,528 bytes; modified 2026-08-24T20:14+03:00
 - `kernels/a733-v7.1.3/arch/arm64/boot/dts/allwinner/sun60i-a733-orangepi-4-pro.dtb`: 20,230 bytes; modified 2026-08-24T19:44+03:00
 
 ## Debug build artifacts (experimental)

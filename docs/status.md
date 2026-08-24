@@ -10,7 +10,7 @@ Refresh with `python3 scripts/refresh-documentation.py`; verify with `python3 sc
 | Path | Role | Observable state |
 |---|---|---|
 | `projects/sun60iw2-upstream/` | tracked source and generator repository | `feature/a733-boot-recovery`; source Git changes are intentionally omitted |
-| `kernels/a733-v7.1.3/` | primary integration build (`a733-v7.1.3`) | `debug/a733-v7.1.3` at `215ddda0a`; 27 working-tree change(s) |
+| `kernels/a733-v7.1.3/` | primary integration build (`a733-v7.1.3`) | `debug/a733-v7.1.3` at `627e2672a`; 0 working-tree change(s) |
 | `kernels/mainline-v7/` | Linux v7.0 comparison / export tree | `detached` at `028ef9c96`; 18 working-tree change(s) |
 | `kernels/a733-debug/` | experimental worktree only | `detached` at `ad299312e`; 20 working-tree change(s) |
 | `references/orangepi-vendor-linux-6.6/` | vendor reference tree | `orange-pi-6.6-sun60iw2` at `8a9be72c9`; 0 working-tree change(s) |
@@ -24,7 +24,7 @@ The source checkout's revision and Git-change list are intentionally omitted: co
 
 ## Integration build artifacts (`a733-v7.1.3`)
 
-- `kernels/a733-v7.1.3/arch/arm64/boot/Image`: 13,398,528 bytes; modified 2026-08-24T17:33+03:00
+- `kernels/a733-v7.1.3/arch/arm64/boot/Image`: 13,398,528 bytes; modified 2026-08-24T18:01+03:00
 - `kernels/a733-v7.1.3/arch/arm64/boot/dts/allwinner/sun60i-a733-orangepi-4-pro.dtb`: 20,230 bytes; modified 2026-08-22T15:01+03:00
 
 ## Debug build artifacts (experimental)
@@ -52,33 +52,7 @@ These rows describe DTS text only. They do not establish driver availability, el
 ## Uncommitted integration changes
 
 ### Integration `a733-v7.1.3`
-- ` M arch/arm64/boot/dts/allwinner/sun60i-a733-orangepi-4-pro.dts`
-- ` M arch/arm64/boot/dts/allwinner/sun60i-a733.dtsi`
-- ` M drivers/clk/sunxi-ng/ccu-sun60i-a733-cpupll.c`
-- ` M drivers/clk/sunxi-ng/ccu-sun60i-a733-rtc.c`
-- ` M drivers/clk/sunxi-ng/ccu-sun60i-a733.c`
-- ` M drivers/clk/sunxi-ng/ccu_common.c`
-- ` M drivers/clk/sunxi-ng/ccu_common.h`
-- ` M drivers/clk/sunxi-ng/ccu_nkmp.c`
-- ` M drivers/clk/sunxi-ng/ccu_nm.c`
-- ` M drivers/clocksource/timer-sun4i.c`
-- ` M drivers/mfd/axp20x.c`
-- ` M drivers/net/wireless/aicsemi/aic8800/cfg80211_core.c`
-- ` M drivers/net/wireless/aicsemi/aic8800/core_fw.c`
-- ` M drivers/net/wireless/aicsemi/aic8800/core_main.c`
-- ` M drivers/net/wireless/aicsemi/aic8800/core_types.h`
-- ` M drivers/net/wireless/aicsemi/aic8800/fw_protocol.c`
-- ` M drivers/net/wireless/aicsemi/aic8800/fw_protocol.h`
-- ` M drivers/net/wireless/aicsemi/aic8800/netdev_core.c`
-- ` M drivers/net/wireless/aicsemi/aic8800/sdio_io.c`
-- ` M drivers/net/wireless/aicsemi/aic8800/sdio_io.h`
-- ` M drivers/net/wireless/aicsemi/aic8800/sdio_probe.c`
-- ` M drivers/nvmem/sunxi_sid.c`
-- ` M drivers/regulator/axp20x-regulator.c`
-- ` M drivers/thermal/sun8i_thermal.c`
-- ` M include/dt-bindings/clock/sun60i-a733-rtc.h`
-- ` M init/main.c`
-- `?? arch/arm64/boot/dts/allwinner/sun60i-a733-cpu-opp.dtsi`
+- No source or integration changes outside documentation/generated artifacts.
 
 ### Linux v7.0
 - ` M arch/arm64/boot/dts/allwinner/Makefile`

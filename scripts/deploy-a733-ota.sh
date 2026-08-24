@@ -10,9 +10,10 @@ set -euo pipefail
 SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 PROJECT_DIR=$(CDPATH= cd -- "$SCRIPT_DIR/.." && pwd)
 KERNEL_DIR=${KERNEL_DIR:-"$PROJECT_DIR/../../kernels/a733-v7.1.3"}
-HOST=${A733_HOST:-a733}
+HOST=${A733_HOST:-auto}
 USER=${A733_USER:-root}
 PORT=${A733_PORT:-22}
+IDENTITY_FILE=${A733_IDENTITY_FILE:-"$HOME/.ssh/id_ed25519_a733"}
 REBOOT=0
 BUILD=0
 
@@ -24,7 +25,7 @@ Stage and verify the current A733 boot artifacts on the board, then atomically
 replace its Image, DTB, and AIC8800 modules over SSH.
 
 Options:
-  --host HOST       Board address (default: A733_HOST or the a733 SSH alias)
+  --host HOST       Board address, or auto to discover its DHCP lease (default)
   --user USER       SSH user (default: A733_USER or root)
   --port PORT       SSH port (default: A733_PORT or 22)
   --build           Build Image/DTBs and regenerate+build the AIC8800 modules
@@ -100,8 +101,15 @@ for module in "$CORE" "$SDIO"; do
 	}
 done
 
-SSH=(ssh -p "$PORT" -o ConnectTimeout=10 -o StrictHostKeyChecking=accept-new)
-SCP=(scp -P "$PORT" -o ConnectTimeout=10 -o StrictHostKeyChecking=accept-new)
+if [[ $HOST == auto ]]; then
+	HOST=$("$SCRIPT_DIR/find-a733-host.sh" --port "$PORT")
+	echo "Discovered A733 at $HOST"
+fi
+
+SSH=(ssh -i "$IDENTITY_FILE" -o IdentitiesOnly=yes -p "$PORT" \
+	-o ConnectTimeout=10 -o StrictHostKeyChecking=accept-new)
+SCP=(scp -i "$IDENTITY_FILE" -o IdentitiesOnly=yes -P "$PORT" \
+	-o ConnectTimeout=10 -o StrictHostKeyChecking=accept-new)
 TARGET=$USER@$HOST
 REMOTE_STAGE=/tmp/a733-ota-$REL-$$
 

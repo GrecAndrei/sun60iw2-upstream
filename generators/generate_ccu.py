@@ -212,11 +212,6 @@ def merge_data(primary: Dict, extracted: Dict, binding_ids: Set[str]) -> Dict:
         out = dict(item)
         canon = primary_by_name.get(name)
         if canon:
-            # The extracted input records the raw BSP shape.  The primary
-            # data is the reviewed model, and must override it when a clock
-            # needs a different CCF representation (for example NKMP rather
-            # than NM for PLL_REF).
-            out.update(canon)
             if "id" in canon:
                 out["id"] = canon["id"]
                 out["_id_source"] = "canonical"

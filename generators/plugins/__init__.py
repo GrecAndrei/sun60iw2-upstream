@@ -38,6 +38,7 @@ MAIN = {
         "UPD_KEY_VALUE": "0x8000000",
     },
     "output_file": ROOT.parent / "drivers" / "clk" / "sunxi-ng" / "ccu-sun60i-a733.c",
+    "upstream_template": ROOT / "data" / "upstream" / "ccu-sun60i-a733.c",
 }
 
 R = {
@@ -54,6 +55,7 @@ R = {
     "cross_domain_parents": True,
     "key_literals": {},
     "output_file": ROOT.parent / "drivers" / "clk" / "sunxi-ng" / "ccu-sun60i-a733-r.c",
+    "upstream_template": ROOT / "data" / "upstream" / "ccu-sun60i-a733-r.c",
 }
 
 RTC = {
@@ -205,6 +207,5 @@ CPUPLL = {
 DOMAINS = {
     "main": MAIN,
     "r": R,
-    "rtc": RTC,
     "cpupll": CPUPLL,
 }

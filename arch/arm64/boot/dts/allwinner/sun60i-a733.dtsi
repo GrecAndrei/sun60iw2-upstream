@@ -4,7 +4,7 @@
 #include <dt-bindings/interrupt-controller/arm-gic.h>
 #include <dt-bindings/clock/sun60i-a733-ccu.h>
 #include <dt-bindings/clock/sun60i-a733-r-ccu.h>
-#include <dt-bindings/clock/sun60i-a733-rtc.h>
+#include <dt-bindings/clock/sun6i-rtc.h>
 #include <dt-bindings/clock/sun60i-a733-cpupll-ccu.h>
 #include <dt-bindings/reset/sun60i-a733-ccu.h>
 #include <dt-bindings/reset/sun60i-a733-r-ccu.h>
@@ -100,40 +100,12 @@
 		clock-output-names = "osc24M";
 	};
 
-	sys24M: sys24M-clk {
-		#clock-cells = <0>;
-		compatible = "fixed-clock";
-		clock-frequency = <24000000>;
-		clock-output-names = "sys24M";
-	};
-
 	rc16m: rc16m-clk {
 		#clock-cells = <0>;
 		compatible = "fixed-clock";
 		clock-frequency = <16000000>;
 		clock-accuracy = <300000000>;
 		clock-output-names = "rc-16m";
-	};
-
-	dcxo19_2M: dcxo19_2M-clk {
-		#clock-cells = <0>;
-		compatible = "fixed-clock";
-		clock-frequency = <19200000>;
-		clock-output-names = "dcxo19_2M";
-	};
-
-	dcxo24M: dcxo24M-clk {
-		#clock-cells = <0>;
-		compatible = "fixed-clock";
-		clock-frequency = <24000000>;
-		clock-output-names = "dcxo24M";
-	};
-
-	dcxo26M: dcxo26M-clk {
-		#clock-cells = <0>;
-		compatible = "fixed-clock";
-		clock-frequency = <26000000>;
-		clock-output-names = "dcxo26M";
 	};
 
 	ext32k: ext32k-clk {
@@ -183,10 +155,9 @@
 			compatible = "allwinner,sun60i-a733-ccu";
 			reg = <0x02002000 0x2000>;
 			clocks = <&osc24M>, <&rtc_ccu CLK_OSC32K>,
-				 <&rtc_ccu CLK_IOSC>, <&rtc_ccu CLK_RTC32K>,
-				 <&sys24M>, <&rtc_ccu CLK_DCXO>;
-			clock-names = "hosc", "osc32k", "iosc", "rtc32k",
-				      "sys24M", "dcxo";
+				 <&rtc_ccu CLK_IOSC>,
+				 <&rtc_ccu CLK_OSC32K_FANOUT>;
+			clock-names = "hosc", "losc", "iosc", "losc-fanout";
 			#clock-cells = <1>;
 			#reset-cells = <1>;
 		};
@@ -194,17 +165,23 @@
 		r_ccu: clock-controller@7010000 {
 			compatible = "allwinner,sun60i-a733-r-ccu";
 			reg = <0x07010000 0x340>;
-			clocks = <&osc24M>, <&rtc_ccu CLK_OSC32K>;
-			clock-names = "hosc", "losc";
+			clocks = <&osc24M>, <&rtc_ccu CLK_OSC32K>,
+				 <&rtc_ccu CLK_IOSC>, <&ccu CLK_SYS_24M>,
+				 <&ccu CLK_PLL_PERIPH0_200M>,
+				 <&ccu CLK_PLL_PERIPH0_300M>,
+				 <&ccu CLK_PLL_PERIPH1_300M>;
+			clock-names = "hosc", "losc", "iosc", "sys-24m",
+				      "pll-periph0-200m", "pll-periph0-300m",
+				      "pll-periph1-300m";
 			#clock-cells = <1>;
 			#reset-cells = <1>;
 		};
 
-		rtc_ccu: clock-controller@7090000 {
-			compatible = "allwinner,sun60i-a733-rtc-ccu";
+		rtc_ccu: rtc@7090000 {
+			compatible = "allwinner,sun60i-a733-rtc";
 			reg = <0x07090000 0x400>;
-			clocks = <&dcxo24M>, <&dcxo19_2M>, <&dcxo26M>;
-			clock-names = "dcxo24M", "dcxo19_2M", "dcxo26M";
+			clocks = <&osc24M>, <&ext32k>;
+			clock-names = "hosc", "ext-osc32k";
 			#clock-cells = <1>;
 			#reset-cells = <1>;
 		};
@@ -212,7 +189,7 @@
 		cpupll_ccu: clock-controller@8870000 {
 			compatible = "allwinner,sun60i-a733-cpupll-ccu";
 			reg = <0x08870000 0x4000>;
-			clocks = <&rtc_ccu CLK_DCXO>;
+			clocks = <&osc24M>;
 			clock-names = "dcxo";
 			#clock-cells = <1>;
 			#reset-cells = <1>;
@@ -331,7 +308,7 @@
 			reg = <0x7025000 0x410>;
 			interrupts = <GIC_SPI 198 IRQ_TYPE_LEVEL_HIGH>,
 				     <GIC_SPI 200 IRQ_TYPE_LEVEL_HIGH>;
-			clocks = <&r_ccu CLK_R_APBS0>, <&osc24M>, <&rtc_ccu CLK_OSC32K>;
+			clocks = <&r_ccu CLK_R_APB0>, <&osc24M>, <&rtc_ccu CLK_OSC32K>;
 			clock-names = "apb", "hosc", "losc";
 			gpio-controller;
 			#gpio-cells = <3>;
@@ -361,7 +338,7 @@
 				     "allwinner,sun50i-a100-dma";
 			reg = <0x4601000 0x2000>;
 			interrupts = <GIC_SPI 111 IRQ_TYPE_LEVEL_HIGH>;
-			clocks = <&ccu CLK_DMA0>, <&ccu CLK_MBUS_DMA0>;
+			clocks = <&ccu CLK_BUS_DMA0>, <&ccu CLK_MBUS_DMA0>;
 			clock-names = "bus", "mbus";
 			dma-channels = <16>;
 			dma-requests = <64>;
@@ -383,7 +360,7 @@
 		ths: thermal-sensor@2522000 {
 			compatible = "allwinner,sun60i-a733-ths";
 			reg = <0x02522000 0x500>;
-			clocks = <&ccu CLK_THS0>, <&ccu CLK_GPADC0_24M>;
+			clocks = <&ccu CLK_BUS_THS0>, <&ccu CLK_GPADC0_24M>;
 			clock-names = "bus", "mod";
 			resets = <&ccu RST_BUS_THS0>;
 			nvmem-cells = <&ths_calibration>;
@@ -405,7 +382,7 @@
 			interrupts = <GIC_SPI 2 IRQ_TYPE_LEVEL_HIGH>;
 			reg-shift = <2>;
 			reg-io-width = <4>;
-			clocks = <&sys24M>, <&ccu CLK_UART0>;
+			clocks = <&ccu CLK_SYS_24M>, <&ccu CLK_BUS_UART0>;
 			clock-names = "baudclk", "apb_pclk";
 			resets = <&ccu RST_BUS_UART0>;
 			dmas = <&dma 14>, <&dma 14>;
@@ -419,7 +396,7 @@
 			interrupts = <GIC_SPI 3 IRQ_TYPE_LEVEL_HIGH>;
 			reg-shift = <2>;
 			reg-io-width = <4>;
-			clocks = <&sys24M>, <&ccu CLK_UART1>;
+			clocks = <&ccu CLK_SYS_24M>, <&ccu CLK_BUS_UART1>;
 			clock-names = "baudclk", "apb_pclk";
 			resets = <&ccu RST_BUS_UART1>;
 			dmas = <&dma 15>, <&dma 15>;
@@ -435,8 +412,8 @@
 				     "allwinner,sun6i-a31-i2c";
 			reg = <0x07083000 0x400>;
 			interrupts = <GIC_SPI 203 IRQ_TYPE_LEVEL_HIGH>;
-			clocks = <&r_ccu CLK_R_TWI0>;
-			resets = <&r_ccu RST_BUS_R_TWI0>;
+			clocks = <&r_ccu CLK_BUS_R_I2C0>;
+			resets = <&r_ccu RST_BUS_R_I2C0>;
 			status = "disabled";
 		};
 
@@ -446,7 +423,7 @@
 			interrupts = <GIC_SPI 4 IRQ_TYPE_LEVEL_HIGH>;
 			reg-shift = <2>;
 			reg-io-width = <4>;
-			clocks = <&sys24M>, <&ccu CLK_UART2>;
+			clocks = <&ccu CLK_SYS_24M>, <&ccu CLK_BUS_UART2>;
 			clock-names = "baudclk", "apb_pclk";
 			resets = <&ccu RST_BUS_UART2>;
 			dmas = <&dma 16>, <&dma 16>;
@@ -460,7 +437,7 @@
 			interrupts = <GIC_SPI 5 IRQ_TYPE_LEVEL_HIGH>;
 			reg-shift = <2>;
 			reg-io-width = <4>;
-			clocks = <&sys24M>, <&ccu CLK_UART3>;
+			clocks = <&ccu CLK_SYS_24M>, <&ccu CLK_BUS_UART3>;
 			clock-names = "baudclk", "apb_pclk";
 			resets = <&ccu RST_BUS_UART3>;
 			dmas = <&dma 17>, <&dma 17>;
@@ -474,7 +451,7 @@
 			interrupts = <GIC_SPI 6 IRQ_TYPE_LEVEL_HIGH>;
 			reg-shift = <2>;
 			reg-io-width = <4>;
-			clocks = <&sys24M>, <&ccu CLK_UART4>;
+			clocks = <&ccu CLK_SYS_24M>, <&ccu CLK_BUS_UART4>;
 			clock-names = "baudclk", "apb_pclk";
 			resets = <&ccu RST_BUS_UART4>;
 			dmas = <&dma 18>, <&dma 18>;
@@ -488,7 +465,7 @@
 			interrupts = <GIC_SPI 7 IRQ_TYPE_LEVEL_HIGH>;
 			reg-shift = <2>;
 			reg-io-width = <4>;
-			clocks = <&sys24M>, <&ccu CLK_UART5>;
+			clocks = <&ccu CLK_SYS_24M>, <&ccu CLK_BUS_UART5>;
 			clock-names = "baudclk", "apb_pclk";
 			resets = <&ccu RST_BUS_UART5>;
 			dmas = <&dma 19>, <&dma 19>;
@@ -502,7 +479,7 @@
 			interrupts = <GIC_SPI 8 IRQ_TYPE_LEVEL_HIGH>;
 			reg-shift = <2>;
 			reg-io-width = <4>;
-			clocks = <&sys24M>, <&ccu CLK_UART6>;
+			clocks = <&ccu CLK_SYS_24M>, <&ccu CLK_BUS_UART6>;
 			clock-names = "baudclk", "apb_pclk";
 			resets = <&ccu RST_BUS_UART6>;
 			dmas = <&dma 20>, <&dma 20>;
@@ -514,19 +491,9 @@
 			compatible = "allwinner,sun60i-a733-mmc",
 				     "allwinner,sun20i-d1-mmc";
 			reg = <0x04020000 0x1000>;
-			/*
-			 * Vendor sdc0 and sdc1 both claim the shared
-			 * STORE/MBUS/MSI_LITE1 gates. Leaving them only on
-			 * mmc1 meant the first mmc1 probe enabled them under
-			 * SDIO RTO load and hung mmc0 root I/O.
-			 */
-			clocks = <&ccu CLK_BUS_SMHC0>, <&ccu CLK_SMHC0>,
-				 <&ccu CLK_STORE_AHB_GATE>,
-				 <&ccu CLK_MBUS_STORE_GATE>,
-				 <&ccu CLK_MSI_LITE1>;
-			clock-names = "ahb", "mmc", "mmc_store", "mmc_mbus",
-				      "mmc_msi_lite";
-			resets = <&ccu RST_BUS_SMHC0>;
+			clocks = <&ccu CLK_BUS_MMC0>, <&ccu CLK_MMC0>;
+			clock-names = "ahb", "mmc";
+			resets = <&ccu RST_BUS_MMC0>;
 			reset-names = "ahb";
 			interrupts = <GIC_SPI 161 IRQ_TYPE_LEVEL_HIGH>;
 			pinctrl-names = "default";
@@ -545,13 +512,9 @@
 			compatible = "allwinner,sun60i-a733-mmc",
 				     "allwinner,sun20i-d1-mmc";
 			reg = <0x04021000 0x1000>;
-			clocks = <&ccu CLK_BUS_SMHC1>, <&ccu CLK_SMHC1>,
-				 <&ccu CLK_STORE_AHB_GATE>,
-				 <&ccu CLK_MBUS_STORE_GATE>,
-				 <&ccu CLK_MSI_LITE1>;
-			clock-names = "ahb", "mmc", "mmc_store", "mmc_mbus",
-				      "mmc_msi_lite";
-			resets = <&ccu RST_BUS_SMHC1>;
+			clocks = <&ccu CLK_BUS_MMC1>, <&ccu CLK_MMC1>;
+			clock-names = "ahb", "mmc";
+			resets = <&ccu RST_BUS_MMC1>;
 			reset-names = "ahb";
 			interrupts = <GIC_SPI 162 IRQ_TYPE_LEVEL_HIGH>;
 			pinctrl-names = "default";
@@ -570,9 +533,9 @@
 			compatible = "allwinner,sun60i-a733-mmc",
 				     "allwinner,sun20i-d1-mmc";
 			reg = <0x04022000 0x1000>;
-			clocks = <&ccu CLK_BUS_SMHC2>, <&ccu CLK_SMHC2>;
+			clocks = <&ccu CLK_BUS_MMC2>, <&ccu CLK_MMC2>;
 			clock-names = "ahb", "mmc";
-			resets = <&ccu RST_BUS_SMHC2>;
+			resets = <&ccu RST_BUS_MMC2>;
 			reset-names = "ahb";
 			interrupts = <GIC_SPI 163 IRQ_TYPE_LEVEL_HIGH>;
 			pinctrl-names = "default";
@@ -591,9 +554,9 @@
 			compatible = "allwinner,sun60i-a733-mmc",
 				     "allwinner,sun20i-d1-mmc";
 			reg = <0x04023000 0x1000>;
-			clocks = <&ccu CLK_BUS_SMHC3>, <&ccu CLK_SMHC3>;
+			clocks = <&ccu CLK_BUS_MMC3>, <&ccu CLK_MMC3>;
 			clock-names = "ahb", "mmc";
-			resets = <&ccu RST_BUS_SMHC3>;
+			resets = <&ccu RST_BUS_MMC3>;
 			reset-names = "ahb";
 			interrupts = <GIC_SPI 164 IRQ_TYPE_LEVEL_HIGH>;
 			pinctrl-names = "default";
@@ -616,7 +579,7 @@
 			reg-names = "phy_ctrl", "pmu0", "pmu1";
 			clocks = <&osc24M>, <&osc24M>;
 			clock-names = "usb0_phy", "usb1_phy";
-			resets = <&ccu RST_USB_0_PHY_RSTN>, <&ccu RST_USB_1_PHY_RSTN>;
+			resets = <&ccu RST_USB_PHY0>, <&ccu RST_USB_PHY1>;
 			reset-names = "usb0_reset", "usb1_reset";
 			#phy-cells = <1>;
 			status = "disabled";
@@ -626,8 +589,8 @@
 			compatible = "generic-ehci";
 			reg = <0x04101000 0x100>;
 			interrupts = <GIC_SPI 157 IRQ_TYPE_LEVEL_HIGH>;
-			clocks = <&ccu CLK_USB_REF>, <&ccu CLK_USB0_EHCI>;
-			resets = <&ccu RST_USB_0_EHCI>;
+			clocks = <&ccu CLK_USB01_REF>, <&ccu CLK_BUS_EHCI0>;
+			resets = <&ccu RST_BUS_EHCI0>;
 			phys = <&usbphy 0>;
 			phy-names = "usb";
 			status = "disabled";
@@ -637,8 +600,8 @@
 			compatible = "generic-ohci";
 			reg = <0x04101400 0x100>;
 			interrupts = <GIC_SPI 158 IRQ_TYPE_LEVEL_HIGH>;
-			clocks = <&ccu CLK_USB_REF>, <&ccu CLK_USB0_OHCI>, <&ccu CLK_USB>;
-			resets = <&ccu RST_USB_0_OHCI>;
+			clocks = <&ccu CLK_USB01_REF>, <&ccu CLK_USB_OHCI0>, <&ccu CLK_BUS_OHCI0>;
+			resets = <&ccu RST_BUS_OHCI0>;
 			phys = <&usbphy 0>;
 			phy-names = "usb";
 			status = "disabled";
@@ -648,8 +611,8 @@
 			compatible = "generic-ehci";
 			reg = <0x04200000 0x100>;
 			interrupts = <GIC_SPI 159 IRQ_TYPE_LEVEL_HIGH>;
-			clocks = <&ccu CLK_USB_REF>, <&ccu CLK_USB1_EHCI>;
-			resets = <&ccu RST_USB_1_EHCI>;
+			clocks = <&ccu CLK_USB01_REF>, <&ccu CLK_BUS_EHCI1>;
+			resets = <&ccu RST_BUS_EHCI1>;
 			phys = <&usbphy 1>;
 			phy-names = "usb";
 			status = "disabled";
@@ -659,8 +622,8 @@
 			compatible = "generic-ohci";
 			reg = <0x04200400 0x100>;
 			interrupts = <GIC_SPI 160 IRQ_TYPE_LEVEL_HIGH>;
-			clocks = <&ccu CLK_USB_REF>, <&ccu CLK_USB1_OHCI>, <&ccu CLK_USB1>;
-			resets = <&ccu RST_USB_1_OHCI>;
+			clocks = <&ccu CLK_USB01_REF>, <&ccu CLK_USB_OHCI1>, <&ccu CLK_BUS_OHCI1>;
+			resets = <&ccu RST_BUS_OHCI1>;
 			phys = <&usbphy 1>;
 			phy-names = "usb";
 			status = "disabled";
@@ -671,7 +634,7 @@
 			reg = <0x04500000 0x8000>, <0x04508000 0x1000>;
 			interrupts = <GIC_SPI 172 IRQ_TYPE_LEVEL_HIGH>;
 			interrupt-names = "macirq";
-			clocks = <&ccu CLK_GMAC0>, <&ccu CLK_GMAC0_MBUS>,
+			clocks = <&ccu CLK_BUS_GMAC0>, <&ccu CLK_MBUS_GMAC0>,
 				 <&gmac_phy25m>, <&ccu CLK_GMAC_PTP>;
 			clock-names = "stmmaceth", "pclk", "phy25m", "ptp_ref";
 			resets = <&ccu RST_BUS_GMAC0_AXI>, <&ccu RST_BUS_GMAC0>;
@@ -703,7 +666,7 @@
 			reg = <0x04510000 0x8000>, <0x04518000 0x1000>;
 			interrupts = <GIC_SPI 175 IRQ_TYPE_LEVEL_HIGH>;
 			interrupt-names = "macirq";
-			clocks = <&ccu CLK_GMAC1>, <&ccu CLK_GMAC1_MBUS>,
+			clocks = <&ccu CLK_BUS_GMAC1>, <&ccu CLK_MBUS_GMAC1>,
 				 <&ccu CLK_GMAC1_PHY>, <&ccu CLK_GMAC_PTP>;
 			clock-names = "stmmaceth", "pclk", "phy25m", "ptp_ref";
 			resets = <&ccu RST_BUS_GMAC1_AXI>, <&ccu RST_BUS_GMAC1>;

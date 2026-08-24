@@ -1,0 +1,19 @@
+{
+  "series": "clk: sun6i-rtc: Add support for Allwinner A733 SoC v7",
+  "url": "https://patchew.org/linux/20260723-a733-rtc-v7-0-8fd68aab94ae%40baylibre.com/",
+  "base": "Linux 7.1.3 plus A733 CCU v2",
+  "patches": [
+    "9d3f6198d",
+    "d70138c7e",
+    "b15fc949e",
+    "d9a51bf84"
+  ],
+  "integration_files": [
+    "drivers/clk/sunxi-ng/ccu_mux.c",
+    "drivers/clk/sunxi-ng/ccu_div.c",
+    "drivers/clk/sunxi-ng/ccu_div.h",
+    "drivers/clk/sunxi-ng/ccu-sun6i-rtc.c",
+    "drivers/clk/sunxi-ng/ccu-sun6i-rtc.h",
+    "include/dt-bindings/clock/sun6i-rtc.h"
+  ]
+}

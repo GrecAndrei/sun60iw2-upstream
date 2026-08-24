@@ -1,20 +1,23 @@
-/* SPDX-License-Identifier: GPL-2.0+ OR MIT */
-#ifndef _DT_BINDINGS_RESET_SUN60I_A733_R_CCU_H_
-#define _DT_BINDINGS_RESET_SUN60I_A733_R_CCU_H_
+/* SPDX-License-Identifier: (GPL-2.0-only OR MIT) */
+/*
+ * Copyright (C) 2026 Junhui Liu <junhui.liu@pigmoral.tech>
+ */
 
-#define RST_BUS_R_TIME		0
+#ifndef _DT_BINDINGS_RST_SUN60I_A733_R_CCU_H_
+#define _DT_BINDINGS_RST_SUN60I_A733_R_CCU_H_
+
+#define RST_BUS_R_TIMER		0
 #define RST_BUS_R_PWM		1
 #define RST_BUS_R_SPI		2
-#define RST_BUS_R_MBOX		3
-#define RST_BUS_R_UART1		4
-#define RST_BUS_R_UART0		5
-#define RST_BUS_R_TWI2		6
-#define RST_BUS_R_TWI1		7
-#define RST_BUS_R_TWI0		8
-#define RST_BUS_R_IRRX		9
-#define RST_BUS_RTC		10
-#define RST_BUS_RISCV_CFG	11
+#define RST_BUS_R_MSGBOX	3
+#define RST_BUS_R_UART0		4
+#define RST_BUS_R_UART1		5
+#define RST_BUS_R_I2C0		6
+#define RST_BUS_R_I2C1		7
+#define RST_BUS_R_I2C2		8
+#define RST_BUS_R_IR_RX		9
+#define RST_BUS_R_RTC		10
+#define RST_BUS_R_RISCV_CFG	11
 #define RST_BUS_R_CPUCFG	12
-#define RST_BUS_R_MODULE	13
 
-#endif /* _DT_BINDINGS_RESET_SUN60I_A733_R_CCU_H_ */
+#endif /* _DT_BINDINGS_RST_SUN60I_A733_R_CCU_H_ */

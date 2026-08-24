@@ -1,9 +1,5 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
- * GENERATED FILE - DO NOT EDIT MANUALLY
- * Imported from the upstream A733 CCU v2 series: ccu-sun60i-a733-r.c
- */
-/*
  * Copyright (C) 2023 rengaomin@allwinnertech.com
  * Copyright (C) 2026 Junhui Liu <junhui.liu@pigmoral.tech>
  * Based on the A523 CCU driver:

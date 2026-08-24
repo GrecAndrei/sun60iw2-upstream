@@ -43,7 +43,6 @@ def main() -> int:
     ccu_domains = {
         "main": "drivers/clk/sunxi-ng/ccu-sun60i-a733.c",
         "r": "drivers/clk/sunxi-ng/ccu-sun60i-a733-r.c",
-        "rtc": "drivers/clk/sunxi-ng/ccu-sun60i-a733-rtc.c",
         "cpupll": "drivers/clk/sunxi-ng/ccu-sun60i-a733-cpupll.c",
     }
 
@@ -52,7 +51,6 @@ def main() -> int:
         "generators/data/ccu-main.json",
         "generators/data/ccu-main-extracted.json",
         "generators/data/ccu-r-extracted.json",
-        "generators/data/ccu-rtc-extracted.json",
         "generators/data/ccu-cpupll-extracted.json",
         "generators/data/pinctrl-main.json",
     ]:
@@ -142,6 +140,17 @@ def main() -> int:
     merged = merge_data(primary, extracted, binding_ids)
     for domain, cfg in DOMAINS.items():
         data = merged if domain == "main" else json.loads(cfg["data_file"].read_text())
+        if cfg.get("upstream_template"):
+            template = cfg["upstream_template"]
+            output = ccu_outputs[domain]
+            check(
+                checks,
+                f"upstream_template:{domain}",
+                template.exists()
+                and "MODULE_DESCRIPTION(\"Support for the Allwinner A733" in output,
+                str(template),
+            )
+            continue
         gen = Generator(data, cfg)
         gen.render()
         check(
@@ -165,31 +174,7 @@ def main() -> int:
         if domain == "main":
             check(checks, "key_gate_native_all", len(set(gen.key_gate_emitted)) == 35)
 
-    # 7. RTC bootstrap dependency safety
-    rtc_data = json.loads((ROOT / "generators/data/ccu-rtc-extracted.json").read_text())
-    r_data = json.loads((ROOT / "generators/data/ccu-r-extracted.json").read_text())
-    r_clock_names = {
-        c["name"] for c in r_data["clocks"] if c.get("type") != "parent_array"
-    }
-    rtc_r_deps = []
-    for clock in rtc_data["clocks"]:
-        if clock.get("type") == "parent_array":
-            continue
-        parents = []
-        if "parent" in clock:
-            parents.append(clock["parent"])
-        parents.extend(clock.get("parents", []))
-        bad = sorted({p for p in parents if p in r_clock_names})
-        if bad:
-            rtc_r_deps.append(f"{clock['name']}<-{','.join(bad)}")
-    check(
-        checks,
-        "rtc_bootstrap_has_no_r_ccu_parents",
-        not rtc_r_deps,
-        "; ".join(rtc_r_deps),
-    )
-
-    # 8. DTS fixed-clock names must not collide with generated provider names
+    # 7. DTS fixed-clock names must not collide with generated provider names
     dtsi_text = (
         ROOT / "arch/arm64/boot/dts/allwinner/sun60i-a733.dtsi"
     ).read_text()
@@ -200,7 +185,6 @@ def main() -> int:
     domain_data = {
         "main": merged,
         "r": json.loads((ROOT / "generators/data/ccu-r-extracted.json").read_text()),
-        "rtc": rtc_data,
         "cpupll": json.loads(
             (ROOT / "generators/data/ccu-cpupll-extracted.json").read_text()
         ),
@@ -336,15 +320,20 @@ def main() -> int:
 
     # 9b. Main CCU exports must cover supported IDs and DTS consumers
     fresh_main_ids = set(re.findall(r"\[CLK_([A-Z0-9_]+)\]", ccu_outputs["main"]))
-    main_supported_ids = sorted(
-        {
-            c["id"]
-            for c in merged["clocks"]
-            if c.get("id")
-            and c.get("type") in SUPPORTED_TYPES
-            and not is_helper(c.get("name", ""))
-        }
-    )
+    if DOMAINS["main"].get("upstream_template"):
+        main_supported_ids = sorted(
+            parse_binding_ids(ROOT / "include/dt-bindings/clock/sun60i-a733-ccu.h")
+        )
+    else:
+        main_supported_ids = sorted(
+            {
+                c["id"]
+                for c in merged["clocks"]
+                if c.get("id")
+                and c.get("type") in SUPPORTED_TYPES
+                and not is_helper(c.get("name", ""))
+            }
+        )
     main_missing_supported = sorted(set(main_supported_ids) - fresh_main_ids)
     check(
         checks,

@@ -1264,6 +1264,45 @@ def main() -> int:
     args = parser.parse_args()
 
     domain = DOMAINS[args.domain]
+
+    upstream_template = domain.get("upstream_template")
+    if upstream_template:
+        template_path = Path(upstream_template)
+        if not template_path.exists():
+            print(f"Error: {template_path} not found", file=sys.stderr)
+            return 1
+
+        source = template_path.read_text()
+        first_newline = source.find("\n")
+        if first_newline < 0:
+            print(f"Error: {template_path} is not C source", file=sys.stderr)
+            return 1
+
+        rendered = (
+            source[: first_newline + 1]
+            + "/*\n"
+            + " * GENERATED FILE - DO NOT EDIT MANUALLY\n"
+            + f" * Imported from the upstream A733 CCU v2 series: {template_path.name}\n"
+            + " */\n"
+            + source[first_newline + 1 :]
+        )
+
+        if not args.no_output:
+            print(rendered, end="")
+        if args.report:
+            print(
+                json.dumps(
+                    {
+                        "mode": "upstream-template",
+                        "template": str(template_path),
+                        "bytes": len(source),
+                    },
+                    indent=2,
+                ),
+                file=sys.stderr,
+            )
+        return 0
+
     data_dir = Path(__file__).parent / "data"
     primary_path = domain.get("data_file") or (data_dir / f"ccu-{args.domain}.json")
     extracted_path = domain.get("extracted_file")

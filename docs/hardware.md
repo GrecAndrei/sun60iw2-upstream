@@ -29,6 +29,11 @@ tracked board/SoC DTS and the integration/debug trees on every refresh.
 
 ### Clocks / thermal / cpufreq (SoC + board)
 
+- `sys-24M` is modeled as an independent fixed 24 MHz clock, matching the
+  shipping-image DTB. Functional consumers therefore do not implicitly enable
+  PLL_REF; main-CCU probe preserves the firmware-selected PLL_REF state. See
+  [`guides/reverse-engineering.md`](guides/reverse-engineering.md) for the
+  shipped-kernel disassembly evidence.
 - CPU clocks use `CLK_CPU_L` / `CLK_CPU_B` (mux with `CLK_SET_RATE_PARENT`)
 - Plain `operating-points-v2` tables (max vendor-bin voltages; no
   `sun50i-cpufreq-nvmem` for A733 yet)

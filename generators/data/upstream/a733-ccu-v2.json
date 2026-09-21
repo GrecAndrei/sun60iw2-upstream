@@ -17,6 +17,7 @@
     "ccu-sun60i-a733-r.c": "be6ad9446e4d350f6d87d763cdb401ceea9c7a7384406feacff74ab31a9d28df"
   },
   "local_deltas": [
-    "Preserve the bootloader-selected PLL_REF state during the Orange Pi 4 Pro console handoff."
+    "Model sys-24M as an independent fixed-rate clock so functional consumers do not enable PLL_REF.",
+    "Preserve the firmware-selected PLL_REF state; the shipping ISO kernel initializer has no explicit write to its 0x000 register."
   ]
 }

@@ -78,14 +78,14 @@ static const struct clk_hw *pll_ref_hws[] = {
 };
 
 /*
- * There is a non-software-configurable mux selecting between the DCXO and the
- * PLL_REF in hardware, whose output is fed to the sys-24M clock. Although both
- * sys-24M and pll-ref are fixed at 24 MHz, define a 1:1 fixed factor clock to
- * provide logical separation:
- * - pll-ref is dedicated to feeding other PLLs
- * - sys-24M serves as reference clock for downstream functional modules
+ * sys-24M is a hardware-selected fixed 24 MHz reference, independent of the
+ * software-visible PLL_REF gate. Model that interface directly so functional
+ * consumers do not acquire PLL_REF merely to use sys-24M.
  */
-static CLK_FIXED_FACTOR_HWS(sys_24M_clk, "sys-24M", pll_ref_hws, 1, 1, 0);
+static struct clk_fixed_rate sys_24M_clk = {
+	.fixed_rate	= 24000000,
+	.hw.init	= CLK_HW_INIT_NO_PARENT("sys-24M", &clk_fixed_rate_ops, 0),
+};
 static const struct clk_hw *sys_24M_hws[] = {
 	&sys_24M_clk.hw
 };
@@ -2294,7 +2294,6 @@ static const struct sunxi_ccu_desc sun60i_a733_ccu_desc = {
 };
 
 static const u32 pll_regs[] = {
-	SUN60I_A733_PLL_REF_REG,
 	SUN60I_A733_PLL_DDR_REG,
 	SUN60I_A733_PLL_PERIPH0_REG,
 	SUN60I_A733_PLL_PERIPH1_REG,
@@ -2324,18 +2323,13 @@ static int sun60i_a733_ccu_probe(struct platform_device *pdev)
 	 * The PLL clock code does not model all bits, for instance it does
 	 * not support a separate enable and gate bit. We present the
 	 * gate bit(27) as the enable bit, but then have to set the
-	 * PLL Enable, LDO Enable, and Lock Enable bits on all PLLs here.
+	 * PLL Enable, LDO Enable, and Lock Enable bits on the listed PLLs here.
 	 *
-	 * Do not enable PLL_REF here.  On the Orange Pi 4 Pro, the bootloader
-	 * hands the live UART its direct DCXO path; enabling PLL_REF switches
-	 * sys-24M underneath that console before its divisor has been
-	 * reprogrammed.  Keep the firmware-selected state until the clock
-	 * handoff is explicitly sequenced.
+	 * PLL_REF is deliberately absent. Its firmware-selected configuration
+	 * feeds the downstream PLLs and must not change as a side effect of CCU
+	 * registration.
 	 */
 	for (i = 0; i < ARRAY_SIZE(pll_regs); i++) {
-		if (pll_regs[i] == SUN60I_A733_PLL_REF_REG)
-			continue;
-
 		val = readl(reg + pll_regs[i]);
 		val |= BIT(31) | BIT(30) | BIT(29);
 		writel(val, reg + pll_regs[i]);

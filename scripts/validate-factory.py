@@ -89,6 +89,25 @@ def main() -> int:
     pin_committed = (ROOT / "drivers/pinctrl/sunxi/pinctrl-sun60i-a733.c").read_text()
     check(checks, "pinctrl_committed_fresh_match", pin_committed == pin1)
 
+    main_ccu = (ROOT / ccu_domains["main"]).read_text()
+    pll_regs_match = re.search(
+        r"static const u32 pll_regs\[\] = \{(?P<body>.*?)\n\};",
+        main_ccu,
+        re.S,
+    )
+    check(
+        checks,
+        "main_sys24m_is_independent_fixed_rate",
+        "static struct clk_fixed_rate sys_24M_clk" in main_ccu
+        and 'CLK_HW_INIT_NO_PARENT("sys-24M"' in main_ccu,
+    )
+    check(
+        checks,
+        "main_probe_preserves_pll_ref",
+        bool(pll_regs_match)
+        and "SUN60I_A733_PLL_REF_REG" not in pll_regs_match.group("body"),
+    )
+
     # 4. Generator Python syntax
     for script in [
         "generate_ccu.py",

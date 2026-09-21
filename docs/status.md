@@ -18,6 +18,10 @@ Refresh with `python3 scripts/refresh-documentation.py`; verify with `python3 sc
 
 The source checkout's revision and Git-change list are intentionally omitted: committing this generated file must not make it stale by changing the state it reports.
 
+## Repository organization
+
+- Result: **PASS** — `Repository layout: PASS`
+
 ## Generated-source validation
 
 - Result: **PASS** — 42/42 checks passed; 0 failed.

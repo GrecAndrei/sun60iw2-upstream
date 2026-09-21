@@ -1,71 +1,41 @@
-#!/bin/bash
-# apply-patches.sh - Apply sun60iw2 patches to a Linux kernel tree
+#!/usr/bin/env bash
+# Patch-series guard: there is no validated active Linux series at present.
 
-set -e
+set -euo pipefail
 
-LINUX_TREE="${1:-}"
-SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-PATCH_DIR="$SCRIPT_DIR/../patches"
-CONFIG_DIR="$SCRIPT_DIR/../configs"
+ROOT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 
-if [ -z "$LINUX_TREE" ]; then
-    echo "Usage: $0 <path-to-linux-tree>"
-    echo "Example: $0 ~/linux"
-    exit 1
-fi
+usage() {
+	cat <<EOF
+Usage: $0 --list
+       $0 --help
 
-if [ ! -e "$LINUX_TREE/.git" ]; then
-    echo "Error: $LINUX_TREE is not a git repository"
-    exit 1
-fi
+No active patch series is currently available. The historical Linux v7.0
+artifacts are deliberately separated under patches/archive/, and standalone
+drafts live under patches/wip/.
 
-if [ ! -d "$PATCH_DIR" ]; then
-    echo "Error: Patch directory $PATCH_DIR not found"
-    exit 1
-fi
+Use the integrated Linux v7.1.3 reference instead:
+  $ROOT_DIR/../../kernels/a733-v7.1.3
+EOF
+}
 
-if [ ! -d "$CONFIG_DIR" ]; then
-    echo "Error: Config directory $CONFIG_DIR not found"
-    exit 1
-fi
+case "${1:-}" in
+--list)
+	printf '%s\n' 'Patch inventory:'
+	find "$ROOT_DIR/patches" -mindepth 1 -maxdepth 4 -type f \
+		\( -name '*.patch' -o -name 'README.md' \) \
+		-printf '  %P\n' | sort
+	;;
+--help|-h)
+	usage
+	;;
+*)
+	usage >&2
+	cat >&2 <<'EOF'
 
-echo "Applying patches from $PATCH_DIR to $LINUX_TREE..."
-
-cd "$LINUX_TREE"
-
-if [ -z "$(git config user.name || true)" ] || [ -z "$(git config user.email || true)" ]; then
-    echo "Error: git user.name and user.email must be configured in $LINUX_TREE before running git am"
-    exit 1
-fi
-
-# Check for uncommitted changes
-if ! git diff-index --quiet HEAD --; then
-    echo "Warning: Linux tree has uncommitted changes"
-    read -p "Continue anyway? [y/N] " -n 1 -r
-    echo
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-        exit 1
-    fi
-fi
-
-# Apply only standalone git-format-patch files from the bootable SoC series.
-for patch in "$PATCH_DIR"/*.patch; do
-    if [ -f "$patch" ]; then
-        if ! head -n 1 "$patch" | grep -q '^From '; then
-            echo "Skipping non-format-patch artifact $(basename "$patch")"
-            continue
-        fi
-        echo "Applying $(basename "$patch")..."
-        git am --3way "$patch" || {
-            echo "Failed to apply $(basename "$patch")"
-            echo "Run 'git am --abort' to clean up"
-            exit 1
-        }
-    fi
-done
-
-echo "Installing defconfigs..."
-cp "$CONFIG_DIR"/sun60iw2_defconfig "$LINUX_TREE"/arch/arm64/configs/
-cp "$CONFIG_DIR"/sun60iw2_minimal_defconfig "$LINUX_TREE"/arch/arm64/configs/
-
-echo "All patches applied successfully!"
+Refusing to apply patches: the former implicit series was historical,
+malformed, and not rebased to the current Linux baseline. See patches/README.md.
+EOF
+	exit 2
+	;;
+esac

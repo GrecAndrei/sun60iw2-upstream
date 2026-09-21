@@ -3,13 +3,16 @@
 # restore systemd as PID 1, and enable automatic Wi-Fi bring-up on boot.
 set -euo pipefail
 
+SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+PROJECT_DIR=$(CDPATH= cd -- "$SCRIPT_DIR/.." && pwd)
+WORKSPACE_DIR=$(CDPATH= cd -- "$PROJECT_DIR/../.." && pwd)
+
 MNT=${MNT:-/mnt/sun60i-a733-rootfs}
 PART=${PART:-/dev/mmcblk0p1}
-STAGING=/home/alex/Documents/porting/artifacts/aic8800-board-install
-K=/home/alex/Documents/porting/kernels/a733-v7.1.3
+STAGING=${STAGING:-"$WORKSPACE_DIR/artifacts/aic8800-board-install"}
+K=${KERNEL_DIR:-"$WORKSPACE_DIR/kernels/a733-v7.1.3"}
 IMG=$K/arch/arm64/boot/Image
 DTB=$K/arch/arm64/boot/dts/allwinner/sun60i-a733-orangepi-4-pro.dtb
-SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
 SKIP_MOUNT=${SKIP_MOUNT:-0}
 LOOP_FALLBACK=${LOOP_FALLBACK:-1}
 
@@ -191,7 +194,6 @@ ip link show 2>/dev/null | grep -i wlan || true
 EOS
 chmod +x "$MNT/root/aic-load.sh"
 
-SCRIPT_DIR=$(CDPATH= cd -- "$(dirname "$0")" && pwd)
 cp -a "$SCRIPT_DIR/wifi-inject-probe.py" "$MNT/root/wifi-inject-probe.py"
 cp -a "$SCRIPT_DIR/wifi-monitor.sh" "$MNT/usr/local/sbin/wifi-monitor"
 cp -a "$SCRIPT_DIR/wifi-station.sh" "$MNT/usr/local/sbin/wifi-station"

@@ -10,7 +10,8 @@ live, generated evidence.
 | [`hardware.md`](hardware.md) | Current DTS declarations (PMIC, MMC, OPP, thermal) and tree roles. | Update with DTS ownership changes. |
 | [`development.md`](development.md) | Editing, generation, and validation rules. | Update with workflow changes. |
 | [`aic8800.md`](aic8800.md) | AIC8800 generator workflow, implemented features, and Orange Pi 4 Pro hardware boundary. | Update when driver capability or board evidence changes. |
-| [`guides/`](guides) | Build, test, and patch workflow. | Update with script behavior. |
+| [`guides/`](guides) | Build, test, patch, and workspace workflow. | Update with script behavior. |
+| [`guides/workspace.md`](guides/workspace.md) | Authority boundaries between source, kernels, references, artifacts, and archives. | Update when workspace ownership changes. |
 | [`guides/bootloader.md`](guides/bootloader.md) | Legacy U-Boot packaging, guarded flash, and UART acceptance procedure. | Update with bootloader script or layout changes. |
 | [`guides/wifi-sdio-bringup.md`](guides/wifi-sdio-bringup.md) | Evidence-led A733 SDIO Wi-Fi validation ladder (enum → station → monitor → inject). | Update with each validated state transition. |
 | [`guides/thermals.md`](guides/thermals.md) | CPU OPP / thermal cooling wiring, Kconfig, and board check. | Update when trips, supplies, or OPP policy change. |
@@ -18,6 +19,7 @@ live, generated evidence.
 Refresh the live report after source, generator, DTS, or integration changes:
 
 ```bash
+python3 scripts/check-repository-layout.py
 python3 scripts/refresh-documentation.py
 python3 scripts/refresh-documentation.py --check
 ```

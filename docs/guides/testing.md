@@ -5,6 +5,7 @@ Separate static checks from hardware tests.
 ## Static checks
 
 ```bash
+python3 scripts/check-repository-layout.py
 python3 scripts/validate-factory.py
 python3 scripts/refresh-documentation.py
 python3 scripts/refresh-documentation.py --check

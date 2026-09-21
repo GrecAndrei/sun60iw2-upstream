@@ -7,19 +7,20 @@ Pro upstream port. The workspace debug worktree is
 `../../kernels/a733-debug/`; do not silently copy its changes into this
 repository or describe them as integrated support.
 
-### Legacy patch-series boundary
+### Patch-series boundary
 
-`patches/0001-*` through `patches/0006-*` are historical Linux v7.0-era
-artifacts, not the current boot baseline. They have not been rebased to Linux
-v7.1.3: `0001` has malformed hunk counts and does not apply to a clean v7.1.3
-tree. `0007-*` is in-progress work, not evidence that the sequence is fixed.
+There is no active reproducible Linux patch series. The historical Linux v7.0
+artifacts are isolated under `patches/archive/linux-v7.0/`; `0001-*` has
+malformed hunk counts. Standalone drafts live under `patches/wip/` and are not
+evidence of a complete sequence. `scripts/apply-patches.sh` intentionally
+refuses the old implicit application behavior.
 
 The currently integrated reference is `../../kernels/a733-v7.1.3/` on
 `debug/a733-v7.1.3`, whose committed v7.1.3 baseline starts at `9568f851f`.
-Use it for comparison and integration builds. Do not use
-`scripts/apply-patches.sh` to create a bootable baseline until the *entire*
-series has been regenerated from a clean v7.1.3 tree and verified by applying
-and building it there. Keep that rebase separate from the AIC8800 skeleton.
+Use it for comparison and integration builds. Create a future active series
+only after regenerating the *entire* sequence from a clean target release and
+verifying apply, build, and hardware evidence. Keep that work separate from
+the AIC8800 skeleton.
 
 ## Generated-source rule
 
@@ -45,6 +46,7 @@ Commit source data and generated output together.
 After generator, DTS, binding, or patch-series changes run:
 
 ```bash
+python3 scripts/check-repository-layout.py
 python3 scripts/validate-factory.py
 python3 scripts/refresh-documentation.py
 python3 scripts/refresh-documentation.py --check

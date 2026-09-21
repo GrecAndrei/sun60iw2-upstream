@@ -14,9 +14,10 @@ generator implementation remain authoritative.
 
 1. Change data or generator code.
 2. Regenerate the affected output.
-3. Run `python3 scripts/validate-factory.py` from the repository root.
-4. Run `python3 scripts/refresh-documentation.py`.
-5. Review source and generated output together.
+3. Run `python3 scripts/check-repository-layout.py` from the repository root.
+4. Run `python3 scripts/validate-factory.py`.
+5. Run `python3 scripts/refresh-documentation.py`.
+6. Review source and generated output together.
 
 The factory validator checks JSON syntax, generator determinism, generated-file
 freshness, binding coverage, and selected structural assumptions. A failed

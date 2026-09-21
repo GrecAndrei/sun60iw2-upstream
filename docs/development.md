@@ -12,6 +12,7 @@ DTS, dt-bindings, scripts, and patch metadata may be edited directly.
 After generator or data changes:
 
 ```bash
+python3 scripts/check-repository-layout.py
 python3 scripts/validate-factory.py
 python3 scripts/refresh-documentation.py
 python3 scripts/refresh-documentation.py --check

@@ -23,15 +23,18 @@ The source repository is separate from local kernel trees:
 - `../../kernels/a733-v7.1.3/` is the primary integration build and flash
   target for Orange Pi 4 Pro bring-up (Wi-Fi, thermals, systemd rootfs).
 - `../../kernels/mainline-v7/` is the mainline v7.0 comparison / export tree.
-  `scripts/apply-patches.sh` applies only Git-format patch files and installs
-  the two defconfigs.
+  Its preserved changes are not a current patch baseline.
 - `../../kernels/a733-debug/` is a detached experimental worktree. Do not
   treat it as reviewable source until changes are reproduced here and
   exported as patches.
 
-`../../references/orangepi-vendor-linux-6.6/` and
+`../../references/orangepi-vendor-linux-5.15/`,
+`../../references/orangepi-vendor-linux-6.6/`, and
 `../../references/aic8800-bsp-snapshot/` are reference-only. Any new
 implementation must use upstream Linux interfaces and coding patterns.
+
+Historical Linux v7.0 patch exports live under `patches/archive/`; standalone
+drafts live under `patches/wip/`. There is no active reproducible series.
 
 ## Generated AIC8800 material
 

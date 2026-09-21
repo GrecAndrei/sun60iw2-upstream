@@ -23,28 +23,8 @@ def generated_files_stats(path: Path) -> dict:
     }
 
 
-def agy_stats(log_dir: Path) -> dict:
-    metas = sorted(log_dir.glob("*.meta.json"))
-    out_nonempty = 0
-    quota_hits = 0
-    for meta_path in metas:
-        meta = json.loads(meta_path.read_text())
-        out_path = Path(meta["stdout_log"])
-        agy_log = Path(meta.get("agy_log", ""))
-        if out_path.exists() and out_path.read_text(errors="replace").strip():
-            out_nonempty += 1
-        if agy_log.exists() and "RESOURCE_EXHAUSTED" in agy_log.read_text(errors="replace"):
-            quota_hits += 1
-    return {
-        "jobs_total": len(metas),
-        "jobs_with_nonempty_stdout": out_nonempty,
-        "jobs_with_quota_errors": quota_hits,
-    }
-
-
 def build_report() -> dict:
     generated = ROOT / "generated" / "aic8800"
-    logs = ROOT / ".tmp" / "agy-logs"
     validation = ROOT / ".tmp" / "validation"
     compile_check = validation / "aic8800-compile-check.json"
     dtb_check = validation / "aic8800-dtb-check.json"
@@ -66,11 +46,6 @@ def build_report() -> dict:
         "generated_artifacts": generated_files_stats(generated),
         "compile_check": compile_info,
         "dtb_check": dtb_info,
-        "agy_delegate": agy_stats(logs) if logs.exists() else {
-            "jobs_total": 0,
-            "jobs_with_nonempty_stdout": 0,
-            "jobs_with_quota_errors": 0,
-        },
     }
 
 
@@ -98,11 +73,6 @@ def write_outputs(report: dict) -> None:
         f"- Status: `{report['dtb_check'].get('status', 'unknown')}`",
         f"- Target: `{report['dtb_check'].get('target', 'n/a')}`",
         f"- Last checked: `{report['dtb_check'].get('checked_at_utc', 'n/a')}`",
-        "",
-        "## AGY Delegate",
-        f"- Jobs total: `{report['agy_delegate']['jobs_total']}`",
-        f"- Jobs with non-empty stdout: `{report['agy_delegate']['jobs_with_nonempty_stdout']}`",
-        f"- Jobs with quota errors: `{report['agy_delegate']['jobs_with_quota_errors']}`",
         "",
         "## Generated File Extensions",
     ]

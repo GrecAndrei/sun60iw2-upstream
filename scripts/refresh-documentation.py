@@ -119,6 +119,20 @@ def displayed_changes(snapshot: dict[str, object]) -> list[str]:
     ]
 
 
+def layout_snapshot() -> dict[str, str]:
+    result = subprocess.run(
+        [sys.executable, "scripts/check-repository-layout.py"],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+    )
+    detail = result.stdout.strip() or result.stderr.strip()
+    return {
+        "status": "PASS" if result.returncode == 0 else "FAIL",
+        "detail": detail,
+    }
+
+
 def factory_snapshot() -> dict[str, object]:
     result = subprocess.run(
         [sys.executable, "scripts/validate-factory.py"],
@@ -201,6 +215,7 @@ def render_snapshot() -> str:
         debug_tree
         / "arch/arm64/boot/dts/allwinner/sun60i-a733-orangepi-4-pro.dtb"
     )
+    layout = layout_snapshot()
     factory = factory_snapshot()
 
     declarations = [
@@ -317,6 +332,10 @@ def render_snapshot() -> str:
         ),
         "",
         "The source checkout's revision and Git-change list are intentionally omitted: committing this generated file must not make it stale by changing the state it reports.",
+        "",
+        "## Repository organization",
+        "",
+        f"- Result: **{layout['status']}** — `{layout['detail']}`",
         "",
         "## Generated-source validation",
         "",

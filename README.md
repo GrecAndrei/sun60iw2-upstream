@@ -2,8 +2,8 @@
 
 This is the source repository for an upstream-quality Linux port of the
 Allwinner A733 SoC and Orange Pi 4 Pro board. It owns Device Tree sources,
-generator inputs, generated driver sources, defconfigs, and a boot-baseline
-patch series.
+generator inputs, generated driver sources, defconfigs, and the inventory of
+archived or work-in-progress patch exports.
 
 The live, evidence-based state is generated at
 [`docs/status.md`](docs/status.md). Do not infer validation or hardware success
@@ -19,18 +19,20 @@ local debug tree.
 | `generators/templates/aic8800/` | Template-only AIC8800 firmware-protocol sources. |
 | `generators/` | Deterministic generator and extraction code; the AIC8800 generator owns the remaining driver sources. |
 | `generated/aic8800/` | Generated AIC8800 bindings, DTS fragment, kernel snapshot, and debt inventory. |
-| `patches/` | Standalone Git-format boot-baseline patches. |
+| `patches/` | Patch inventory; archival and WIP material only until a complete active series is validated. |
 | `bootloader/patches/` | Git-format fixes for the separate legacy U-Boot recovery source. |
-| `configs/` | Defconfigs installed by `scripts/apply-patches.sh`. |
+| `configs/` | A733 defconfig sources for integration trees. |
+| `scripts/` | Validation, export, deployment, and board helpers; see `scripts/README.md`. |
 | `docs/` | Maintained process documentation; `status.md` is generated. |
 | `.tmp/validation/` | Local, ignored validation evidence written by AIC8800 checks. |
 
 ## Start of work
 
 ```bash
+python3 scripts/check-repository-layout.py
+python3 scripts/validate-factory.py
 python3 scripts/refresh-documentation.py
 python3 scripts/refresh-documentation.py --check
-python3 scripts/validate-factory.py
 ```
 
 Read [`docs/README.md`](docs/README.md) for the documentation contract and
@@ -44,7 +46,8 @@ Read [`docs/README.md`](docs/README.md) for the documentation contract and
   register maps. Do not import BSP implementation.
 - Treat `../../kernels/a733-debug/` as a separate experimental worktree, not a
   patch source.
-- Keep boot-baseline patches reproducible independently of AIC8800 driver work.
+- Treat `patches/archive/` and `patches/wip/` as non-active material. Do not
+  present a boot baseline until a complete clean-tree series is reproducible.
 - Build and flash legacy A733 U-Boot through the checked procedure in
   [`docs/guides/bootloader.md`](docs/guides/bootloader.md); never overwrite
   the whole SD device with a sparse merged image.

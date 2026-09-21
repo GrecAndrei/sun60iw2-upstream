@@ -6,9 +6,13 @@
 # Usage: sudo bash flash-vendor-for-dump.sh
 set -euo pipefail
 
-MNT=/mnt/sun60i-a733-rootfs
-VENDOR_ROOTFS=/home/alex/Documents/porting/artifacts/rootfs/vendor-ubuntu-jammy
-PART=/dev/mmcblk0p1
+SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+PROJECT_DIR=$(CDPATH= cd -- "$SCRIPT_DIR/.." && pwd)
+WORKSPACE_DIR=$(CDPATH= cd -- "$PROJECT_DIR/../.." && pwd)
+
+MNT=${MNT:-/mnt/sun60i-a733-rootfs}
+VENDOR_ROOTFS=${VENDOR_ROOTFS:-"$WORKSPACE_DIR/artifacts/rootfs/vendor-ubuntu-jammy"}
+PART=${PART:-/dev/mmcblk0p1}
 TS=$(date +%Y%m%d-%H%M%S)
 
 fail() { printf 'ERROR: %s\n' "$*" >&2; exit 1; }

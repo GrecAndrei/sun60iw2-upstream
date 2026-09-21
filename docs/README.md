@@ -12,6 +12,7 @@ live, generated evidence.
 | [`aic8800.md`](aic8800.md) | AIC8800 generator workflow, implemented features, and Orange Pi 4 Pro hardware boundary. | Update when driver capability or board evidence changes. |
 | [`guides/`](guides) | Build, test, patch, and workspace workflow. | Update with script behavior. |
 | [`guides/workspace.md`](guides/workspace.md) | Authority boundaries between source, kernels, references, artifacts, and archives. | Update when workspace ownership changes. |
+| [`guides/reverse-engineering.md`](guides/reverse-engineering.md) | Shipping-image evidence hierarchy, provenance, and reproduced binary findings. | Update when the reference image or reverse-engineered hardware evidence changes. |
 | [`guides/bootloader.md`](guides/bootloader.md) | Legacy U-Boot packaging, guarded flash, and UART acceptance procedure. | Update with bootloader script or layout changes. |
 | [`guides/wifi-sdio-bringup.md`](guides/wifi-sdio-bringup.md) | Evidence-led A733 SDIO Wi-Fi validation ladder (enum → station → monitor → inject). | Update with each validated state transition. |
 | [`guides/thermals.md`](guides/thermals.md) | CPU OPP / thermal cooling wiring, Kconfig, and board check. | Update when trips, supplies, or OPP policy change. |

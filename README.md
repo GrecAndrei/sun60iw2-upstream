@@ -42,8 +42,11 @@ Read [`docs/README.md`](docs/README.md) for the documentation contract and
 
 - Edit generator data or templates, then regenerate; do not hand-edit generated
   C or AIC8800 outputs.
-- Use the vendor kernel only as a reference for observable behavior and
-  register maps. Do not import BSP implementation.
+- Prefer reverse engineering the exact proven-working vendor image. Its shipped
+  DTB, binaries, firmware, and runtime behavior outrank a potentially
+  mismatched vendor source tree; see
+  [`docs/guides/reverse-engineering.md`](docs/guides/reverse-engineering.md).
+  Do not import BSP implementation.
 - Treat `../../kernels/a733-debug/` as a separate experimental worktree, not a
   patch source.
 - Treat `patches/archive/` and `patches/wip/` as non-active material. Do not

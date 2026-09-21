@@ -33,10 +33,22 @@ Never hand-edit a file marked `GENERATED FILE`.
 
 Commit source data and generated output together.
 
-## Vendor and upstream rules
+## Evidence, vendor, and upstream rules
 
-- The vendor tree is reference-only. Do not copy BSP code, BSP-only APIs, or
-  vendor logging/framework layers.
+The proven-working vendor image is the primary source of vendor-behavior
+evidence. Prefer reverse engineering its exact DTB, kernel, modules, firmware,
+bootloader, and runtime/register behavior. A vendor source tree is **not**
+presumed to match that image or board and is not more authoritative than the
+shipping binaries.
+
+Use vendor source only as secondary explanatory material after cross-checking
+it against image artifacts. Record artifact hashes plus function addresses,
+register operations, or runtime captures for hardware claims. If source and
+image disagree, follow the image evidence and document the discrepancy. See
+`docs/guides/reverse-engineering.md`.
+
+- The vendor tree remains reference-only. Do not copy BSP code, BSP-only APIs,
+  or vendor logging/framework layers.
 - Follow existing mainline sunxi patterns and Linux coding conventions.
 - Keep the AIC8800 draft skeleton separate from the standalone boot-baseline
   patch series until it is independently reviewable.

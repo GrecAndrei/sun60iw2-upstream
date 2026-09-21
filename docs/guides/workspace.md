@@ -12,14 +12,17 @@ trees as interchangeable copies.
    integrated on its branch, not what has been upstreamed.
 3. `artifacts/` — local binaries, logs, root filesystems, backups, and test
    material. An artifact is evidence only when its revision/checksum and test
-   record are known.
-4. `references/` — vendor/BSP behavior comparison only. Never copy vendor
-   implementation or APIs into the source project.
+   record are known. The hashed, proven-working vendor-image extraction under
+   `artifacts/re/vendor-iso-extract/` is primary evidence of shipped behavior.
+4. `references/` — secondary vendor/BSP source comparison only. Source may not
+   match the image or board and cannot override DTB, binary, or runtime
+   evidence. Never copy vendor implementation or APIs into the source project.
 5. `archive/` and `docs/archive/` — superseded context; never current guidance.
 
 `kernels/a733-debug/` and `kernels/mainline-v7/` contain preserved experimental
 changes. Reproduce useful work in the source project rather than copying a
-working tree wholesale.
+working tree wholesale. See [`reverse-engineering.md`](reverse-engineering.md)
+for the hardware-evidence hierarchy.
 
 ## Repository-owned paths
 

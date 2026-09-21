@@ -10,7 +10,7 @@ Refresh with `python3 scripts/refresh-documentation.py`; verify with `python3 sc
 | Path | Role | Observable state |
 |---|---|---|
 | `projects/sun60iw2-upstream/` | tracked source and generator repository | `feature/a733-boot-recovery`; source Git changes are intentionally omitted |
-| `kernels/a733-v7.1.3/` | primary integration build (`a733-v7.1.3`) | `debug/a733-v7.1.3` at `39a71ec8b`; 0 working-tree change(s) |
+| `kernels/a733-v7.1.3/` | primary integration build (`a733-v7.1.3`) | `debug/a733-v7.1.3` at `05d39b65c`; 0 working-tree change(s) |
 | `kernels/mainline-v7/` | Linux v7.0 comparison / export tree | `detached` at `028ef9c96`; 18 working-tree change(s) |
 | `kernels/a733-debug/` | experimental worktree only | `detached` at `ad299312e`; 20 working-tree change(s) |
 | `references/orangepi-vendor-linux-6.6/` | vendor reference tree | `orange-pi-6.6-sun60iw2` at `8a9be72c9`; 0 working-tree change(s) |
@@ -18,13 +18,17 @@ Refresh with `python3 scripts/refresh-documentation.py`; verify with `python3 sc
 
 The source checkout's revision and Git-change list are intentionally omitted: committing this generated file must not make it stale by changing the state it reports.
 
+## Hardware evidence policy
+
+The exact proven-working vendor image is primary evidence of shipped hardware behavior. Prefer its extracted DTB, binaries, firmware, bootloader, and runtime captures; vendor source is secondary and may not match the image or board. See [`guides/reverse-engineering.md`](guides/reverse-engineering.md).
+
 ## Repository organization
 
 - Result: **PASS** — `Repository layout: PASS`
 
 ## Generated-source validation
 
-- Result: **PASS** — 50/50 checks passed; 0 failed.
+- Result: **PASS** — 52/52 checks passed; 0 failed.
 
 ## Source/integration synchronization
 
@@ -53,7 +57,7 @@ The active `.config` is local build state. Reproducible integration depends on t
 
 ## Integration build artifacts (`a733-v7.1.3`)
 
-- `kernels/a733-v7.1.3/arch/arm64/boot/Image`: 13,390,336 bytes; modified 2026-08-24T21:31+03:00
+- `kernels/a733-v7.1.3/arch/arm64/boot/Image`: 13,390,336 bytes; modified 2026-09-21T19:40+03:00
 - `kernels/a733-v7.1.3/arch/arm64/boot/dts/allwinner/sun60i-a733-orangepi-4-pro.dtb`: 19,862 bytes; modified 2026-08-24T20:33+03:00
 
 ## Debug build artifacts (experimental)

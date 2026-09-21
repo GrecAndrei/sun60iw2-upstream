@@ -21,6 +21,15 @@ python3 scripts/refresh-documentation.py --check
 The factory result is authoritative even when it fails. Fix or explicitly
 document failed checks before treating generated output as ready for integration.
 
+## Hardware evidence discipline
+
+Prefer the exact proven-working vendor image over a vendor source checkout.
+Reverse its shipped DTB, kernel, modules, firmware, bootloader, and observed
+runtime state first. Vendor source can explain names and intent only after its
+claims are checked against those artifacts; it may describe another release or
+board configuration. Record hashes and binary addresses or runtime captures.
+See [`guides/reverse-engineering.md`](guides/reverse-engineering.md).
+
 ## Integration discipline
 
 Use a disposable or reviewable Linux tree for exports and compile checks. The

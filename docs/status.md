@@ -24,7 +24,32 @@ The source checkout's revision and Git-change list are intentionally omitted: co
 
 ## Generated-source validation
 
-- Result: **PASS** — 42/42 checks passed; 0 failed.
+- Result: **PASS** — 50/50 checks passed; 0 failed.
+
+## Source/integration synchronization
+
+- Exact file matches: 32
+- Integrated fragment checks: 2
+- Different files: 6
+- Missing integration files: 0
+- Different source/integration files:
+  - `arch/arm64/boot/dts/allwinner/sun60i-a733.dtsi`
+  - `configs/sun60iw2_defconfig -> arch/arm64/configs/sun60iw2_defconfig`
+  - `configs/sun60iw2_minimal_defconfig -> arch/arm64/configs/sun60iw2_minimal_defconfig`
+  - `drivers/clk/sunxi-ng/ccu-sun60i-a733-cpupll.c`
+  - `drivers/clk/sunxi-ng/ccu-sun60i-a733-r.c`
+  - `generators/output/sun8i_thermal.c -> drivers/thermal/sun8i_thermal.c`
+
+## Defconfig capabilities
+
+| Capability | Source defconfig | Integration defconfig | Active `.config` |
+|---|---:|---:|---:|
+| `A733 cpufreq-dt` | yes | no | yes |
+| `Sun8i thermal + SID nvmem` | yes | no | yes |
+| `AXP8191 I2C/regulator stack` | yes | yes | yes |
+| `AIC8800 SDIO modules` | yes | yes | yes |
+
+The active `.config` is local build state. Reproducible integration depends on the checked-in defconfig, which may lag it.
 
 ## Integration build artifacts (`a733-v7.1.3`)
 
@@ -46,8 +71,8 @@ The source checkout's revision and Git-change list are intentionally omitted: co
 | `AXP DCDC3 (big CPU supply)` | yes | yes | no |
 | `AXP DCDC5 (little CPU supply)` | yes | yes | no |
 | `CPU OPP tables (`sun60i-a733-cpu-opp.dtsi`)` | yes | yes | no |
-| `THS nvmem calibration wired` | yes | no | no |
-| `CPU thermal zones (70/90 passive)` | yes | no | no |
+| `THS nvmem calibration reference` | yes | no | no |
+| `CPU thermal policy (70/90 passive)` | yes | no | no |
 | `R-TWI0 enabled` | yes | yes | yes |
 | `R-PIO PL supply declared` | yes | yes | yes |
 
@@ -102,4 +127,4 @@ These rows describe DTS text only. They do not establish driver availability, el
 
 ## Documentation contract
 
-Permanent docs describe ownership, procedure, and the last recorded capability boundary. This generated file is the live evidence authority for Git/artifact/DTS/factory state; archived notes are intentionally excluded from current guidance.
+Permanent docs describe ownership, procedure, and the last recorded capability boundary. This generated file is the live evidence authority for source/integration parity, configuration, Git, artifact, DTS, and factory state; archived notes are intentionally excluded from current guidance.

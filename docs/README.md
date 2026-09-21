@@ -5,7 +5,7 @@ live, generated evidence.
 
 | Document | Purpose | Update mechanism |
 |---|---|---|
-| [`status.md`](status.md) | Git state, build-artifact metadata, DTS declarations, and factory-validation result. | `python3 scripts/refresh-documentation.py` |
+| [`status.md`](status.md) | Git state, source/integration file parity, defconfig capabilities, build artifacts, DTS declarations, and validation results. | `python3 scripts/refresh-documentation.py` |
 | [`architecture.md`](architecture.md) | Source ownership and generation boundaries. | Update when structure changes. |
 | [`hardware.md`](hardware.md) | Current DTS declarations (PMIC, MMC, OPP, thermal) and tree roles. | Update with DTS ownership changes. |
 | [`development.md`](development.md) | Editing, generation, and validation rules. | Update with workflow changes. |

@@ -2,8 +2,9 @@
 """Generate the live project status document from the workspace itself.
 
 The generated document deliberately reports only observable state: Git state,
-build artifact metadata, Device Tree declarations, and factory-validation
-output. It is not a replacement for hardware test logs.
+source/integration parity, defconfig capabilities, build artifact metadata,
+Device Tree declarations, and validation output. It is not a replacement for
+hardware test logs.
 """
 
 from __future__ import annotations
@@ -99,6 +100,83 @@ def node_enabled(path: Path, node: str) -> bool:
         return False
     pattern = rf"&{re.escape(node)}\s*\{{.*?status\s*=\s*\"okay\";"
     return bool(re.search(pattern, path.read_text(errors="replace"), re.S))
+
+
+def config_enabled(path: Path, *options: str) -> bool:
+    if not path.exists():
+        return False
+    values = {
+        match.group(1): match.group(2)
+        for match in re.finditer(
+            r"^(CONFIG_[A-Z0-9_]+)=(y|m)$", path.read_text(errors="replace"), re.M
+        )
+    }
+    return all(values.get(option) in {"y", "m"} for option in options)
+
+
+def source_integration_sync(integration_tree: Path) -> dict[str, object]:
+    result = subprocess.run(
+        ["git", "ls-files", "--cached", "--others", "--exclude-standard", "-z"],
+        cwd=ROOT,
+        capture_output=True,
+        check=True,
+    )
+    prefixes = ("arch/", "configs/", "drivers/", "include/")
+    special_targets = {
+        "generators/output/sun8i_thermal.c": "drivers/thermal/sun8i_thermal.c",
+    }
+    paths = sorted(
+        {
+            item.decode()
+            for item in result.stdout.split(b"\0")
+            if item and item.decode().startswith(prefixes)
+        }
+        | set(special_targets)
+    )
+    states: dict[str, list[str]] = {
+        "match": [],
+        "fragment": [],
+        "different": [],
+        "missing": [],
+    }
+
+    for relative in paths:
+        source = ROOT / relative
+        if not source.is_file():
+            continue
+        if relative == "arch/arm64/Kconfig.platforms.fragment":
+            target = integration_tree / "arch/arm64/Kconfig.platforms"
+            integrated = target.exists() and contains(target, "config ARCH_SUNXI")
+            states["fragment" if integrated else "missing"].append(relative)
+            continue
+        if relative == "arch/arm64/boot/dts/allwinner/Makefile.fragment":
+            target = integration_tree / "arch/arm64/boot/dts/allwinner/Makefile"
+            required = [
+                line.strip()
+                for line in source.read_text().splitlines()
+                if line.strip() and not line.lstrip().startswith("#")
+            ]
+            integrated = target.exists() and all(contains(target, line) for line in required)
+            states["fragment" if integrated else "missing"].append(relative)
+            continue
+
+        target_relative = special_targets.get(relative)
+        if target_relative is None:
+            target_relative = (
+                f"arch/arm64/configs/{Path(relative).name}"
+                if relative.startswith("configs/")
+                else relative
+            )
+        target = integration_tree / target_relative
+        label = f"{relative} -> {target_relative}" if relative != target_relative else relative
+        if not target.exists():
+            states["missing"].append(label)
+        elif source.read_bytes() == target.read_bytes():
+            states["match"].append(label)
+        else:
+            states["different"].append(label)
+
+    return states
 
 
 def displayed_changes(snapshot: dict[str, object]) -> list[str]:
@@ -197,6 +275,11 @@ def render_snapshot() -> str:
         integration_tree
         / "arch/arm64/boot/dts/allwinner/sun60i-a733-cpu-opp.dtsi"
     )
+    source_defconfig = ROOT / "configs/sun60iw2_defconfig"
+    integration_defconfig = (
+        integration_tree / "arch/arm64/configs/sun60iw2_defconfig"
+    )
+    integration_active_config = integration_tree / ".config"
     debug_board = (
         debug_tree / "arch/arm64/boot/dts/allwinner/sun60i-a733-orangepi-4-pro.dts"
     )
@@ -217,6 +300,7 @@ def render_snapshot() -> str:
     )
     layout = layout_snapshot()
     factory = factory_snapshot()
+    sync = source_integration_sync(integration_tree)
 
     declarations = [
         (
@@ -259,13 +343,13 @@ def render_snapshot() -> str:
             and contains(debug_board, "sun60i-a733-cpu-opp.dtsi"),
         ),
         (
-            "THS nvmem calibration wired",
+            "THS nvmem calibration reference",
             contains(source_soc, 'nvmem-cell-names = "calibration"'),
             contains(integration_soc, 'nvmem-cell-names = "calibration"'),
             contains(debug_soc, 'nvmem-cell-names = "calibration"'),
         ),
         (
-            "CPU thermal zones (70/90 passive)",
+            "CPU thermal policy (70/90 passive)",
             contains(source_soc, "cpu-l-thermal")
             and contains(source_soc, "temperature = <90000>"),
             contains(integration_soc, "cpu-l-thermal")
@@ -284,6 +368,41 @@ def render_snapshot() -> str:
             contains(source_board, "vcc-pl-supply"),
             contains(integration_board, "vcc-pl-supply"),
             contains(debug_board, "vcc-pl-supply"),
+        ),
+    ]
+
+    defconfig_features = [
+        (
+            "A733 cpufreq-dt",
+            ("CONFIG_CPUFREQ_DT", "CONFIG_CPUFREQ_DT_PLATDEV"),
+        ),
+        (
+            "Sun8i thermal + SID nvmem",
+            (
+                "CONFIG_CPU_THERMAL",
+                "CONFIG_THERMAL_OF",
+                "CONFIG_THERMAL_GOV_STEP_WISE",
+                "CONFIG_SUN8I_THERMAL",
+                "CONFIG_NVMEM_SUNXI_SID",
+            ),
+        ),
+        (
+            "AXP8191 I2C/regulator stack",
+            (
+                "CONFIG_I2C_SUNXI",
+                "CONFIG_MFD_AXP20X",
+                "CONFIG_MFD_AXP20X_I2C",
+                "CONFIG_REGULATOR_AXP20X",
+            ),
+        ),
+        (
+            "AIC8800 SDIO modules",
+            (
+                "CONFIG_CFG80211",
+                "CONFIG_WLAN_VENDOR_AICSEMI",
+                "CONFIG_AIC8800_CORE",
+                "CONFIG_AIC8800_SDIO",
+            ),
         ),
     ]
 
@@ -351,8 +470,40 @@ def render_snapshot() -> str:
         if factory["failed"]:
             lines.append("- Failing checks:")
             lines.extend(f"  - `{name}`" for name in factory["failed"])
+
     lines.extend(
         [
+            "",
+            "## Source/integration synchronization",
+            "",
+            f"- Exact file matches: {len(sync['match'])}",
+            f"- Integrated fragment checks: {len(sync['fragment'])}",
+            f"- Different files: {len(sync['different'])}",
+            f"- Missing integration files: {len(sync['missing'])}",
+        ]
+    )
+    if sync["different"]:
+        lines.append("- Different source/integration files:")
+        lines.extend(f"  - `{path}`" for path in sync["different"])
+    if sync["missing"]:
+        lines.append("- Missing or unapplied files/fragments:")
+        lines.extend(f"  - `{path}`" for path in sync["missing"])
+
+    lines.extend(
+        [
+            "",
+            "## Defconfig capabilities",
+            "",
+            "| Capability | Source defconfig | Integration defconfig | Active `.config` |",
+            "|---|---:|---:|---:|",
+            *(
+                f"| `{name}` | {yes_no(config_enabled(source_defconfig, *options))} "
+                f"| {yes_no(config_enabled(integration_defconfig, *options))} "
+                f"| {yes_no(config_enabled(integration_active_config, *options))} |"
+                for name, options in defconfig_features
+            ),
+            "",
+            "The active `.config` is local build state. Reproducible integration depends on the checked-in defconfig, which may lag it.",
             "",
             "## Integration build artifacts (`a733-v7.1.3`)",
             "",
@@ -420,8 +571,9 @@ def render_snapshot() -> str:
             "",
             "Permanent docs describe ownership, procedure, and the last recorded "
             "capability boundary. This generated file is the live evidence "
-            "authority for Git/artifact/DTS/factory state; archived notes are "
-            "intentionally excluded from current guidance.",
+            "authority for source/integration parity, configuration, Git, "
+            "artifact, DTS, and factory state; archived notes are intentionally "
+            "excluded from current guidance.",
             "",
         ]
     )

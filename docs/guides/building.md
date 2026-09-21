@@ -15,7 +15,12 @@ intentionally refuses the historical implicit series; use `--list` only to
 inspect the archived/WIP inventory. The current integration reference is the
 existing Linux v7.1.3 tree:
 
+Install the repository-owned defconfigs before configuring the integration
+checkout; its copies may lag source changes:
+
 ```bash
+install -m 0644 configs/sun60iw2*_defconfig \
+  ../../kernels/a733-v7.1.3/arch/arm64/configs/
 make -C ../../kernels/a733-v7.1.3 \
   ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- LOCALVERSION= \
   sun60iw2_defconfig

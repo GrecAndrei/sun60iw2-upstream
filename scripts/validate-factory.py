@@ -53,6 +53,7 @@ def main() -> int:
         "generators/data/ccu-r-extracted.json",
         "generators/data/ccu-cpupll-extracted.json",
         "generators/data/pinctrl-main.json",
+        "generators/data/thermal-main.json",
     ]:
         try:
             json.loads((ROOT / p).read_text())
@@ -95,6 +96,7 @@ def main() -> int:
         "generate_buildsys.py",
         "generate_defconfig.py",
         "generate_bindings.py",
+        "generate_thermal.py",
         "report_ccu_pipeline.py",
     ]:
         try:
@@ -102,6 +104,90 @@ def main() -> int:
             check(checks, f"syntax:{script}", True)
         except SyntaxError as e:
             check(checks, f"syntax:{script}", False, str(e))
+
+    # 4b. Generated defconfigs must match their Python specification and retain
+    # the board features already required by the integration tree.
+    from generators.generate_defconfig import (
+        DEFCONFIG_SPEC,
+        generate_defconfig,
+        generate_minimal_defconfig,
+    )
+
+    full_defconfig = (ROOT / "configs/sun60iw2_defconfig").read_text()
+    minimal_defconfig = (ROOT / "configs/sun60iw2_minimal_defconfig").read_text()
+    check(
+        checks,
+        "defconfig_committed_fresh_match:full",
+        full_defconfig == generate_defconfig(DEFCONFIG_SPEC),
+    )
+    check(
+        checks,
+        "defconfig_committed_fresh_match:minimal",
+        minimal_defconfig == generate_minimal_defconfig(),
+    )
+    required_full_config = {
+        "CONFIG_CPUFREQ_DT=y",
+        "CONFIG_CPUFREQ_DT_PLATDEV=y",
+        "CONFIG_CPU_THERMAL=y",
+        "CONFIG_THERMAL=y",
+        "CONFIG_THERMAL_OF=y",
+        "CONFIG_THERMAL_GOV_STEP_WISE=y",
+        "CONFIG_SUN8I_THERMAL=y",
+        "CONFIG_NVMEM=y",
+        "CONFIG_NVMEM_SUNXI_SID=y",
+        "CONFIG_I2C=y",
+        "CONFIG_I2C_SUNXI=y",
+        "CONFIG_MFD_AXP20X=y",
+        "CONFIG_MFD_AXP20X_I2C=y",
+        "CONFIG_REGULATOR_AXP20X=y",
+        "CONFIG_CFG80211=y",
+        "CONFIG_WLAN=y",
+        "CONFIG_WLAN_VENDOR_AICSEMI=y",
+        "CONFIG_AIC8800_CORE=m",
+        "CONFIG_AIC8800_SDIO=m",
+    }
+    missing_full_config = sorted(required_full_config - set(full_defconfig.splitlines()))
+    check(
+        checks,
+        "defconfig_required_board_features",
+        not missing_full_config,
+        ", ".join(missing_full_config),
+    )
+
+    # 4c. Thermal generation must be fresh and safe when its pinned upstream
+    # template already contains A733 support.
+    from generators.generate_thermal import patch_driver
+
+    thermal_data = json.loads((ROOT / "generators/data/thermal-main.json").read_text())
+    thermal_template = (
+        ROOT / "generators/data/upstream/sun8i_thermal.c"
+    ).read_text()
+    thermal_committed = (ROOT / "generators/output/sun8i_thermal.c").read_text()
+    thermal_fresh = patch_driver(thermal_template, thermal_data["chips"])
+    check(
+        checks,
+        "thermal_committed_fresh_match",
+        thermal_committed == thermal_fresh,
+    )
+    check(
+        checks,
+        "thermal_generation_idempotent",
+        patch_driver(thermal_fresh, thermal_data["chips"]) == thermal_fresh,
+    )
+    check(
+        checks,
+        "thermal_a733_definitions_unique",
+        thermal_committed.count("static int sun60i_a733_calc_temp(") == 1
+        and thermal_committed.count("static int sun60i_a733_ths_calibrate(") == 1
+        and thermal_committed.count(
+            "static const struct ths_thermal_chip sun60i_a733_ths ="
+        )
+        == 1
+        and thermal_committed.count(
+            'compatible = "allwinner,sun60i-a733-ths"'
+        )
+        == 1,
+    )
 
     # 5. Extractor plugins syntax
     for plugin in ["clocks.py", "resets.py", "registers.py"]:

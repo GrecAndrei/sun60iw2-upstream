@@ -17,7 +17,7 @@ DEFCONFIG_SPEC = {
     "_metadata": {
         "board": "Orange Pi 4 Pro",
         "soc": "Allwinner A733 (sun60iw2)",
-        "purpose": "Initial bringup - UART, SD, USB",
+        "purpose": "A733 board integration - boot, PMIC, thermals, and Wi-Fi",
     },
     "architecture": {
         "CONFIG_ARCH_SUNXI": "y",
@@ -89,9 +89,22 @@ DEFCONFIG_SPEC = {
         "CONFIG_REGULATOR": "y",
         "CONFIG_REGULATOR_FIXED_VOLTAGE": "y",
     },
+    "i2c_pmic": {
+        "CONFIG_I2C": "y",
+        "CONFIG_I2C_SUNXI": "y",
+        "CONFIG_MFD_AXP20X": "y",
+        "CONFIG_MFD_AXP20X_I2C": "y",
+        "CONFIG_REGULATOR_AXP20X": "y",
+    },
     "network": {
-        "CONFIG_NET": "y",
         "CONFIG_MODULES": "y",
+        "CONFIG_NET": "y",
+        "CONFIG_NETDEVICES": "y",
+        "CONFIG_WLAN": "y",
+        "CONFIG_CFG80211": "y",
+        "CONFIG_WLAN_VENDOR_AICSEMI": "y",
+        "CONFIG_AIC8800_CORE": "m",
+        "CONFIG_AIC8800_SDIO": "m",
     },
     "usb": {
         "CONFIG_USB": "y",

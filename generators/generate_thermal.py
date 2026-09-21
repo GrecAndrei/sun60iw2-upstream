@@ -6,9 +6,12 @@ Reads generators/data/thermal-main.json and emits a patched
 sun8i_thermal.c with the new chip definitions merged in.
 
 Usage (from the source repository):
-    python3 generators/generate_thermal.py \
-        --input ../../kernels/mainline-v7/drivers/thermal/sun8i_thermal.c \
-        --output generators/output/sun8i_thermal.c
+    python3 generators/generate_thermal.py
+
+The default input is a pinned upstream template so generation does not depend
+on mutable workspace kernel trees. Existing A733 blocks are detected and not
+inserted again, allowing the generator to consume newer upstream templates
+that already contain some or all of the support.
 """
 
 import argparse
@@ -19,7 +22,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-WORKSPACE = ROOT.parents[1]
+UPSTREAM_TEMPLATE = ROOT / "generators/data/upstream/sun8i_thermal.c"
 
 
 def generate_calc_temp(chip):
@@ -169,39 +172,63 @@ def patch_driver(orig_text, chips):
             f"#define MAX_SENSOR_NUM\t{max_needed}",
         )
 
-    # 2. Insert calc_temp functions before the first existing calc_temp
-    calc_temp_code = "\n".join(generate_calc_temp(c) for c in chips)
-    # Find a good insertion point: before sun8i_ths_calc_temp or sun50i_h5_calc_temp
-    match = re.search(r"(static int sun8i_ths_calc_temp\()", text)
-    if match:
+    # 2. Insert only calc_temp functions absent from the input.
+    missing = [
+        c for c in chips if f"static int {c['name']}_calc_temp(" not in text
+    ]
+    if missing:
+        calc_temp_code = "\n".join(generate_calc_temp(c) for c in missing)
+        match = re.search(r"(static int sun8i_ths_calc_temp\()", text)
+        if not match:
+            raise ValueError("cannot locate calc_temp insertion point")
         pos = match.start()
         text = text[:pos] + calc_temp_code + "\n" + text[pos:]
 
-    # 3. Insert calibrate functions before sun8i_h3_ths_calibrate
-    calibrate_code = "\n".join(generate_calibrate(c) for c in chips)
-    match = re.search(r"(static int sun8i_h3_ths_calibrate\()", text)
-    if match:
+    # 3. Insert only calibration functions absent from the input.
+    missing = [
+        c for c in chips if f"static int {c['name']}_ths_calibrate(" not in text
+    ]
+    if missing:
+        calibrate_code = "\n".join(generate_calibrate(c) for c in missing)
+        match = re.search(r"(static int sun8i_h3_ths_calibrate\()", text)
+        if not match:
+            raise ValueError("cannot locate calibration insertion point")
         pos = match.start()
         text = text[:pos] + calibrate_code + "\n" + text[pos:]
 
-    # 4. Insert init functions before sun8i_h3_thermal_init
-    init_code = "\n".join(generate_init(c) for c in chips)
-    match = re.search(r"(static int sun8i_h3_thermal_init\()", text)
-    if match:
+    # 4. Insert only initialization functions absent from the input.
+    missing = [
+        c for c in chips if f"static int {c['name']}_thermal_init(" not in text
+    ]
+    if missing:
+        init_code = "\n".join(generate_init(c) for c in missing)
+        match = re.search(r"(static int sun8i_h3_thermal_init\()", text)
+        if not match:
+            raise ValueError("cannot locate initialization insertion point")
         pos = match.start()
         text = text[:pos] + init_code + "\n" + text[pos:]
 
-    # 5. Insert chip structs before the first existing chip struct
-    chip_code = "\n".join(generate_chip_struct(c) for c in chips)
-    match = re.search(r"(static const struct ths_thermal_chip sun8i_a83t_ths =)", text)
-    if match:
+    # 5. Insert only chip descriptors absent from the input.
+    missing = [
+        c
+        for c in chips
+        if f"static const struct ths_thermal_chip {c['name']}_ths =" not in text
+    ]
+    if missing:
+        chip_code = "\n".join(generate_chip_struct(c) for c in missing)
+        match = re.search(r"(static const struct ths_thermal_chip sun8i_a83t_ths =)", text)
+        if not match:
+            raise ValueError("cannot locate chip descriptor insertion point")
         pos = match.start()
         text = text[:pos] + chip_code + "\n" + text[pos:]
 
-    # 6. Insert OF match entries before sentinel
-    match_code = "\n".join(generate_of_match_entry(c) for c in chips)
-    sentinel = re.search(r"(\t\{ /\* sentinel \*/ \},)", text)
-    if sentinel:
+    # 6. Insert only OF match entries absent from the input.
+    missing = [c for c in chips if f'compatible = "{c["compatible"]}"' not in text]
+    if missing:
+        match_code = "\n".join(generate_of_match_entry(c) for c in missing)
+        sentinel = re.search(r"(\t\{ /\* sentinel \*/ \},)", text)
+        if not sentinel:
+            raise ValueError("cannot locate OF match sentinel")
         pos = sentinel.start()
         text = text[:pos] + match_code + "\n" + text[pos:]
 
@@ -231,6 +258,8 @@ def patch_driver(orig_text, chips):
 \t\t\treturn ret;
 \t}""",
         )
+        if "platform_get_irq_optional" not in text:
+            raise ValueError("cannot make the THS interrupt optional")
 
     return text
 
@@ -244,7 +273,7 @@ def main():
     )
     parser.add_argument(
         "--input",
-        default=WORKSPACE / "kernels/mainline-v7/drivers/thermal/sun8i_thermal.c",
+        default=UPSTREAM_TEMPLATE,
         help="Path to original sun8i_thermal.c",
     )
     parser.add_argument(
@@ -254,7 +283,7 @@ def main():
     )
     args = parser.parse_args()
 
-    data = json.load(open(args.data))
+    data = json.loads(Path(args.data).read_text())
     orig = Path(args.input).read_text()
     patched = patch_driver(orig, data["chips"])
 
